@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Jeopardy - Python/WebSocket Trivia!</title>
+
+        {% include "scripts.html" %}
+
+    </head>
+        <body>
+            {% if group == 'host' %}
+            <h1>
+                HOST!
+            </h1>
+            <h2>
+                {{ room }}
+            </h2>
+            {% elif group == 'player' %}
+            <h1>
+                Player!
+            </h1>
+            {% endif %}
+        </body>
+ </html>

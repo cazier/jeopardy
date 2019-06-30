@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Jeopardy - Python/WebSocket Trivia!</title>
+
+    {% include "scripts.html" %}
+
+  </head>
+  <body>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            {% include "header.html" %}
+            <div class="jumbotron card card-block">
+                <h2>
+                    Let's Play Jeopardy!
+                </h2>
+                <h3>
+                    We are currently playing {{ segment }}!
+                </h3>
+                <table class="table">
+                    <tr>
+                        {% for name in game.categories %}
+                            <th style="width: 16.667%; text-align: center;">
+                                <h5>
+                                    {{ name.category }}
+                                </h5>
+                            </th>
+                        {% endfor %}
+                    </tr>
+                    {% for value in game.values %}
+                        <tr>
+                            {% for _ in range(size) %}
+                            <td>
+                                <button class="btn btn-block btn-primary" id="{{ _ }}_{{ value }}">
+                                    ${{ value }}
+                                </button>
+                            </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </table>
+                <br>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
