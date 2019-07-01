@@ -117,3 +117,5 @@ dmypy.json
 # Custom
 jeopardyenv/
 helpers/database/clues.json
+.DS_Store
+
