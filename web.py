@@ -1,13 +1,15 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session, redirect, url_for
 from flask_socketio import SocketIO
 
 import random
 import alex
 
 COPYRIGHT_NAME = u'Jeopardy'
+CURRENCY = u'¢'
 
 app = Flask(__name__)
 app.jinja_env.globals.update(copyright_protection = COPYRIGHT_NAME)
+app.jinja_env.globals.update(currency = CURRENCY)
 
 app.config[u'SECRET_KEY'] = u'secret!'
 app.debug = True
@@ -48,9 +50,25 @@ def play_game():
 
 	elif request.form.get(u'player'):
 		room = request.form.get(u'room')
+		print(u'Adding player to room {room}'.format(room = room))
+		print(LIVE_GAME_CONTAINER[room].score)
 		LIVE_GAME_CONTAINER[room].add_player(request.form.get(u'name'))
+		print(LIVE_GAME_CONTAINER[room].score)
 
-		return render_template(template_name_or_list = u'game.html', group = u'player', room = room)
+		return redirect(url_for(u'show_player'))
+
+@app.route(u'/play', methods = [u'POST'])
+def show_player():
+	room = request.form.get(u'room')
+
+	print(room)
+	print(LIVE_GAME_CONTAINER[room].score)
+
+	return render_template(
+		template_name_or_list = u'play.html',
+		room = room,
+		score = u'10',
+		game = LIVE_GAME_CONTAINER[room])
 
 @app.route(u'/board', methods = [u'POST'])
 def show_board():
@@ -58,9 +76,7 @@ def show_board():
 	return render_template(
 		template_name_or_list = u'board.html',
 		room = room,
-		size = LIVE_GAME_CONTAINER[room].size,
-		segment = LIVE_GAME_CONTAINER[room].round_text(),
-		game = LIVE_GAME_CONTAINER[room].board)
+		game = LIVE_GAME_CONTAINER[room])
 
 
 def generate_room_code():

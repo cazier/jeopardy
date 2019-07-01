@@ -18,11 +18,11 @@
             {% include "header.html" %}
             <div class="jumbotron card card-block">
                 <h2>
-                    Let's Play {{ segment }}
+                    Let's Play {{ game.round_text() }}
                 </h2>
                 <table class="table">
                     <tr>
-                        {% for name in game.categories %}
+                        {% for name in game.board.categories %}
                             <th style="width: 16.667%; text-align: center;">
                                 <h5>
                                     {{ name.category }}
@@ -35,7 +35,7 @@
                             {% for question in category %}
                             <td>
                                 <button class="btn btn-block btn-primary {% if question.shown %}disabled{% endif %}" id="{{ question.id() }}">
-                                    ${{ question.value }}
+                                    {{ currency }}{{ question.value }}
                                 </button>
                             </td>
                             {% endfor %}
@@ -43,6 +43,25 @@
                     {% endfor %}
                 </table>
                 <br>
+                <table class="table" style="width: 100%;">
+                    <h4>
+                        Scores!
+                    </h4>
+                    <tr>
+                        {% for name in game.score.keys() %}
+                            <th style="text-align: center;">
+                                {{ name }}
+                            </th>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        {% for name in game.score.keys() %}
+                            <td style="text-align: center;">
+                                {{ currency }}{{ game.score[name] }}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                </table>
             </div>
         </div>
     </div>

@@ -42,7 +42,10 @@ class Game(object):
         else:
             print(u'An error has occurred....')
             return u'Oops...'
-        
+
+    def html_board(self) -> str:
+        return zip(*[category.questions for category in self.board.categories])
+
 
 class Board(object):
     """Class to hold the Jeopardy game board. Contains methods to get categories and questions."""
