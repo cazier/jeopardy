@@ -4,12 +4,18 @@ from flask_socketio import SocketIO
 import random
 import alex
 
+COPYRIGHT_NAME = u'Jeopardy'
+
 app = Flask(__name__)
+app.jinja_env.globals.update(copyright_protection = COPYRIGHT_NAME)
+
 app.config[u'SECRET_KEY'] = u'secret!'
 app.debug = True
 socketio = SocketIO(app)
 
 LIVE_GAME_CONTAINER = dict()
+
+DATABASE = u'data/database.db'
 
 @app.route(u'/')
 def index_page():
@@ -31,9 +37,10 @@ def play_game():
 		room = generate_room_code()
 		room = 'ABCD' ##########################################################################
 		LIVE_GAME_CONTAINER[room] = alex.Game(
-			database_name = u'updated_database.db',
+			database_name = DATABASE,
 			players = int(request.form.get(u'players')),
-			size = int(request.form.get(u'categories')))
+			size = int(request.form.get(u'categories')),
+			copyright = COPYRIGHT_NAME)
 
 		LIVE_GAME_CONTAINER[room].make_board()
 
@@ -52,7 +59,7 @@ def show_board():
 		template_name_or_list = u'board.html',
 		room = room,
 		size = LIVE_GAME_CONTAINER[room].size,
-		segment = LIVE_GAME_CONTAINER[room].round,
+		segment = LIVE_GAME_CONTAINER[room].round_text(),
 		game = LIVE_GAME_CONTAINER[room].board)
 
 

@@ -3,11 +3,13 @@ import random
 from pprint import pprint
 
 class Game(object):
-    def __init__(self, database_name: str, players: int, size: int):
+    def __init__(self, database_name: str, players: int, size: int, copyright: str):
         self.db = database_name
         self.players = players
-        self.round = 1
         self.size = size
+        self.copyright = copyright
+        
+        self.round = 1
 
         self.score = dict()
 
@@ -17,8 +19,6 @@ class Game(object):
     def make_board(self):
         self.board = Board(database_name = self.db, segment = self.round, size = self.size)
 
-        self.board.get_questions()
-
     def reset(self, reset_score: bool, reset_players: bool):
         if reset_players:
             self.score = dict()
@@ -26,12 +26,23 @@ class Game(object):
         elif reset_score:
             self.score = {player: 0 for player in self.score.keys()}
 
-    def table(self) -> list:
-        content = list()
-        for category in self.board.categories:
-            category_questions = list()
-            for question in category.questions:
-                print(type(question))
+    def round_text(self) -> str:
+        if self.round == 1:
+            return '{copyright}!'.format(copyright = self.copyright)
+
+        elif self.round == 2:
+            return 'Double {copyright}!'.format(copyright = self.copyright)
+
+        elif self.round == 3:
+            return 'Final {copyright}!'.format(copyright = self.copyright)
+
+        elif self.round == 4:
+            return 'Tiebreaker {copyright}!'.format(copyright = self.copyright)
+
+        else:
+            print(u'An error has occurred....')
+            return u'Oops...'
+        
 
 class Board(object):
     """Class to hold the Jeopardy game board. Contains methods to get categories and questions."""
@@ -41,11 +52,15 @@ class Board(object):
         self.round = segment
         self.categories = list()
 
+        self.get_questions()
+
+
     def __contains__(self, item):
         if len(self.categories) == 0:
             return False
         else:
             return item[1] in [i.title() for i in self.categories]
+
 
     def get_questions(self) -> list:
         questions = list()
@@ -60,7 +75,7 @@ class Board(object):
         selected_shows = random.sample(all_shows, self.size)
         
 
-        for show in selected_shows:
+        for index, show in enumerate(selected_shows):
             categories = t.execute(u'SELECT category FROM questions WHERE \
                 segment=? AND show=? AND complete_category=? AND external_media=?',
                 (self.round, show, True, False)).fetchall()
@@ -71,34 +86,24 @@ class Board(object):
             dataset = t.execute(u'SELECT * FROM questions WHERE segment=? AND show=? and category=?',
                 (self.round, show, category)).fetchall()
 
-            self.categories.append(Category(dataset))
+            self.categories.append(Category(dataset, index))
 
-        self.values = list(self.categories[0].questions.keys())
+        self.values = [question.value for question in self.categories[0].questions]
 
-    def get_categories(self):
-        return [name.category for name in self.categories]
 
-    def get_question(self, element: str) -> dict:
-        category = element.split(u'_')[0]
-        value = element.split(u'_')[1]
+    def html_board(self):
+        return zip(*[i.questions for i in self.categories])
 
-        return self.categories[int(category)].questions[int(value)].get()
-
-    def true(self, element: str) -> bool:
-        category = element.split(u'_')[0]
-        print(category, type(category))
-        value = element.split(u'_')[1]
-        print(value, type(value))
-
-        return self.categories[int(category)].questions[int(value)].shown        
 
 class Category(object):
-    def __init__(self, db_questions: list):
+    def __init__(self, db_questions: list, index: int):
         self.category = db_questions[0][1]
-        self.questions = dict()
+        self.questions = list()
 
         for row in db_questions:
-            self.add_question(row)
+            self.add_question(row, index)
+
+        self.questions.sort()
 
     def __str__(self):
         return self.category
@@ -106,16 +111,30 @@ class Category(object):
     def __repr__(self):
         return self.category
 
-    def add_question(self, question_info: tuple):
-        self.questions[question_info[5]] = Question(question_info)
+    def add_question(self, question_info: tuple, index: int):
+        self.questions.append(Question(question_info, index))
 
 
 class Question(object):
-    def __init__(self, question_info: tuple):
+    def __init__(self, question_info: tuple, index: int):
+        self.index = index
+        self.shown = False
+
         self.question = question_info[3].strip(u'\'')
         self.answer = question_info[4].strip(u'\'')
+        self.value = question_info[5]
         self.year = question_info[6]
-        self.shown = False
+
+    def __lt__(self, other):
+        return self.value < other.value
+
+    def __repr__(self):
+        return str(self.value)
+
+    def id(self):
+        return u'{category}_{value}'.format(
+            category = self.index,
+            value = self.value)
 
     def get(self):
         self.shown = True

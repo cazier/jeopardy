@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>Jeopardy - Python/WebSocket Trivia!</title>
+    <title>{{ copyright_protection }} - Python/WebSocket Trivia!</title>
 
     {% include "scripts.html" %}
 
@@ -35,12 +35,12 @@
                                 <form action="/game" method="POST">
                                     <div class="form-group">
                                         <label for="players">What is your name?</label>
-                                        <input name="name" type="text" class="form-control" placeholder="Alex Trebek" required>
+                                        <input name="name" type="text" class="form-control" placeholder="Alex Trebek" required value="Alex">
                                         <small class="form-text text-muted"></small>
                                     </div>
                                     <div class="form-group">
                                         <label for="room">What is the room code?</label>
-                                        <input name="room" type="text" class="form-control" placeholder="ABCD" size="4" required>
+                                        <input name="room" type="text" class="form-control" placeholder="ABCD" size="4" required value="ABCD">
                                     </div>
                                     <div class="form-group">
                                         <button type="submit" class="btn btn-success">Let's Go!</button>
@@ -63,7 +63,7 @@
                                 <form action="/board" method="POST">
                                     <div class="form-group">
                                         <label for="room">What is the room code?</label>
-                                        <input name="room" type="text" class="form-control" placeholder="ABCD" size="4" required>
+                                        <input name="room" type="text" class="form-control" placeholder="ABCD" size="4" required value="ABCD">
                                     </div>
                                     <div class="form-group">
                                         <button type="submit" class="btn btn-success">Let's Go!</button>
