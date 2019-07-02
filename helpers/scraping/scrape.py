@@ -165,7 +165,7 @@ class Game():
                 question[u'complete_category'] = True
 
             elif (question[u'round'] == u'Final Jeopardy!') or (question[u'round'] == u'Tiebreaker'):
-                question[u'complete_category'] = u'N/A'
+                question[u'complete_category'] = u'True'
 
             else:
                 question[u'complete_category'] = False

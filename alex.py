@@ -3,11 +3,12 @@ import random
 from pprint import pprint
 
 class Game(object):
-    def __init__(self, database_name: str, players: int, size: int, copyright: str):
+    def __init__(self, database_name: str, players: int, size: int, copyright: str, room: str):
         self.db = database_name
         self.players = players
         self.size = size
         self.copyright = copyright
+        self.room = room
         
         self.round = 1
 
@@ -43,6 +44,9 @@ class Game(object):
             print(u'An error has occurred....')
             return u'Oops...'
 
+    def next_round(self):
+        self.round += 1
+
     def html_board(self) -> str:
         return zip(*[category.questions for category in self.board.categories])
 
@@ -51,7 +55,7 @@ class Board(object):
     """Class to hold the Jeopardy game board. Contains methods to get categories and questions."""
     def __init__(self, database_name: str, segment: int, size: int):
         self.db = database_name
-        self.size = size
+        self.size = size if segment < 3 else 1
         self.round = segment
         self.categories = list()
 
@@ -84,6 +88,9 @@ class Board(object):
                 (self.round, show, True, False)).fetchall()
 
             all_categories = sqlite_cleaned(categories)
+            print(u'=====================')
+            print(all_categories)
+            input()
             category = random.choice(all_categories)
             
             dataset = t.execute(u'SELECT * FROM questions WHERE segment=? AND show=? and category=?',

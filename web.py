@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, redirect, url_for
+from flask import Flask, render_template, request, session, redirect, url_for, abort, flash, get_flashed_messages
 from flask_socketio import SocketIO
 
 import random
@@ -24,81 +24,82 @@ def index_page():
 	return render_template(template_name_or_list = u'index.html')
 
 
-@app.route(u'/new')
+@app.route(u'/new', methods = [u'GET'])
 def new_game():
 	return render_template(template_name_or_list = u'new.html')
 
-@app.route(u'/join', methods = [u'GET', u'POST'])
+@app.route(u'/join', methods = [u'GET'])
 def join_game():
-	if request.method == u'POST':
-		if request.form.get(u'host'):
-			room = generate_room_code()
-			room = 'ABCD' ##########################################################################
-			LIVE_GAME_CONTAINER[room] = alex.Game(
-				database_name = DATABASE,
-				players = int(request.form.get(u'players')),
-				size = int(request.form.get(u'categories')),
-				copyright = COPYRIGHT_NAME)
-
-			LIVE_GAME_CONTAINER[room].make_board()
-
-			return render_template(template_name_or_list = u'game.html', group = u'host', room = room)
-
-		elif request.form.get(u'player'):
-			room = request.form.get(u'room')
-			print(u'Adding player to room {room}'.format(room = room))
-			print(LIVE_GAME_CONTAINER[room].score)
-			LIVE_GAME_CONTAINER[room].add_player(request.form.get(u'name'))
-			print(LIVE_GAME_CONTAINER[room].score)
-
-			return redirect(url_for(u'show_player', room = room, game = LIVE_GAME_CONTAINER[room]))
-	return render_template(template_name_or_list = u'join.html')
+	return render_template(template_name_or_list = u'join.html', errors = get_flashed_messages())
 
 
-@app.route(u'/game', methods = [u'POST'])
-def play_game():
-	if request.form.get(u'host'):
+@app.route(u'/host', methods = [u'POST'])
+def show_host():
+	if request.form.get(u'players') and request.form.get(u'categories'):
 		room = generate_room_code()
 		room = 'ABCD' ##########################################################################
 		LIVE_GAME_CONTAINER[room] = alex.Game(
-			database_name = DATABASE,
+			database_name = DATABASE, copyright = COPYRIGHT_NAME, room = room,
 			players = int(request.form.get(u'players')),
-			size = int(request.form.get(u'categories')),
-			copyright = COPYRIGHT_NAME)
+			size = int(request.form.get(u'categories')))
 
 		LIVE_GAME_CONTAINER[room].make_board()
 
-		return render_template(template_name_or_list = u'game.html', group = u'host', room = room)
-
-	elif request.form.get(u'player'):
+	elif request.form.get(u'room'):
 		room = request.form.get(u'room')
-		print(u'Adding player to room {room}'.format(room = room))
-		print(LIVE_GAME_CONTAINER[room].score)
-		LIVE_GAME_CONTAINER[room].add_player(request.form.get(u'name'))
-		print(LIVE_GAME_CONTAINER[room].score)
 
-		return redirect(url_for(u'show_player'))
+	else:
+		abort(500)
+
+	return render_template(template_name_or_list = u'host.html', group = u'host', room = room)
+
 
 @app.route(u'/play', methods = [u'POST'])
 def show_player():
-	room = request.form.get(u'room')
+	error_occurred = False
 
-	print(room)
-	print(LIVE_GAME_CONTAINER[room].score)
+	room = request.form.get(u'room').upper()
+	name = request.form.get(u'name')
+
+	if room not in LIVE_GAME_CONTAINER.keys():
+		flash(message = u'The room code you entered was invalid. Please try again!', category = u'error')
+		error_occurred = True
+
+	elif name in LIVE_GAME_CONTAINER[room].score.keys():
+		flash(message = u'The name you selected already exists. Please choose another one!', category = u'error')
+		error_occurred = True
+
+	if (len(name) < 1) or (name.isspace()):
+		flash(message = u'The name you entered was invalid. Please try again!', category = u'error')
+		error_occurred = True
+
+	if error_occurred:
+		return redirect(url_for(u'join_game'))
+
+	else:
+		LIVE_GAME_CONTAINER[room].add_player(name)
 
 	return render_template(
 		template_name_or_list = u'play.html',
-		room = room,
 		score = u'10',
 		game = LIVE_GAME_CONTAINER[room])
 
 @app.route(u'/board', methods = [u'POST'])
 def show_board():
-	room = request.form.get(u'room')
+	room = request.form.get(u'room').upper()
+
+	if room not in LIVE_GAME_CONTAINER.keys():
+		flash(message = u'The room code you entered was invalid. Please try again!', category = u'error')
+		return redirect(url_for(u'join_game'))
+
+
 	return render_template(
 		template_name_or_list = u'board.html',
-		room = room,
 		game = LIVE_GAME_CONTAINER[room])
+
+@app.errorhandler(500)
+def internal_server_error(error):
+	return render_template(template_name_or_list = u'errors.html', error_code = error), 500
 
 
 def generate_room_code():

@@ -21,6 +21,13 @@
                     Oh Boy! What a great idea! Let's Play!
                 </h2>
                 <hr>
+                {% if errors %}
+                    {% for alert in errors %}
+                        <div class="alert alert-danger" role="alert">
+                            {{ alert }}
+                        </div>
+                    {% endfor %}
+                {% endif %}                        
                 <div class="accordion" id="jointype">
                     <div class="card">
                         <div class="card-header" id="Player">
@@ -45,7 +52,6 @@
                                     <div class="form-group">
                                         <button type="submit" class="btn btn-success">Let's Go!</button>
                                     </div>
-                                    <input type="hidden" name="player" value="true" />
                                 </form>
                             </div>
                         </div>
@@ -68,9 +74,29 @@
                                     <div class="form-group">
                                         <button type="submit" class="btn btn-success">Let's Go!</button>
                                     </div>
-                                    <input type="hidden" name="player" value="true" />
                                 </form>
-
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header" id="Host">
+                            <h2 class="mb-0">
+                                <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#chost" aria-expanded="false" aria-controls="chost">
+                                    Host Settings
+                                </button>
+                            </h2>
+                        </div>
+                        <div id="chost" class="collapse" aria-labelledby="Host" data-parent="#jointype">
+                            <div class="card-body">
+                                <form action="/host" method="POST">
+                                    <div class="form-group">
+                                        <label for="room">What is the room code?</label>
+                                        <input name="room" type="text" class="form-control" placeholder="ABCD" size="4" required value="ABCD">
+                                    </div>
+                                    <div class="form-group">
+                                        <button type="submit" class="btn btn-success">Let's Go!</button>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     </div>

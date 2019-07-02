@@ -24,7 +24,7 @@
                 <h4>
                     Game Settings
                 </h4>
-                <form action="/game" method="POST">
+                <form action="/host" method="POST">
                     <div class="form-group">
                         <label for="players">Number of Players:</label>
                         <input name="players" type="number" min="2" max="4" class="form-control" placeholder="2" value="2" required>
@@ -38,7 +38,6 @@
                     <div class="form-group">
                         <button type="submit" class="btn btn-success">Let's Get Started!</button>
                     </div>
-                    <input type="hidden" name="host" value="true" />
                 </form>
             </div>
         </div>

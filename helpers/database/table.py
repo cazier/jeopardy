@@ -3,8 +3,8 @@ import json
 import operator
 
 ROUNDS = {u'Jeopardy!': 1, u'Double Jeopardy!': 2, u'Final Jeopardy!': 3, u'Tiebreaker': 4}
-DB_NAME = u'updated_database.db'
-JSON_NAME = u'helpers/clues.json'
+DB_NAME = u'data/database.db'
+JSON_NAME = u'helpers/database/clues.json'
 
 def format_row(data: dict) -> tuple:
     num = int(data[u'show_number'])

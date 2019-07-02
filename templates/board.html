@@ -23,7 +23,7 @@
                 <table class="table">
                     <tr>
                         {% for name in game.board.categories %}
-                            <th style="width: 16.667%; text-align: center;">
+                            <th style="width: {{ 100 / game.size }}%; text-align: center;">
                                 <h5>
                                     {{ name.category }}
                                 </h5>
