@@ -28,8 +28,30 @@ def index_page():
 def new_game():
 	return render_template(template_name_or_list = u'new.html')
 
-@app.route(u'/join')
+@app.route(u'/join', methods = [u'GET', u'POST'])
 def join_game():
+	if request.method == u'POST':
+		if request.form.get(u'host'):
+			room = generate_room_code()
+			room = 'ABCD' ##########################################################################
+			LIVE_GAME_CONTAINER[room] = alex.Game(
+				database_name = DATABASE,
+				players = int(request.form.get(u'players')),
+				size = int(request.form.get(u'categories')),
+				copyright = COPYRIGHT_NAME)
+
+			LIVE_GAME_CONTAINER[room].make_board()
+
+			return render_template(template_name_or_list = u'game.html', group = u'host', room = room)
+
+		elif request.form.get(u'player'):
+			room = request.form.get(u'room')
+			print(u'Adding player to room {room}'.format(room = room))
+			print(LIVE_GAME_CONTAINER[room].score)
+			LIVE_GAME_CONTAINER[room].add_player(request.form.get(u'name'))
+			print(LIVE_GAME_CONTAINER[room].score)
+
+			return redirect(url_for(u'show_player', room = room, game = LIVE_GAME_CONTAINER[room]))
 	return render_template(template_name_or_list = u'join.html')
 
 
