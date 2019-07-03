@@ -51,37 +51,46 @@ def show_host():
 	else:
 		abort(500)
 
-	return render_template(template_name_or_list = u'host.html', group = u'host', room = room)
+	return render_template(
+		template_name_or_list = u'host.html', 
+		game = LIVE_GAME_CONTAINER[room])
 
 
-@app.route(u'/play', methods = [u'POST'])
+@app.route(u'/play', methods = [u'GET', u'POST'])
 def show_player():
-	error_occurred = False
+	print(session)
+	if request.method == u'POST':
+		error_occurred = False
 
-	room = request.form.get(u'room').upper()
-	name = request.form.get(u'name')
+		room = request.form.get(u'room').upper()
+		name = request.form.get(u'name')
 
-	if room not in LIVE_GAME_CONTAINER.keys():
-		flash(message = u'The room code you entered was invalid. Please try again!', category = u'error')
-		error_occurred = True
+		if room not in LIVE_GAME_CONTAINER.keys():
+			flash(message = u'The room code you entered was invalid. Please try again!', category = u'error')
+			error_occurred = True
 
-	elif name in LIVE_GAME_CONTAINER[room].score.keys():
-		flash(message = u'The name you selected already exists. Please choose another one!', category = u'error')
-		error_occurred = True
+		elif name in LIVE_GAME_CONTAINER[room].score.keys():
+			flash(message = u'The name you selected already exists. Please choose another one!', category = u'error')
+			error_occurred = True
 
-	if (len(name) < 1) or (name.isspace()):
-		flash(message = u'The name you entered was invalid. Please try again!', category = u'error')
-		error_occurred = True
+		if (len(name) < 1) or (name.isspace()):
+			flash(message = u'The name you entered was invalid. Please try again!', category = u'error')
+			error_occurred = True
 
-	if error_occurred:
-		return redirect(url_for(u'join_game'))
+		if error_occurred:
+			return redirect(url_for(u'join_game'))
 
-	else:
-		LIVE_GAME_CONTAINER[room].add_player(name)
+		else:
+			LIVE_GAME_CONTAINER[room].add_player(name)
+			session[u'name'] = name
+			session[u'room'] = room
+
+	elif request.method == u'GET' and session is not None:
+		room = session[u'room']
 
 	return render_template(
 		template_name_or_list = u'play.html',
-		score = u'10',
+		score = u'10', session = session,
 		game = LIVE_GAME_CONTAINER[room])
 
 @app.route(u'/board', methods = [u'POST'])
@@ -96,6 +105,12 @@ def show_board():
 	return render_template(
 		template_name_or_list = u'board.html',
 		game = LIVE_GAME_CONTAINER[room])
+
+@app.route(u'/score/<string:user>/<int:incrementer>')
+def add_score(user, incrementer):
+	LIVE_GAME_CONTAINER[u'ABCD'].score[user] += incrementer
+	print(LIVE_GAME_CONTAINER[u'ABCD'].score)
+	return u'Added {incrementer} to user {user}'.format(incrementer = incrementer, user = user)
 
 @app.errorhandler(500)
 def internal_server_error(error):

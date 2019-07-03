@@ -1,27 +1,90 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <title>{{ copyright_protection }} - Python/WebSocket Trivia!</title>
 
-        {% include "scripts.html" %}
+    {% include "scripts.html" %}
 
-    </head>
-        <body>
-            {% if group == 'host' %}
-            <h1>
-                HOST!
-            </h1>
-            <h2>
-                {{ room }}
-            </h2>
-            {% elif group == 'player' %}
-            <h1>
-                Player!
-            </h1>
-            {% endif %}
-        </body>
- </html>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                {% include "header.html" %}
+                <div class="jumbotron card card-block">
+                    <h2>
+                        Time to be a Host!
+                    </h2>
+                    <hr>
+                    <div id="categories">
+                        <table class="table">
+                            <tr>
+                                {% for name in game.board.categories %}
+                                    <th style="width: {{ 100 // game.size }}%; text-align: center;">
+                                        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#c_{{ name.index }}">
+                                            {{ name.category }}
+                                        </button>
+                                    </th>
+                                {% endfor %}
+                            </tr>
+                        </table>
+                        <hr>
+                        <div class="accordion-group">
+                            {% for name in game.board.categories %}
+                                <div class="collapse" id="c_{{ name.index }}" data-parent="#categories">
+                                    <table class="table">
+                                        <tr>
+                                            {% for question in name.questions %}
+                                                <td>
+                                                    <button class="btn btn-success show-question {% if question.shown %}disabled{% endif %}" id="{{ question.id() }}">
+                                                        {{ currency }}{{ question.value }}
+                                                    </button>
+                                                </td>
+                                            {% endfor %}
+                                        </tr>
+                                    </table>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div id="table" style="display: block; visibility: visible">
+                        <table class="table">
+                            <tr>
+                                <th>
+                                    Question:
+                                </th>
+                            </tr>
+                            <tr>
+                                <td id="question">
+                                </td>
+                            </tr>
+                        </table>
+                        <table class="table">
+                            <tr>
+                                <th>
+                                    Answer:
+                                </th>
+                            </tr>
+                            <tr>
+                                <td id="answer">
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <p>
+                        <a class="btn btn-primary btn-large" href="/new">Start a New Game!</a>
+                        <a class="btn btn-primary btn-large" href="/join">Join a Game!</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

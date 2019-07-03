@@ -88,9 +88,7 @@ class Board(object):
                 (self.round, show, True, False)).fetchall()
 
             all_categories = sqlite_cleaned(categories)
-            print(u'=====================')
-            print(all_categories)
-            input()
+
             category = random.choice(all_categories)
             
             dataset = t.execute(u'SELECT * FROM questions WHERE segment=? AND show=? and category=?',
@@ -108,6 +106,7 @@ class Board(object):
 class Category(object):
     def __init__(self, db_questions: list, index: int):
         self.category = db_questions[0][1]
+        self.index = index
         self.questions = list()
 
         for row in db_questions:

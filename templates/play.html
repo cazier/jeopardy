@@ -18,7 +18,7 @@
             {% include "header.html" %}
             <div class="jumbotron card card-block">
                 <h2>
-                    Hey!
+                    Hey {{ session['name'] }}!
                 </h2>
                 <table class="table">
                     <tr>
@@ -28,7 +28,7 @@
                     </tr>
                     <tr>
                         <td>
-                            {{ score }}
+                            {{ game.score[session['name']] }}
                         </td>
                     </tr>
                 </table>
