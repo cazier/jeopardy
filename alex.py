@@ -13,6 +13,7 @@ class Game(object):
         self.round = 1
 
         self.score = dict()
+        self.buzzers = list()
 
     def add_player(self, name: str):
         self.score[name] = 0
@@ -26,6 +27,9 @@ class Game(object):
 
         elif reset_score:
             self.score = {player: 0 for player in self.score.keys()}
+
+        else:
+            return False
 
     def round_text(self) -> str:
         if self.round == 1:
@@ -42,13 +46,28 @@ class Game(object):
 
         else:
             print(u'An error has occurred....')
-            return u'Oops...'
+            return False
 
     def next_round(self):
         self.round += 1
 
     def html_board(self) -> str:
         return zip(*[category.questions for category in self.board.categories])
+
+    def get(self, identifier: str):
+        entry, category, question = identifier.split(u'_')
+
+        if entry == u'q':
+            return self.board.categories[int(category)].questions[int(question)].get()
+
+        else: 
+            print(u'An error has occurred....')
+            return False
+
+    def buzz(self, name: str):
+        if (name in self.score.keys()) and (name not in self.buzzers):
+            self.buzzers.append(name)
+
 
 
 class Board(object):
@@ -109,8 +128,10 @@ class Category(object):
         self.index = index
         self.questions = list()
 
-        for row in db_questions:
-            self.add_question(row, index)
+        for question_index, row in enumerate(db_questions):
+            self.add_question(
+                question_info = row,
+                question_index = question_index)
 
         self.questions.sort()
 
@@ -120,13 +141,18 @@ class Category(object):
     def __repr__(self):
         return self.category
 
-    def add_question(self, question_info: tuple, index: int):
-        self.questions.append(Question(question_info, index))
+    def add_question(self, question_info: tuple, question_index: int):
+        self.questions.append(
+            Question(
+                question_info = question_info, 
+                question_index = question_index,
+                category_index = self.index))
 
 
 class Question(object):
-    def __init__(self, question_info: tuple, index: int):
-        self.index = index
+    def __init__(self, question_info: tuple, question_index: int, category_index: int):
+        self.category_index = category_index
+        self.question_index = question_index
         self.shown = False
 
         self.question = question_info[3].strip(u'\'')
@@ -141,12 +167,13 @@ class Question(object):
         return str(self.value)
 
     def id(self):
-        return u'{category}_{value}'.format(
-            category = self.index,
-            value = self.value)
+        return u'{category}_{question}'.format(
+            category = self.category_index,
+            question = self.question_index)
 
     def get(self):
         self.shown = True
+
         return {u'question': self.question, u'answer': self.answer}
 
 

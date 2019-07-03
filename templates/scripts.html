@@ -14,7 +14,11 @@
 -->
 
 
-<!-- <link rel="stylesheet" href="{{ url_for('static', filename='custom.css') }}" crossorigin="anonymous"></script> -->
+<link rel="stylesheet" href="{{ url_for('static', filename='custom.css') }}" crossorigin="anonymous"></script>
+
+<script type="text/javascript">
+    var socket = io('http://' + document.domain + ':' + location.port);
+</script>
 
 
 <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon-32x32.png') }}" sizes="32x32" />

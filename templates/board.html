@@ -23,7 +23,7 @@
                 <table class="table">
                     <tr>
                         {% for name in game.board.categories %}
-                            <th style="width: {{ 100 / game.size }}%; text-align: center;">
+                            <th style="width: {{ 100 // game.size }}%; text-align: center;">
                                 <h5>
                                     {{ name.category }}
                                 </h5>
@@ -34,7 +34,7 @@
                         <tr>
                             {% for question in category %}
                             <td>
-                                <button class="btn btn-block btn-primary {% if question.shown %}disabled{% endif %}" id="{{ question.id() }}">
+                                <button class="btn btn-block btn-primary {% if question.shown %}disabled{% endif %}" id="q_{{ question.id() }}">
                                     {{ currency }}{{ question.value }}
                                 </button>
                             </td>
@@ -62,9 +62,37 @@
                         {% endfor %}
                     </tr>
                 </table>
+                <div class="modal fade" id="ModalQuestion" tabindex="-1" role="dialog" aria-labelledby="ModalQuestionHolder" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h3 class="modal-title" id="ModalQuestionHolder">Question:</h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body" id="question">
+                      </div>
+                    </div>
+                  </div>
+                </div>
             </div>
         </div>
     </div>
+    <script type="text/javascript">
+        socket.on('question_revealed', function(message) {
+            $('#' + message['identifier']).addClass('disabled');
+            $('#question').text(message['question']);
+
+            $('#ModalQuestion').modal('show', {
+                focus: true
+            });
+        });
+
+        socket.on('clear_modal', function(message) {
+            $('#ModalQuestion').modal('hide');
+        });
+    </script>
 </div>
 </body>
 </html>

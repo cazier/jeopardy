@@ -33,14 +33,24 @@
                     </tr>
                 </table>
                 <br>
-                {% if game.round <= 2 %}
                 <button id="buzzer" class="btn btn-block btn-primary disabled">BUZZ IN!</button>
-                {% elif game.round <= 4 %}
-                <button id="fj_buzzer" class="btn btn-block btn-primary">Final Jeopardy!</button>
-                {% endif %}
             </div>
         </div>
     </div>
 </div>
+<script type="text/javascript">
+        socket.on('host_finished_reading', function(message) {
+            $('#buzzer').removeClass('disabled');
+            });
+
+        $('button').click(function(event) {
+            if (this.id == 'buzzer') {
+                socket.emit('buzzed_in', {
+                    'room': '{{ game.room }}',
+                    'name': '{{ session['name'] }}'
+                });
+            } 
+        });
+</script>
 </body>
 </html>

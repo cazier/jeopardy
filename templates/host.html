@@ -22,69 +22,83 @@
                         Time to be a Host!
                     </h2>
                     <hr>
-                    <div id="categories">
-                        <table class="table">
-                            <tr>
+                    {% for width in range(2) %}
+                        <div id="categories" class="{% if width == 0 %}d-none d-md-block{% elif width == 1 %}d-md-none{% endif %}">
+                            <div class="{% if width == 0 %}btn-group{% elif width == 1 %}btn-group-vertical{% endif %}" role="group">
                                 {% for name in game.board.categories %}
-                                    <th style="width: {{ 100 // game.size }}%; text-align: center;">
-                                        <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#c_{{ name.index }}">
+                                    <div class="btn-group{% if width == 1 %} dropright{% endif %}" role="group">
+                                        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" id="c_{{ name.index }}" aria-haspopup="true" aria-expanded="false">
                                             {{ name.category }}
                                         </button>
-                                    </th>
-                                {% endfor %}
-                            </tr>
-                        </table>
-                        <hr>
-                        <div class="accordion-group">
-                            {% for name in game.board.categories %}
-                                <div class="collapse" id="c_{{ name.index }}" data-parent="#categories">
-                                    <table class="table">
-                                        <tr>
+                                        <div class="dropdown-menu" aria-labelledby="c_{{ name.index }}">
                                             {% for question in name.questions %}
-                                                <td>
-                                                    <button class="btn btn-success show-question {% if question.shown %}disabled{% endif %}" id="{{ question.id() }}">
-                                                        {{ currency }}{{ question.value }}
-                                                    </button>
-                                                </td>
+                                                <button class="dropdown-item show-question{% if question.shown %} disabled{% endif %}" type="button" id="q_{{ question.id() }}">
+                                                    {{ currency }}{{ question.value }}
+                                                </button>
                                             {% endfor %}
-                                        </tr>
-                                    </table>
-                                </div>
-                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                 <div class="modal fade" id="ModalQuestion" tabindex="-1" role="dialog" aria-labelledby="ModalQuestionHolder" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h3 class="modal-title" id="ModalQuestionHolder">Question:</h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body" id="question">
+                      </div>
+                      <div class="modal-body" id="answer">
+                      </div>
+                      <div class="modal-footer" id="question_footer">
+                            <p id="player">
+                            </p>
+                            <button type="button" class="btn btn-success" id="finished_reading">Finished Reading!</button>
                         </div>
                     </div>
-                    <div id="table" style="display: block; visibility: visible">
-                        <table class="table">
-                            <tr>
-                                <th>
-                                    Question:
-                                </th>
-                            </tr>
-                            <tr>
-                                <td id="question">
-                                </td>
-                            </tr>
-                        </table>
-                        <table class="table">
-                            <tr>
-                                <th>
-                                    Answer:
-                                </th>
-                            </tr>
-                            <tr>
-                                <td id="answer">
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                    <p>
-                        <a class="btn btn-primary btn-large" href="/new">Start a New Game!</a>
-                        <a class="btn btn-primary btn-large" href="/join">Join a Game!</a>
-                    </p>
+                  </div>
+                </div>
                 </div>
             </div>
         </div>
     </div>
+    <script type="text/javascript">
+        $('button').click(function(event) {
+            if (this.className.includes('show-question')) {
+                socket.emit('question_clicked', {
+                    'identifier': this.id,
+                    'room': '{{ game.room }}'
+                });
+
+                $(this).addClass('disabled');
+            }
+
+            else if (this.id == 'finished_reading') {
+                socket.emit('finished_reading', {
+                    'room': '{{ game.room }}'
+                });
+            } 
+        });
+
+        socket.on('question_revealed', function(message) {
+            $('#question').text(message['question']);
+            $('#answer').text(message['answer']);
+
+            $('#ModalQuestion').modal('show', {
+                focus: true
+            });
+        });
+
+        socket.on('player_buzzed', function(message) {
+            $('#player').text(message['name']);
+        });
+
+    </script>
 </body>
 
 </html>

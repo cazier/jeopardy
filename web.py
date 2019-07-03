@@ -116,6 +116,35 @@ def add_score(user, incrementer):
 def internal_server_error(error):
 	return render_template(template_name_or_list = u'errors.html', error_code = error), 500
 
+@socketio.on(u'question_clicked')
+def reveal_host_clue(data):
+	info = LIVE_GAME_CONTAINER[data[u'room']].get(data[u'identifier'])
+
+	socketio.emit(u'question_revealed', {
+		u'room': data[u'room'],
+		u'identifier': data[u'identifier'],
+
+		u'question': info[u'question'],
+		u'answer': info[u'answer']
+		})
+
+@socketio.on(u'finished_reading')
+def host_finished_reading(data):
+	socketio.emit(u'host_finished_reading', {
+		u'room': data[u'room']
+		})
+
+	LIVE_GAME_CONTAINER[data[u'room']].buzzers = list()
+
+@socketio.on(u'buzzed_in')
+def player_buzzed_in(data):
+	LIVE_GAME_CONTAINER[data[u'room']].buzz(data[u'name'])
+
+	socketio.emit(u'player_buzzed', {
+		u'room': data[u'room'], 
+		u'player': LIVE_GAME_CONTAINER[data[u'room']].buzzers[0]
+		})
+
 
 def generate_room_code():
     letters = u''.join(random.sample(list(u'ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 4))
