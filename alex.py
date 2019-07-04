@@ -13,7 +13,10 @@ class Game(object):
         self.round = 1
 
         self.score = dict()
-        self.buzzers = list()
+        self.buzzers = u''
+
+        self.standing_question = None
+        self.standing_player = u''
 
     def add_player(self, name: str):
         self.score[name] = 0
@@ -58,15 +61,17 @@ class Game(object):
         entry, category, question = identifier.split(u'_')
 
         if entry == u'q':
-            return self.board.categories[int(category)].questions[int(question)].get()
+            response = self.board.categories[int(category)].questions[int(question)]
+            self.standing_question = response.get_question()
+            return response.get()
 
         else: 
             print(u'An error has occurred....')
             return False
 
     def buzz(self, name: str):
-        if (name in self.score.keys()) and (name not in self.buzzers):
-            self.buzzers.append(name)
+        if (name in self.score.keys()) and (len(self.buzzers) == 0):
+            self.buzzers = name
 
 
 
@@ -91,6 +96,7 @@ class Board(object):
     def get_questions(self) -> list:
         questions = list()
         categories = list()
+        category_list = [u'']
 
         conn = sqlite3.connect(self.db)
         t = conn.cursor()
@@ -108,10 +114,15 @@ class Board(object):
 
             all_categories = sqlite_cleaned(categories)
 
-            category = random.choice(all_categories)
-            
-            dataset = t.execute(u'SELECT * FROM questions WHERE segment=? AND show=? and category=?',
-                (self.round, show, category)).fetchall()
+            dataset = [(0, 0, 0, 0, 0, 0, 0, 0, 1)]
+
+            category = u''
+
+            while sum([datum[8] for datum in dataset]) > 0 and category in category_list:
+                category = random.choice(all_categories)
+                
+                dataset = t.execute(u'SELECT * FROM questions WHERE segment=? AND show=? and category=?',
+                    (self.round, show, category)).fetchall()
 
             self.categories.append(Category(dataset, index))
 
@@ -175,6 +186,9 @@ class Question(object):
         self.shown = True
 
         return {u'question': self.question, u'answer': self.answer}
+
+    def get_question(self):
+        return self
 
 
 def sqlite_cleaned(items: list) -> list:

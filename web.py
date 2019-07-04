@@ -134,15 +134,48 @@ def host_finished_reading(data):
 		u'room': data[u'room']
 		})
 
+	LIVE_GAME_CONTAINER[data[u'room']].buzzers = u''
+
+@socketio.on(u'correct_answer')
+def host_correct_answer(data):
+	game = LIVE_GAME_CONTAINER[data[u'room']]
+	game.score[game.standing_player] += game.standing_question.value
+
+	game.standing_player = None
+	game.standing_question = None
+
+	print(game.score)
+
+	socketio.emit(u'update_scores', {
+		u'room': data[u'room']
+		})
+
+
+@socketio.on(u'incorrect_answer')
+def host_incorrect_answer(data):
+	game = LIVE_GAME_CONTAINER[data[u'room']]
+	game.score[game.standing_player] -= game.standing_question.value
+
+	game.standing_player = None
+	game.standing_question = None
+
+	print(game.score)
+
+	socketio.emit(u'update_scores', {
+		u'room': data[u'room']
+		})
+
 	LIVE_GAME_CONTAINER[data[u'room']].buzzers = list()
 
 @socketio.on(u'buzzed_in')
 def player_buzzed_in(data):
 	LIVE_GAME_CONTAINER[data[u'room']].buzz(data[u'name'])
 
+	LIVE_GAME_CONTAINER[data[u'room']].standing_player = data[u'name']
+
 	socketio.emit(u'player_buzzed', {
 		u'room': data[u'room'], 
-		u'player': LIVE_GAME_CONTAINER[data[u'room']].buzzers[0]
+		u'name': LIVE_GAME_CONTAINER[data[u'room']].buzzers
 		})
 
 

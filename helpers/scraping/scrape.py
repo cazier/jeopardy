@@ -74,7 +74,7 @@ def get_specifier(element):
     return {u'category': element[5:-2], u'value': 200 * int(element[-1:]) * len(element[5:-4])}
 
 def string_clean(element):
-    return element.replace(u'\\\'', u'\'')
+    return element.replace(u'\\\'', u'\'').replace(u'<br />', u'\n')
 
 def check_for_external(element):
     return len(element.find_all(class_=u'clue_text')[0].find_all(u'a')) != 0
