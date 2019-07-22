@@ -22,6 +22,7 @@ class Game(object):
         self.score[name] = 0
 
     def make_board(self):
+        self.remaining_questions = size * 5
         self.board = Board(database_name = self.db, segment = self.round, size = self.size)
 
     def reset(self, reset_score: bool, reset_players: bool):
@@ -34,17 +35,20 @@ class Game(object):
         else:
             return False
 
-    def round_text(self) -> str:
-        if self.round == 1:
+    def round_text(self, next_round: bool = False) -> str:
+        if next_round:
+            next_round = self.round + 1
+
+        if (not next_round and self.round == 1) or (next_round == 1):
             return '{copyright}!'.format(copyright = self.copyright)
 
-        elif self.round == 2:
+        elif (not next_round and self.round == 2) or (next_round == 2):
             return 'Double {copyright}!'.format(copyright = self.copyright)
 
-        elif self.round == 3:
+        elif (not next_round and self.round == 3) or (next_round == 3):
             return 'Final {copyright}!'.format(copyright = self.copyright)
 
-        elif self.round == 4:
+        elif (not next_round and self.round == 4):
             return 'Tiebreaker {copyright}!'.format(copyright = self.copyright)
 
         else:
@@ -58,6 +62,7 @@ class Game(object):
         return zip(*[category.questions for category in self.board.categories])
 
     def get(self, identifier: str):
+        self.remaining_questions -= 1
         entry, category, question = identifier.split(u'_')
 
         if entry == u'q':

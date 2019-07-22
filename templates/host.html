@@ -42,11 +42,14 @@
                             </div>
                         </div>
                     {% endfor %}
-                 <div class="modal fade" id="ModalQuestion" tabindex="-1" role="dialog" aria-labelledby="ModalQuestionHolder" aria-hidden="true">
+                 <div class="modal fade" id="question_modal" tabindex="-1" role="dialog" aria-labelledby="question-modal-holder" aria-hidden="true">
                   <div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
                       <div class="modal-header">
-                        <h4 class="modal-title" id="ModalQuestionHolder"></h4>
+                        <h4 class="modal-title" id="question-modal-holder"></h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="modal_dismiss">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
                       </div>
                       <h4 style="padding: 16px;">Question:</h4>
                       <div class="modal-body" id="question">
@@ -63,6 +66,25 @@
                     </div>
                   </div>
                 </div>
+                 <div class="modal fade" id="round_modal" tabindex="-1" role="dialog" aria-labelledby="round-modal-holder" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h3 class="modal-title" id="round-modal-holder">Round Complete!</h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+                        Congratulations on finishing <span id="current_round"></span>! Are you ready to start <span id="next_round"></span>?!
+                      </div>
+                      <div class="modal-footer">
+                        <button class="btn btn-success mr-auto" id="start_next_round">Start the next round!</button>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+
                 </div>
             </div>
         </div>
@@ -101,8 +123,23 @@
                     'room': '{{ game.room }}'
                 });
 
+                $('#player').text('');
+
+
                 $('#correct_answer').addClass('disabled');
                 $('#incorrect_answer').addClass('disabled');
+            } 
+
+            else if (this.id == 'modal_dismiss') {
+                socket.emit('dismiss_modal', {
+                    'room': '{{ game.room }}'
+                });
+            } 
+
+            else if (this.id == 'start_next_round') {
+                socket.emit('start_next_round', {
+                    'room': '{{ game.room }}'
+                });
             } 
         });
 
@@ -110,16 +147,37 @@
             $('#question').text(message['question']);
             $('#answer').text(message['answer']);
 
-            $('#ModalQuestion').modal('show', {
+            $('#question_modal').modal('show', {
                 focus: true
             });
         });
 
         socket.on('player_buzzed', function(message) {
             $('#player').text(message['name']);
+
             $('#correct_answer').removeClass('disabled');
             $('#incorrect_answer').removeClass('disabled');
         });
+
+        socket.on('clear_modal', function(message) {
+            $('#player').text('');
+
+            $('#question_modal').modal('hide');
+        });
+
+        socket.on('round_complete', function(message) {
+            $('#current_round').text(message['current_round']);
+            $('#next_round').text(message['next_round']);
+
+            $('#round_modal').modal('show', {
+                focus: true
+            });
+        });
+
+        socket.on('round_started', function(message) {
+            $('<form method="POST" action="' + document.URL + '"><input type="hidden" name="room" value="{{ game.room }}"/></form>').submit();
+        });
+
 
     </script>
 </body>

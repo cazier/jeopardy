@@ -20,28 +20,37 @@
                 <h2>
                     Hey {{ session['name'] }}!
                 </h2>
-                <table class="table">
-                    <tr>
-                        <th>
-                            Current Score:
-                        </th>
-                    </tr>
-                    <tr>
-                        <td>
-                            {{ game.score[session['name']] }}
-                        </td>
-                    </tr>
-                </table>
+                <div class="input-group-lg mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">Current Score:</span>
+                        <span class="input-group-text">{{ currency }}</span>
+                        <span class="input-group-text" id="score">{{ game.score[session['name']] }}</span>
+                    </div>
+                </div>
                 <br>
-                <button id="buzzer" class="btn btn-block btn-primary disabled">BUZZ IN!</button>
+                <div id="buzzer_container">
+                    <button id="buzzer" class="btn btn-block btn-danger disabled">BUZZ IN!</button>
+                </div>
             </div>
         </div>
     </div>
 </div>
 <script type="text/javascript">
         socket.on('host_finished_reading', function(message) {
-            $('#buzzer').removeClass('disabled');
+            if (message['player'] != "{{ session['name'] }}") {
+                $('#buzzer').removeClass('disabled btn-danger');
+                $('#buzzer').addClass('btn-success');
+            }
             });
+
+        socket.on('reset_player', function (message) {
+            $('#buzzer').removeClass('btn-success');
+            $('#buzzer').addClass('disabled btn-danger');
+            });
+
+        socket.on('update_scores', function (message) {
+            $('#score').text(message['scores']['{{ session['name'] }}']);
+        });
 
         $('button').click(function(event) {
             if (this.id == 'buzzer') {
