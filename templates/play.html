@@ -32,6 +32,38 @@
                 <div id="buzzer_container">
                     <button id="buzzer" class="btn btn-block btn-danger disabled">BUZZ IN!</button>
                 </div>
+
+                 <div class="modal fade" id="wager_modal" tabindex="-1" role="dialog" aria-labelledby="wager-modal-holder" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h3 class="modal-title" id="wager-modal-holder">Welcome to <span id="current_round"></span></h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+                        <h4>The category is <span id="category"></span>, and you currently have <br>{{ currency }} <span id="score">{{ game.score[session['name']] }}</span>!</h4>
+                        <div class="alert alert-danger collapse" role="alert" id="wager-alert">
+                            Your wager must be less than or equal to your current money. Please try again!
+                        </div>
+                        <div class="form-group" id="wager">
+                            <label for="wager">How much would you like to wager?</label>
+                            <input name="wager" type="number" class="form-control" placeholder="" required id="wager_value">
+                            <small class="form-text text-muted"></small>
+                        </div>
+                        <div class="form-group" id="answer" style="display: none;">
+                            <label for="wager">Please enter an answer!</label>
+                            <input name="wager" type="text" class="form-control" placeholder="" required id="answer_value">
+                            <small class="form-text text-muted"></small>
+                        </div> 
+                    </div>
+                      <div class="modal-footer">
+                        <button class="btn btn-success mr-auto" id="wager_submit">Submit!</button>
+                        </div>
+                    </div>
+                  </div>
+                </div>
             </div>
         </div>
     </div>
@@ -53,13 +85,32 @@
             $('#score').text(message['scores']['{{ session['name'] }}']);
         });
 
+        socket.on('start_wager_round', function (message) {
+            $('#category').text(message['category']);
+            $('#wager_modal').modal('show', {
+                focus: true
+            });
+        });
+
         $('button').click(function(event) {
             if (this.id == 'buzzer') {
                 socket.emit('buzzed_in', {
                     'room': '{{ game.room }}',
                     'name': '{{ session['name'] }}'
                 });
-            } 
+            }
+
+            else if (this.id == 'wager_submit') {
+                if (parseInt($('#wager_value')) > parseInt($('#score'))) {
+                    $('#wager_error')
+
+                }
+                socket.emit('wager_submitted', {
+                    'room': '{{ game.room }}',
+                    'name': '{{ session['name'] }}',
+                    'wager': $('#wager').value()
+                });
+            };
         });
 </script>
 </body>

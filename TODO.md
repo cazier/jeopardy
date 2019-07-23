@@ -8,3 +8,7 @@
 
 - Host/board fade modal on timeout
 - Use message/alert to show answerer and plus/minus
+
+# Missing actual functionality
+ [ ] Final Jeopardy / Tiebreakers
+ [ ] Daily Doubles
