@@ -22,9 +22,10 @@
                 </h2>
                 <div class="input-group-lg mb-3">
                     <div class="input-group-prepend">
-                        <span class="input-group-text">Current Score:</span>
-                        <span class="input-group-text">{{ currency }}</span>
-                        <span class="input-group-text" id="score">{{ game.score[session['name']] }}</span>
+                        <span class="input-group-text">Current Score:
+                            {{ currency }}&nbsp;
+                            <span id="score">{{ game.score[session['name']] }}</span>
+                        </span>
                     </div>
                 </div>
                 <br>
@@ -36,8 +37,8 @@
     </div>
 </div>
 <script type="text/javascript">
-        socket.on('host_finished_reading', function(message) {
-            if !(message['players'].contains("{{ session['name'] }}")) {
+        socket.on('enable_buzzers', function(message) {
+            if (!message['players'].includes("{{ session['name'] }}")) {
                 $('#buzzer').removeClass('disabled btn-danger');
                 $('#buzzer').addClass('btn-success');
             }

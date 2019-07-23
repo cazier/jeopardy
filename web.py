@@ -135,8 +135,8 @@ def reveal_host_clue(data):
 		})
 
 @socketio.on(u'finished_reading')
-def host_finished_reading(data, incorrect_players: list = None):
-	socketio.emit(u'host_finished_reading', {
+def enable_buzzers(data, incorrect_players: list = list()):
+	socketio.emit(u'enable_buzzers', {
 		u'room': data[u'room'],
 		u'players': incorrect_players
 		})
@@ -168,7 +168,7 @@ def host_incorrect_answer(data):
 		u'scores': game.score
 		})
 
-	host_finished_reading(data, incorrect_players = game.buzzers)
+	enable_buzzers(data, incorrect_players = game.buzzers)
 
 
 @socketio.on(u'buzzed_in')
