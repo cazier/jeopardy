@@ -80,6 +80,7 @@ def show_player():
 			return redirect(url_for(u'join_game'))
 
 		else:
+			print(u'adding to session')
 			LIVE_GAME_CONTAINER[room].add_player(name)
 
 			socketio.emit(u'add_player_to_board', {
@@ -134,18 +135,17 @@ def reveal_host_clue(data):
 		})
 
 @socketio.on(u'finished_reading')
-def host_finished_reading(data, incorrect_player: str = None):
+def host_finished_reading(data, incorrect_players: list = None):
 	socketio.emit(u'host_finished_reading', {
 		u'room': data[u'room'],
-		u'player': incorrect_player
+		u'players': incorrect_players
 		})
 
-	LIVE_GAME_CONTAINER[data[u'room']].buzzers = u''
 
 @socketio.on(u'correct_answer')
 def host_correct_answer(data):
 	game = LIVE_GAME_CONTAINER[data[u'room']]
-	game.score[game.standing_player] += game.standing_question.value
+	game.score[game.buzzers[-1]] += game.standing_question.value
 
 	socketio.emit(u'clear_modal', {
 		u'room': data[u'room']
@@ -161,23 +161,19 @@ def host_correct_answer(data):
 @socketio.on(u'incorrect_answer')
 def host_incorrect_answer(data):
 	game = LIVE_GAME_CONTAINER[data[u'room']]
-	game.score[game.standing_player] -= game.standing_question.value
+	game.score[game.buzzers[-1]] -= game.standing_question.value
 
 	socketio.emit(u'update_scores', {
 		u'room': data[u'room'],
 		u'scores': game.score
 		})
 
-	host_finished_reading(data, incorrect_player = game.standing_player)
-
-	game.standing_player = None
+	host_finished_reading(data, incorrect_players = game.buzzers)
 
 
 @socketio.on(u'buzzed_in')
 def player_buzzed_in(data):
 	LIVE_GAME_CONTAINER[data[u'room']].buzz(data[u'name'])
-
-	LIVE_GAME_CONTAINER[data[u'room']].standing_player = data[u'name']
 
 	socketio.emit(u'reset_player', {
 		u'room': data[u'room'],
@@ -186,7 +182,7 @@ def player_buzzed_in(data):
 
 	socketio.emit(u'player_buzzed', {
 		u'room': data[u'room'], 
-		u'name': LIVE_GAME_CONTAINER[data[u'room']].buzzers
+		u'name': LIVE_GAME_CONTAINER[data[u'room']].buzzers[-1]
 		})
 
 @socketio.on(u'dismiss_modal')
@@ -198,7 +194,7 @@ def dismiss_modal(data):
 	end_question(data)
 
 @socketio.on(u'start_next_round')
-def next_round(data):
+def start_next_round(data):
 	game = LIVE_GAME_CONTAINER[data[u'room']]
 
 	game.next_round()
@@ -222,7 +218,7 @@ def generate_room_code():
 def end_question(data):
 	game = LIVE_GAME_CONTAINER[data[u'room']]
 
-	game.standing_player = None
+	game.buzzers = list()
 	game.standing_question = None
 
 	if game.remaining_questions == 0:

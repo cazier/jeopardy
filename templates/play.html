@@ -37,7 +37,7 @@
 </div>
 <script type="text/javascript">
         socket.on('host_finished_reading', function(message) {
-            if (message['player'] != "{{ session['name'] }}") {
+            if !(message['players'].contains("{{ session['name'] }}")) {
                 $('#buzzer').removeClass('disabled btn-danger');
                 $('#buzzer').addClass('btn-success');
             }

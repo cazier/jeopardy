@@ -13,16 +13,15 @@ class Game(object):
         self.round = 1
 
         self.score = dict()
-        self.buzzers = u''
+        self.buzzers = list()
 
         self.standing_question = None
-        self.standing_player = u''
 
     def add_player(self, name: str):
         self.score[name] = 0
 
     def make_board(self):
-        self.remaining_questions = size * 5
+        self.remaining_questions = self.size * 5
         self.board = Board(database_name = self.db, segment = self.round, size = self.size)
 
     def reset(self, reset_score: bool, reset_players: bool):
@@ -75,8 +74,8 @@ class Game(object):
             return False
 
     def buzz(self, name: str):
-        if (name in self.score.keys()) and (len(self.buzzers) == 0):
-            self.buzzers = name
+        if name in self.score.keys():
+            self.buzzers.append(name)
 
 
 
