@@ -97,7 +97,7 @@
                     'room': '{{ game.room }}'
                 });
 
-                $(this).addClass('disabled');
+                $('#' + this.id).addClass('disabled');
             }
 
             else if (this.id == 'finished_reading') {

@@ -17,6 +17,8 @@ class Game(object):
 
         self.standing_question = None
 
+        self.wagered_round = dict()
+
     def add_player(self, name: str):
         self.score[name] = 0
 

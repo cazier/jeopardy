@@ -92,7 +92,7 @@ def show_player():
 			session[u'room'] = room
 
 	elif request.method == u'GET' and session is not None:
-		room = session[u'room']
+		room = 'ABCD'#session[u'room']
 
 	return render_template(
 		template_name_or_list = u'play.html',
@@ -201,6 +201,15 @@ def start_next_round(data):
 	game.make_board()
 
 	socketio.emit(u'round_started')
+
+@socketio.on(u'wager_submitted')
+def received_wager(data):
+	game = LIVE_GAME_CONTAINER[data[u'room']]
+
+	game.wagered_round[data[u'name']] = data[u'wager']
+
+
+	print(game.wagered_round)
 
 
 @socketio.on(u'join')

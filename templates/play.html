@@ -44,7 +44,7 @@
                       </div>
                       <div class="modal-body">
                         <h4>The category is <span id="category"></span>, and you currently have <br>{{ currency }} <span id="score">{{ game.score[session['name']] }}</span>!</h4>
-                        <div class="alert alert-danger collapse" role="alert" id="wager-alert">
+                        <div class="alert alert-danger collapse" role="alert" id="wager_alert">
                             Your wager must be less than or equal to your current money. Please try again!
                         </div>
                         <div class="form-group" id="wager">
@@ -101,15 +101,28 @@
             }
 
             else if (this.id == 'wager_submit') {
-                if (parseInt($('#wager_value')) > parseInt($('#score'))) {
-                    $('#wager_error')
-
+                if (parseInt($('#wager_value').val()) <= parseInt($('#score').text())) {
+                    socket.emit('wager_submitted', {
+                        'room': '{{ game.room }}',
+                        'name': '{{ session['name'] }}',
+                        'wager': $('#wager_value').val()
+                    });
                 }
-                socket.emit('wager_submitted', {
-                    'room': '{{ game.room }}',
-                    'name': '{{ session['name'] }}',
-                    'wager': $('#wager').value()
-                });
+
+                else if (parseInt($('#wager_value').val()) > parseInt($('#score').text())) {
+                    if (parseInt($('#wager_value').val()) <= 1000) {
+                        socket.emit('wager_submitted', {
+                            'room': '{{ game.room }}',
+                            'name': '{{ session['name'] }}',
+                            'wager': $('#wager_value').val()
+                        });
+                    }
+
+                    else {
+                        $('#wager_alert').show();
+                    }
+                }
+
             };
         });
 </script>
