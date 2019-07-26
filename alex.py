@@ -24,6 +24,7 @@ class Game(object):
 
     def make_board(self):
         self.remaining_questions = self.size * 5
+        self.remaining_questions = 1
         self.board = Board(database_name = self.db, segment = self.round, size = self.size)
 
     def reset(self, reset_score: bool, reset_players: bool):
@@ -58,6 +59,7 @@ class Game(object):
 
     def next_round(self):
         self.round += 1
+        self.make_board()
 
     def html_board(self) -> str:
         return zip(*[category.questions for category in self.board.categories])

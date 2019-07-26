@@ -130,10 +130,9 @@
         });
 
         socket.on('round_started', function(message) {
-            $('#round_modal').modal('hide');
-
-            $('<form method="POST" action="' + document.URL + '"><input type="hidden" name="room" value="{{ game.room }}"/></form>').submit();
+            post('/board', {'room': '{{ game.room }}'});
         });
+
     </script>
 </div>
 </body>

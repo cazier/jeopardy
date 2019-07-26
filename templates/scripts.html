@@ -17,7 +17,30 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='custom.css') }}" crossorigin="anonymous"></script>
 
 <script type="text/javascript">
+
+	
     var socket = io('http://' + document.domain + ':' + location.port);
+
+    // https://stackoverflow.com/questions/133925/javascript-post-request-like-a-form-submit
+	function post(path, params, method='post') {
+	  const web_form = document.createElement('form');
+	  web_form.method = method;
+	  web_form.action = path;
+
+	  for (const key in params) {
+	    if (params.hasOwnProperty(key)) {
+	      const hiddenField = document.createElement('input');
+	      hiddenField.type = 'hidden';
+	      hiddenField.name = key;
+	      hiddenField.value = params[key];
+
+	      web_form.appendChild(hiddenField);
+	    }
+	  }
+
+	  document.body.appendChild(web_form);
+	  web_form.submit();
+	}
 </script>
 
 

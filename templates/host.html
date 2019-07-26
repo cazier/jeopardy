@@ -175,7 +175,7 @@
         });
 
         socket.on('round_started', function(message) {
-            $('<form method="POST" action="' + document.URL + '"><input type="hidden" name="room" value="{{ game.room }}"/></form>').submit();
+            $("<form method='POST' action='" + document.url + "'><input type='hidden' name='room' value='{{ game.room }}'/></form>").appendTo("body").submit();
         });
 
 

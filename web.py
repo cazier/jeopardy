@@ -96,7 +96,7 @@ def show_player():
 
 	return render_template(
 		template_name_or_list = u'play.html',
-		score = u'10', session = session,
+		session = session,
 		game = LIVE_GAME_CONTAINER[room])
 
 @app.route(u'/board', methods = [u'POST'])
@@ -198,7 +198,6 @@ def start_next_round(data):
 	game = LIVE_GAME_CONTAINER[data[u'room']]
 
 	game.next_round()
-	game.make_board()
 
 	socketio.emit(u'round_started')
 
