@@ -37,13 +37,10 @@
                   <div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
                       <div class="modal-header">
-                        <h3 class="modal-title" id="wager-modal-holder">Welcome to <span id="current_round"></span></h3>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                          <span aria-hidden="true">&times;</span>
-                        </button>
+                        <h3 class="modal-title" id="wager-modal-holder"><span id="current_round"></span></h3>
                       </div>
                       <div class="modal-body">
-                        <h4>The category is <span id="category"></span>, and you currently have <br>{{ currency }} <span id="score">{{ game.score[session['name']] }}</span>!</h4>
+                        <h4>You currently have <br>{{ currency }} <span id="scores"></span>!</h4>
                         <div class="alert alert-danger collapse" role="alert" id="wager_alert">
                             Your wager must be less than or equal to your current money. Please try again!
                         </div>
@@ -83,14 +80,21 @@
 
         socket.on('update_scores', function (message) {
             $('#score').text(message['scores']['{{ session['name'] }}']);
+            $('#scores').text(message['scores']['{{ session['name'] }}']);
         });
 
-        socket.on('start_wager_round', function (message) {
-            $('#category').text(message['category']);
-            $('#wager_modal').modal('show', {
-                focus: true
-            });
+        socket.on('start_wager_round', function(message) {
+            if (message['players'].includes("{{ session['name'] }}")) {
+                $('#wager_modal').modal('show', {
+                    focus: true
+                });
+            }
         });
+
+        socket.on('final_question_revealed', function(message) {
+            $('#answer').show();
+        });
+
 
         $('button').click(function(event) {
             if (this.id == 'buzzer') {
@@ -101,26 +105,22 @@
             }
 
             else if (this.id == 'wager_submit') {
-                if (parseInt($('#wager_value').val()) <= parseInt($('#score').text())) {
+                wager = parseInt($('#wager_value').val());
+                score = parseInt($('#score').text());
+
+                if ((wager <= score) | ((wager > score) & (wager <= 1000))) {
                     socket.emit('wager_submitted', {
                         'room': '{{ game.room }}',
                         'name': '{{ session['name'] }}',
                         'wager': $('#wager_value').val()
                     });
+
+                    $('#wager_value').prop('disabled', function(i, v) {return !v; });
+                    $('#wager_alert').hide();
                 }
 
-                else if (parseInt($('#wager_value').val()) > parseInt($('#score').text())) {
-                    if (parseInt($('#wager_value').val()) <= 1000) {
-                        socket.emit('wager_submitted', {
-                            'room': '{{ game.room }}',
-                            'name': '{{ session['name'] }}',
-                            'wager': $('#wager_value').val()
-                        });
-                    }
-
-                    else {
-                        $('#wager_alert').show();
-                    }
+                else {
+                    $('#wager_alert').show();
                 }
 
             };

@@ -11,6 +11,7 @@ class Game(object):
         self.room = room
         
         self.round = 1
+        self.round = 2
 
         self.score = dict()
         self.buzzers = list()
@@ -139,7 +140,6 @@ class Board(object):
 
     def html_board(self):
         return zip(*[i.questions for i in self.categories])
-
 
 class Category(object):
     def __init__(self, db_questions: list, index: int):

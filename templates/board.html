@@ -64,6 +64,21 @@
                         {% endfor %}
                     </tr>
                 </table>
+                {% elif game.round > 2 %}
+                <div id="category_details" class="collapse">
+                    <hr>
+                    <h3 >
+                        The category is:
+                    </h3>
+                    <h4 style="padding-left: 25px">{{ game.board.categories[0].category }}</h4>
+                </div>
+                <div id="question_details" class="collapse">
+                    <hr>
+                    <h3>
+                        The question is:
+                    </h3>
+                    <h4 style="padding-left: 25px">{{ game.board.categories[0].questions[0].question }}</h4>
+                </div>
                 {% endif %}
                 <div class="modal fade" id="question_modal" tabindex="-1" role="dialog" aria-labelledby="question-modal-holder" aria-hidden="true">
                   <div class="modal-dialog modal-dialog-centered" role="document">
@@ -185,6 +200,14 @@
 
         socket.on('reveal_wager_answer', function(message) {
             $('#wager_answer_holder').collapse('show');
+        });
+
+        socket.on('final_category_revealed', function(message) {
+            $('#category_details').collapse();
+        });
+
+        socket.on('final_question_revealed', function(message) {
+            $('#question_details').collapse();
         });
 
     </script>

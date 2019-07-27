@@ -130,7 +130,7 @@ def reveal_host_clue(data):
 		u'room': data[u'room'],
 		u'identifier': data[u'identifier'],
 
-		u'question': info[u'question'],
+		u'question': info[u'question'].replace(u'<br />', u'\n'),
 		u'answer': info[u'answer']
 		})
 
@@ -205,18 +205,17 @@ def start_next_round(data):
 def reveal_category(data):
 	game = LIVE_GAME_CONTAINER[data[u'room']]
 
-	game.get(u'q_0_0')
-	print(game)
+	socketio.emit(u'final_category_revealed');
+	socketio.emit(u'start_wager_round', {
+		u'room': data[u'room'],
+		u'players': list(game.score.keys())
+		});
 
-	socketio.emit(u'round_started')
-
-@socketio.on(u'reveal_clue')
-def reveal_clue(data):
+@socketio.on(u'reveal_question')
+def reveal_question(data):
 	game = LIVE_GAME_CONTAINER[data[u'room']]
 
-	game.next_round()
-
-	socketio.emit(u'round_started')
+	socketio.emit(u'final_question_revealed')
 
 @socketio.on(u'wager_submitted')
 def received_wager(data):
@@ -224,6 +223,10 @@ def received_wager(data):
 
 	game.wagered_round[data[u'name']] = data[u'wager']
 
+	socketio.emit('wagerer_received', {
+		u'room': data[u'room'],
+		u'name': data[u'name']
+		})
 
 	print(game.wagered_round)
 
@@ -246,7 +249,7 @@ def end_question(data):
 	game.buzzers = list()
 	game.standing_question = None
 
-	if game.remaining_questions == 0:
+	if game.remaining_questions <= 0:
 		socketio.emit(u'round_complete', {
 			u'room': data[u'room'],
 			u'current_round': LIVE_GAME_CONTAINER[data[u'room']].round_text(),
