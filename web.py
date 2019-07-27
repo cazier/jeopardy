@@ -221,14 +221,35 @@ def reveal_question(data):
 def received_wager(data):
 	game = LIVE_GAME_CONTAINER[data[u'room']]
 
-	game.wagered_round[data[u'name']] = data[u'wager']
+	game.wagered_round[data[u'name']] = {u'wager': data[u'wager']}
 
 	socketio.emit('wagerer_received', {
 		u'room': data[u'room'],
 		u'name': data[u'name']
 		})
 
-	print(game.wagered_round)
+@socketio.on(u'answer_submitted')
+def received_answer(data):
+	game = LIVE_GAME_CONTAINER[data[u'room']]
+
+	game.wagered_round[data[u'name']][u'answer'] = data[u'answer']
+
+	socketio.emit('wagerer_received', {
+		u'room': data[u'room'],
+		u'name': data[u'name']
+		})
+
+@socketio.on(u'final_wagerer_reveal')
+def wagerer_reveal(data):
+	game = LIVE_GAME_CONTAINER[data[u'room']]
+	name = data[u'name'][:-8]
+
+	socketio.emit('final_wager_received', {
+		u'room': data[u'room'],
+		u'name': name,
+		u'wager': game.wagered_round[name][u'wager'],
+		u'answer': game.wagered_round[name][u'answer']
+		})
 
 
 @socketio.on(u'join')

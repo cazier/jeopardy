@@ -40,13 +40,13 @@
                         <h3 class="modal-title" id="wager-modal-holder"><span id="current_round"></span></h3>
                       </div>
                       <div class="modal-body">
-                        <h4>You currently have <br>{{ currency }} <span id="scores"></span>!</h4>
+                        <h4>You currently have <br>{{ currency }} <span id="scores">0</span>!</h4>
                         <div class="alert alert-danger collapse" role="alert" id="wager_alert">
                             Your wager must be less than or equal to your current money. Please try again!
                         </div>
                         <div class="form-group" id="wager">
                             <label for="wager">How much would you like to wager?</label>
-                            <input name="wager" type="number" class="form-control" placeholder="" required id="wager_value">
+                            <input name="wager" type="number" class="form-control" placeholder="0" value="0" required id="wager_value">
                             <small class="form-text text-muted"></small>
                         </div>
                         <div class="form-group" id="answer" style="display: none;">
@@ -117,13 +117,25 @@
 
                     $('#wager_value').prop('disabled', function(i, v) {return !v; });
                     $('#wager_alert').hide();
+
+                    document.getElementById('wager_submit').id = 'answer_submit';
                 }
 
                 else {
                     $('#wager_alert').show();
                 }
 
-            };
+            }
+
+            else if (this.id == 'answer_submit') {
+                socket.emit('answer_submitted', {
+                    'room': '{{ game.room }}',
+                    'name': '{{ session['name'] }}',
+                    'answer': $('#answer_value').val()
+                });
+
+                $('#wager_modal').modal('hide');
+            }
         });
 </script>
 </body>

@@ -44,6 +44,23 @@
                     {% endfor %}
                 </table>
                 <br>
+                {% elif game.round > 2 %}
+                <div id="category_details" class="collapse">
+                    <hr>
+                    <h3 >
+                        The category is:
+                    </h3>
+                    <h4 style="padding-left: 25px">{{ game.board.categories[0].category }}</h4>
+                </div>
+                <div id="question_details" class="collapse">
+                    <hr>
+                    <h3>
+                        The question is:
+                    </h3>
+                    <h4 style="padding-left: 25px">{{ game.board.categories[0].questions[0].question }}</h4>
+                </div>
+                {% endif %}
+                <hr>
                 <table class="table" style="width: 100%;" id="score_board">
                     <h4>
                         Scores!
@@ -64,22 +81,6 @@
                         {% endfor %}
                     </tr>
                 </table>
-                {% elif game.round > 2 %}
-                <div id="category_details" class="collapse">
-                    <hr>
-                    <h3 >
-                        The category is:
-                    </h3>
-                    <h4 style="padding-left: 25px">{{ game.board.categories[0].category }}</h4>
-                </div>
-                <div id="question_details" class="collapse">
-                    <hr>
-                    <h3>
-                        The question is:
-                    </h3>
-                    <h4 style="padding-left: 25px">{{ game.board.categories[0].questions[0].question }}</h4>
-                </div>
-                {% endif %}
                 <div class="modal fade" id="question_modal" tabindex="-1" role="dialog" aria-labelledby="question-modal-holder" aria-hidden="true">
                   <div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
@@ -193,9 +194,13 @@
         socket.on('final_wager_received', function(message) {
             $('#wager_answer_holder').collapse('hide');
 
-            $('#wager_round_name').text(message['wager_name']);
-            $('#wager_round_amount').text(message['wager_amount']);
-            $('#wager_round_answer').text(message['wager_answer']);
+            $('#wager_round_name').text(message['name']);
+            $('#wager_round_amount').text(message['wager']);
+            $('#wager_round_answer').text(message['answer']);
+
+            $('#wager_category_modal').modal('show', {
+                focus: true
+            });
         });
 
         socket.on('reveal_wager_answer', function(message) {

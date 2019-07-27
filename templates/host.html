@@ -45,9 +45,26 @@
                     <div class="btn-toolbar" role="toolbar">
                         <div class="btn-group" role="group" id="wagerers">
                             {% for name in game.score.keys() %}
-                                <button class="btn btn-danger" id="{{ name }}_wagered">{{ name }}</button>
+                                <button class="btn btn-danger wager_names" id="{{ name }}_wagered">{{ name }}</button>
                             {% endfor %}
                         </div>
+                    </div>
+                    <div>
+                        <hr>
+                        <h4>
+                            CATEGORY:
+                        </h4>
+                        <h5 style="padding-left: 25px">{{ game.board.categories[0].category }}</h5>
+                        <hr>
+                        <h4>
+                            QUESTION:
+                        </h4>
+                        <h5 style="padding-left: 25px">{{ game.board.categories[0].questions[0].question }}</h5>
+                        <hr>
+                        <h4>
+                            ANSWER:
+                        </h3>
+                        <h5 style="padding-left: 25px">{{ game.board.categories[0].questions[0].answer }}</h5>
                     </div>
                     <hr>
                         <div class="btn-toolbar" role="toolbar">
@@ -105,6 +122,54 @@
                     </div>
                   </div>
                 </div>
+                 <div class="modal fade" id="wager_category_modal" tabindex="-1" role="dialog" aria-labelledby="wager-category-modal-holder" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h3 class="modal-title" id="wager-category-modal-holder"><span id="category"></span></h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+                        <h3>Clue:</h3>
+                        <h4 id="wager_clue"></h4>
+                        <table>
+                            <tr>
+                                <th>
+                                    <span id="wager_round_name"></span> has wagered:
+                                </th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    {{ currency }} <span id="wager_round_amount"></span>
+                                </td>
+                            </tr>
+                        </table>
+                        <br>
+                        <table class="collapse" id="wager_answer_holder">
+                            <tr>
+                                <th>
+                                    Answer:
+                                </th>
+                            </tr>
+                            <tr>
+                                <td id="wager_round_answer">
+                                </td>
+                            </tr>
+                        </table>
+                      </div>
+                      <div class="modal-footer" id="question_footer">
+                        <div class="btn-toolbar" role="toolbar">
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-success disabled mr-auto" id="correct_wager">Correct!</button>
+                                <button class="btn btn-danger disabled mr-auto" id="incorrect_wager">Incorrect</button>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                  </div>
+                </div>
 
                 </div>
             </div>
@@ -120,6 +185,13 @@
                     });
 
                     $('#' + this.id).addClass('disabled');
+                }
+
+                else if (this.className.includes('wager_names')) {
+                    socket.emit('final_wagerer_reveal', {
+                        'room': '{{ game.room }}',
+                        'name': this.id,
+                    })
                 }
 
                 else if (this.id == 'finished_reading') {
@@ -221,6 +293,17 @@
             $('#' + message['name'] + '_wagered').removeClass('btn-danger');
             $('#' + message['name'] + '_wagered').addClass('btn-success');
         });
+
+        socket.on('final_wager_received', function(message) {
+            $('#wager_answer_holder').collapse('hide');
+
+            $('#wager_round_name').text(message['name']);
+            $('#wager_round_amount').text(message['wager']);
+            $('#wager_round_answer').text(message['answer']);
+
+            $('#wager_category_modal').modal('show', {
+                focus: true
+            });
 
 
     </script>
