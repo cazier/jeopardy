@@ -22,26 +22,35 @@
                         Time to be a Host!
                     </h2>
                     <hr>
-                    {% for width in range(2) %}
-                        <div id="categories" class="{% if width == 0 %}d-none d-md-block{% elif width == 1 %}d-md-none{% endif %}">
-                            <div class="{% if width == 0 %}btn-group{% elif width == 1 %}btn-group-vertical{% endif %}" role="group">
-                                {% for name in game.board.categories %}
-                                    <div class="btn-group{% if width == 1 %} dropright{% endif %}" role="group">
-                                        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" id="c_{{ name.index }}" aria-haspopup="true" aria-expanded="false">
-                                            {{ name.category }}
-                                        </button>
-                                        <div class="dropdown-menu" aria-labelledby="c_{{ name.index }}">
-                                            {% for question in name.questions %}
-                                                <button class="dropdown-item show-question{% if question.shown %} disabled{% endif %}" type="button" id="q_{{ question.id() }}">
-                                                    {{ currency }}{{ question.value }}
-                                                </button>
-                                            {% endfor %}
+                    {% if game.round <= 2 %}
+                        {% for width in range(2) %}
+                            <div id="categories" class="{% if width == 0 %}d-none d-md-block{% elif width == 1 %}d-md-none{% endif %}">
+                                <div class="{% if width == 0 %}btn-group{% elif width == 1 %}btn-group-vertical{% endif %}" role="group">
+                                    {% for name in game.board.categories %}
+                                        <div class="btn-group{% if width == 1 %} dropright{% endif %}" role="group">
+                                            <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" id="c_{{ name.index }}" aria-haspopup="true" aria-expanded="false">
+                                                {{ name.category }}
+                                            </button>
+                                            <div class="dropdown-menu" aria-labelledby="c_{{ name.index }}">
+                                                {% for question in name.questions %}
+                                                    <button class="dropdown-item show-question{% if question.shown %} disabled{% endif %}" type="button" id="q_{{ question.id() }}">
+                                                        {{ currency }}{{ question.value }}
+                                                    </button>
+                                                {% endfor %}
+                                            </div>
                                         </div>
-                                    </div>
-                                {% endfor %}
+                                    {% endfor %}
+                                </div>
                             </div>
-                        </div>
-                    {% endfor %}
+                        {% endfor %}
+                    {% else %}
+                    <table class="table" style="width: 100%;">
+                        <tr id='players'>
+                        </tr>
+                    </table>
+                        <button class="btn btn-success" id="reveal_category">Reveal Category</button>
+                        <button class="btn btn-success" id="reveal_clue">Reveal Clue</button>
+                    {% endif %}
                  <div class="modal fade" id="question_modal" tabindex="-1" role="dialog" aria-labelledby="question-modal-holder" aria-hidden="true">
                   <div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
@@ -141,6 +150,18 @@
                     'room': '{{ game.room }}'
                 });
             } 
+
+            else if (this.id == 'reveal_category') {
+                socket.emit('reveal_category', {
+                    'room': '{{ game.room }}'
+                });
+            } 
+
+            else if (this.id == 'reveal_clue') {
+                socket.emit('reveal_clue', {
+                    'room': '{{ game.room }}'
+                });
+            } 
         });
 
         socket.on('question_revealed', function(message) {
@@ -175,7 +196,11 @@
         });
 
         socket.on('round_started', function(message) {
-            $("<form method='POST' action='" + document.url + "'><input type='hidden' name='room' value='{{ game.room }}'/></form>").appendTo("body").submit();
+            $("<form method='POST' action='" + document.URL + "'><input type='hidden' name='room' value='{{ game.room }}'/></form>").appendTo("body").submit();
+        });
+
+        socket.on('wagerer_received', function(message) {
+            $('#players').append('<th style="text-align: center;">' + message['player'] + '</th>');
         });
 
 

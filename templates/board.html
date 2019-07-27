@@ -20,6 +20,7 @@
                 <h2>
                     Let's Play {{ game.round_text() }}
                 </h2>
+                {% if game.round <= 2 %}
                 <table class="table">
                     <tr>
                         {% for name in game.board.categories %}
@@ -63,6 +64,7 @@
                         {% endfor %}
                     </tr>
                 </table>
+                {% endif %}
                 <div class="modal fade" id="question_modal" tabindex="-1" role="dialog" aria-labelledby="question-modal-holder" aria-hidden="true">
                   <div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
@@ -88,6 +90,46 @@
                       </div>
                       <div class="modal-body">
                         Congratulations on finishing <span id="current_round"></span>! Are you ready to start <span id="next_round"></span>?!
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                 <div class="modal fade" id="wager_category_modal" tabindex="-1" role="dialog" aria-labelledby="wager-category-modal-holder" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h3 class="modal-title" id="wager-category-modal-holder"><span id="category"></span></h3>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+                        <h3>Clue:</h3>
+                        <h4 id="wager_clue"></h4>
+                        <table>
+                            <tr>
+                                <th>
+                                    <span id="wager_round_name"></span> has wagered:
+                                </th>
+                            </tr>
+                            <tr>
+                                <td>
+                                    {{ currency }} <span id="wager_round_amount"></span>
+                                </td>
+                            </tr>
+                        </table>
+                        <br>
+                        <table class="collapse" id="wager_answer_holder">
+                            <tr>
+                                <th>
+                                    Answer:
+                                </th>
+                            </tr>
+                            <tr>
+                                <td id="wager_round_answer">
+                                </td>
+                            </tr>
+                        </table>
                       </div>
                     </div>
                   </div>
@@ -130,7 +172,19 @@
         });
 
         socket.on('round_started', function(message) {
-            post('/board', {'room': '{{ game.room }}'});
+            $("<form method='POST' action='" + document.URL + "'><input type='hidden' name='room' value='{{ game.room }}'/></form>").appendTo("body").submit();
+        });
+
+        socket.on('final_wager_received', function(message) {
+            $('#wager_answer_holder').collapse('hide');
+
+            $('#wager_round_name').text(message['wager_name']);
+            $('#wager_round_amount').text(message['wager_amount']);
+            $('#wager_round_answer').text(message['wager_answer']);
+        });
+
+        socket.on('reveal_wager_answer', function(message) {
+            $('#wager_answer_holder').collapse('show');
         });
 
     </script>

@@ -201,6 +201,23 @@ def start_next_round(data):
 
 	socketio.emit(u'round_started')
 
+@socketio.on(u'reveal_category')
+def reveal_category(data):
+	game = LIVE_GAME_CONTAINER[data[u'room']]
+
+	game.get(u'q_0_0')
+	print(game)
+
+	socketio.emit(u'round_started')
+
+@socketio.on(u'reveal_clue')
+def reveal_clue(data):
+	game = LIVE_GAME_CONTAINER[data[u'room']]
+
+	game.next_round()
+
+	socketio.emit(u'round_started')
+
 @socketio.on(u'wager_submitted')
 def received_wager(data):
 	game = LIVE_GAME_CONTAINER[data[u'room']]
