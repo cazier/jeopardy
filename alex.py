@@ -137,6 +137,23 @@ class Board(object):
 
         self.values = [question.value for question in self.categories[0].questions]
 
+    def add_wagers(self):
+        if self.round == 1:
+            question = (random.randrange(self.size),random.randrange(5))
+
+            self.categories[question[0]].questions[question[1]].wager = True
+
+        elif self.round == 2:
+            question_one = (random.randrange(self.size),random.randrange(5))
+            question_two = (random.randrange(self.size),random.randrange(5))
+
+            while question_one == question_two:
+                question_two = (random.randrange(self.size),random.randrange(5))
+
+
+            self.categories[question_one[0]].questions[question_one[1]].wager = True
+            self.categories[question_two[0]].questions[question_two[1]].wager = True
+
 
     def html_board(self):
         return zip(*[i.questions for i in self.categories])
@@ -173,6 +190,8 @@ class Question(object):
         self.category_index = category_index
         self.question_index = question_index
         self.shown = False
+
+        self.wager = False
 
         self.question = question_info[3].strip(u'\'')
         self.answer = question_info[4].strip(u'\'')
