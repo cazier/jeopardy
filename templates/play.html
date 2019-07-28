@@ -33,7 +33,7 @@
                     <button id="buzzer" class="btn btn-block btn-danger disabled">BUZZ IN!</button>
                 </div>
 
-                 <div class="modal fade" id="wager_modal" tabindex="-1" role="dialog" aria-labelledby="wager-modal-holder" aria-hidden="true">
+                 <div class="modal fade" id="wager_modal" tabindex="-1" role="dialog" aria-labelledby="wager-modal-holder" aria-hidden="true" data-keyboard="false" data-backdrop="static">
                   <div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
                       <div class="modal-header">
@@ -85,9 +85,11 @@
 
         socket.on('start_wager_round', function(message) {
             if (message['players'].includes("{{ session['name'] }}")) {
-                $('#wager_modal').modal('show', {
-                    focus: true
-                });
+                $('#wager_modal').modal({
+                    focus: true,
+                    backdrop: 'static',
+                    keyboard: false
+                }, 'show');
             }
         });
 
@@ -112,7 +114,7 @@
                     socket.emit('wager_submitted', {
                         'room': '{{ game.room }}',
                         'name': '{{ session['name'] }}',
-                        'wager': $('#wager_value').val()
+                        'wager': wager
                     });
 
                     $('#wager_value').prop('disabled', function(i, v) {return !v; });

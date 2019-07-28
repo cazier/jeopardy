@@ -55,16 +55,18 @@
                             CATEGORY:
                         </h4>
                         <h5 style="padding-left: 25px">{{ game.board.categories[0].category }}</h5>
-                        <hr>
-                        <h4>
-                            QUESTION:
+                        <div id='final_question_answer_reveal' class="collapse">
+                            <hr>
+                            <h4>
+                                QUESTION:
+                            </h4>
+                            <h5 style="padding-left: 25px">{{ game.board.categories[0].questions[0].question }}</h5>
+                            <hr>
+                            <h4>
+                                ANSWER:
+                            </h3>
+                            <h5 style="padding-left: 25px">{{ game.board.categories[0].questions[0].answer }}</h5>
                         </h4>
-                        <h5 style="padding-left: 25px">{{ game.board.categories[0].questions[0].question }}</h5>
-                        <hr>
-                        <h4>
-                            ANSWER:
-                        </h3>
-                        <h5 style="padding-left: 25px">{{ game.board.categories[0].questions[0].answer }}</h5>
                     </div>
                     <hr>
                         <div class="btn-toolbar" role="toolbar">
@@ -76,7 +78,7 @@
                             </div>
                         </div>
                     {% endif %}
-                 <div class="modal fade" id="question_modal" tabindex="-1" role="dialog" aria-labelledby="question-modal-holder" aria-hidden="true">
+                 <div class="modal fade" id="question_modal" tabindex="-1" role="dialog" aria-labelledby="question-modal-holder" aria-hidden="true" data-keyboard="false" data-backdrop="static">
                   <div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
                       <div class="modal-header">
@@ -104,7 +106,7 @@
                   </div>
                 </div>
             </div>
-                 <div class="modal fade" id="round_modal" tabindex="-1" role="dialog" aria-labelledby="round-modal-holder" aria-hidden="true">
+                 <div class="modal fade" id="round_modal" tabindex="-1" role="dialog" aria-labelledby="round-modal-holder" aria-hidden="true" data-keyboard="false" data-backdrop="static">
                   <div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
                       <div class="modal-header">
@@ -122,17 +124,13 @@
                     </div>
                   </div>
                 </div>
-                 <div class="modal fade" id="wager_category_modal" tabindex="-1" role="dialog" aria-labelledby="wager-category-modal-holder" aria-hidden="true">
+                 <div class="modal fade" id="wager_category_modal" tabindex="-1" role="dialog" aria-labelledby="wager-category-modal-holder" aria-hidden="true" data-keyboard="false" data-backdrop="static">
                   <div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
                       <div class="modal-header">
                         <h3 class="modal-title" id="wager-category-modal-holder"><span id="category"></span></h3>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                          <span aria-hidden="true">&times;</span>
-                        </button>
                       </div>
                       <div class="modal-body">
-                        <h3>Clue:</h3>
                         <h4 id="wager_clue"></h4>
                         <table>
                             <tr>
@@ -162,6 +160,7 @@
                       <div class="modal-footer" id="question_footer">
                         <div class="btn-toolbar" role="toolbar">
                             <div class="btn-group" role="group">
+                                <button class="btn btn-warning mr-auto" id="reveal_answer">Reveal Answer!</button>
                                 <button class="btn btn-success disabled mr-auto" id="correct_wager">Correct!</button>
                                 <button class="btn btn-danger disabled mr-auto" id="incorrect_wager">Incorrect</button>
                             </div>
@@ -192,6 +191,8 @@
                         'room': '{{ game.room }}',
                         'name': this.id,
                     })
+
+                    $('#' + this.id).addClass('disabled');
                 }
 
                 else if (this.id == 'finished_reading') {
@@ -246,10 +247,48 @@
                     $('#wagerers>button').removeClass('btn-success');
                     $('#wagerers>button').addClass('btn-danger');
 
+                    $('#final_question_answer_reveal').show();
+
                     socket.emit('reveal_question', {
                         'room': '{{ game.room }}'
                     });
+                }
+
+                else if (this.id == 'reveal_answer') {
+                    $('#correct_wager').removeClass('disabled');
+                    $('#incorrect_wager').removeClass('disabled');
+
+                    socket.emit('reveal_answer', {
+                        'room': '{{ game.room }}',
+                        'name': $('#wager_round_name').text()
+                    });
+                }
+
+
+                else if (this.id == 'correct_wager') {
+                    $('#correct_wager').addClass('disabled');
+                    $('#incorrect_wager').addClass('disabled');
+
+                    $('#wager_category_modal').modal('hide');
+
+                    socket.emit('correct_wager', {
+                        'room': '{{ game.room }}',
+                        'name': $('#wager_round_name').text()
+                    });
                 } 
+
+                else if (this.id == 'incorrect_wager') {
+                    $('#correct_wager').addClass('disabled');
+                    $('#incorrect_wager').addClass('disabled');
+
+                    $('#wager_category_modal').modal('hide');
+
+                    socket.emit('incorrect_wager', {
+                        'room': '{{ game.room }}',
+                        'name': $('#wager_round_name').text()
+                    });
+                } 
+
             }
         });
 
@@ -258,9 +297,11 @@
             $('#question').text(message['question']);
             $('#answer').text(message['answer']);
 
-            $('#question_modal').modal('show', {
-                focus: true
-            });
+            $('#question_modal').modal({
+                focus: true,
+                backdrop: 'static',
+                keyboard: false
+            }, 'show');
         });
 
         socket.on('player_buzzed', function(message) {
@@ -280,9 +321,11 @@
             $('#current_round').text(message['current_round']);
             $('#next_round').text(message['next_round']);
 
-            $('#round_modal').modal('show', {
-                focus: true
-            });
+            $('#round_modal').modal({
+                focus: true,
+                backdrop: 'static',
+                keyboard: false
+            }, 'show');
         });
 
         socket.on('round_started', function(message) {
@@ -301,9 +344,16 @@
             $('#wager_round_amount').text(message['wager']);
             $('#wager_round_answer').text(message['answer']);
 
-            $('#wager_category_modal').modal('show', {
-                focus: true
-            });
+            $('#wager_category_modal').modal({
+                focus: true,
+                backdrop: 'static',
+                keyboard: false
+            }, 'show');
+        });
+
+        socket.on('reveal_wager_answer', function(message) {
+            $('#wager_answer_holder').collapse('show');
+        });
 
 
     </script>

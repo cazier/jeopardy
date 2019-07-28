@@ -153,7 +153,8 @@ def host_correct_answer(data):
 
 	socketio.emit(u'update_scores', {
 		u'room': data[u'room'],
-		u'scores': game.score
+		u'scores': game.score,
+		u'final': False
 		})
 
 	end_question(data)
@@ -249,6 +250,38 @@ def wagerer_reveal(data):
 		u'name': name,
 		u'wager': game.wagered_round[name][u'wager'],
 		u'answer': game.wagered_round[name][u'answer']
+		})
+
+@socketio.on(u'reveal_answer')
+def reveal_answer(data):
+	game = LIVE_GAME_CONTAINER[data[u'room']]
+
+	socketio.emit(u'reveal_wager_answer', {
+		u'room': data[u'room'],
+		})
+
+@socketio.on(u'correct_wager')
+def correct_wager(data):
+	game = LIVE_GAME_CONTAINER[data[u'room']]
+
+	game.score[data[u'name']] += game.wagered_round[data[u'name']][u'wager']
+
+	socketio.emit(u'update_scores', {
+		u'room': data[u'room'],
+		u'scores': game.score,
+		u'final': True
+		})
+
+@socketio.on(u'incorrect_wager')
+def incorrect_wager(data):
+	game = LIVE_GAME_CONTAINER[data[u'room']]
+
+	game.score[data[u'name']] -= game.wagered_round[data[u'name']][u'wager']
+
+	socketio.emit(u'update_scores', {
+		u'room': data[u'room'],
+		u'scores': game.score,
+		u'final': True
 		})
 
 

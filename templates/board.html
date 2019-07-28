@@ -81,7 +81,7 @@
                         {% endfor %}
                     </tr>
                 </table>
-                <div class="modal fade" id="question_modal" tabindex="-1" role="dialog" aria-labelledby="question-modal-holder" aria-hidden="true">
+                <div class="modal fade" id="question_modal" tabindex="-1" role="dialog" aria-labelledby="question-modal-holder" aria-hidden="true" data-keyboard="false" data-backdrop="static">
                   <div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
                       <div class="modal-header">
@@ -95,7 +95,7 @@
                     </div>
                   </div>
                 </div>
-                 <div class="modal fade" id="round_modal" tabindex="-1" role="dialog" aria-labelledby="round-modal-holder" aria-hidden="true">
+                 <div class="modal fade" id="round_modal" tabindex="-1" role="dialog" aria-labelledby="round-modal-holder" aria-hidden="true" data-keyboard="false" data-backdrop="static">
                   <div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
                       <div class="modal-header">
@@ -110,7 +110,7 @@
                     </div>
                   </div>
                 </div>
-                 <div class="modal fade" id="wager_category_modal" tabindex="-1" role="dialog" aria-labelledby="wager-category-modal-holder" aria-hidden="true">
+                 <div class="modal fade" id="wager_category_modal" tabindex="-1" role="dialog" aria-labelledby="wager-category-modal-holder" aria-hidden="true" data-keyboard="false" data-backdrop="static">
                   <div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
                       <div class="modal-header">
@@ -120,7 +120,6 @@
                         </button>
                       </div>
                       <div class="modal-body">
-                        <h3>Clue:</h3>
                         <h4 id="wager_clue"></h4>
                         <table>
                             <tr>
@@ -163,9 +162,11 @@
             $('#' + message['identifier']).addClass('disabled');
             $('#question').text(message['question']);
 
-            $('#question_modal').modal('show', {
-                focus: true
-            });
+            $('#question_modal').modal({
+                focus: true,
+                backdrop: 'static',
+                keyboard: false
+            }, 'show');
         });
 
         socket.on('clear_modal', function(message) {
@@ -176,15 +177,21 @@
             for (player in message['scores']) {
                 $('#' + player + '_score').text(message['scores'][player]);
             };
+
+            if (message.final) {
+                $('#wager_category_modal').modal('hide');
+            };
         });
 
         socket.on('round_complete', function(message) {
             $('#current_round').text(message['current_round']);
             $('#next_round').text(message['next_round']);
 
-            $('#round_modal').modal('show', {
-                focus: true
-            });
+            $('#round_modal').modal({
+                focus: true,
+                backdrop: 'static',
+                keyboard: false
+            }, 'show');
         });
 
         socket.on('round_started', function(message) {
@@ -198,9 +205,11 @@
             $('#wager_round_amount').text(message['wager']);
             $('#wager_round_answer').text(message['answer']);
 
-            $('#wager_category_modal').modal('show', {
-                focus: true
-            });
+            $('#wager_category_modal').modal({
+                focus: true,
+                backdrop: 'static',
+                keyboard: false
+            }, 'show');
         });
 
         socket.on('reveal_wager_answer', function(message) {
