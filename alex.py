@@ -11,14 +11,12 @@ class Game(object):
         self.room = room
         
         self.round = 1
-        self.round = 2
 
         self.score = dict()
         self.buzzers = list()
 
         self.standing_question = None
 
-        self.wagered_round = dict()
 
     def add_player(self, name: str):
         self.score[name] = 0
@@ -27,6 +25,10 @@ class Game(object):
         self.remaining_questions = self.size * 5
         self.remaining_questions = 1
         self.board = Board(database_name = self.db, segment = self.round, size = self.size)
+        
+        self.wagered_round = dict()
+
+        self.board.add_wagers()
 
     def reset(self, reset_score: bool, reset_players: bool):
         if reset_players:
@@ -143,6 +145,9 @@ class Board(object):
 
             self.categories[question[0]].questions[question[1]].wager = True
 
+            print(question)
+
+
         elif self.round == 2:
             question_one = (random.randrange(self.size),random.randrange(5))
             question_two = (random.randrange(self.size),random.randrange(5))
@@ -153,6 +158,8 @@ class Board(object):
 
             self.categories[question_one[0]].questions[question_one[1]].wager = True
             self.categories[question_two[0]].questions[question_two[1]].wager = True
+
+            print(question_one, question_two)
 
 
     def html_board(self):
@@ -212,7 +219,7 @@ class Question(object):
     def get(self):
         self.shown = True
 
-        return {u'question': self.question, u'answer': self.answer}
+        return {u'question': self.question, u'answer': self.answer, u'wager': self.wager}
 
     def get_question(self):
         return self

@@ -42,33 +42,34 @@
                             </div>
                         </div>
                     {% else %}
-                    <div class="btn-toolbar" role="toolbar">
-                        <div class="btn-group" role="group" id="wagerers">
-                            {% for name in game.score.keys() %}
-                                <button class="btn btn-danger wager_names" id="{{ name }}_wagered">{{ name }}</button>
-                            {% endfor %}
-                        </div>
-                    </div>
                     <div>
-                        <hr>
-                        <h4>
-                            CATEGORY:
-                        </h4>
-                        <h5 style="padding-left: 25px">{{ game.board.categories[0].category }}</h5>
-                        <div id='final_question_answer_reveal' class="collapse">
+                        <div class="btn-toolbar" role="toolbar">
+                            <div class="btn-group" role="group" id="wagerers">
+                                {% for name in game.score.keys() %}
+                                    <button class="btn btn-danger wager_names" id="{{ name }}_wagered">{{ name }}</button>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div>
                             <hr>
                             <h4>
-                                QUESTION:
+                                CATEGORY:
                             </h4>
-                            <h5 style="padding-left: 25px">{{ game.board.categories[0].questions[0].question }}</h5>
-                            <hr>
-                            <h4>
-                                ANSWER:
-                            </h3>
-                            <h5 style="padding-left: 25px">{{ game.board.categories[0].questions[0].answer }}</h5>
-                        </h4>
-                    </div>
-                    <hr>
+                            <h5 style="padding-left: 25px">{{ game.board.categories[0].category }}</h5>
+                            <div id='final_question_answer_reveal' class="collapse">
+                                <hr>
+                                <h4>
+                                    QUESTION:
+                                </h4>
+                                <h5 style="padding-left: 25px">{{ game.board.categories[0].questions[0].question }}</h5>
+                                <hr>
+                                <h4>
+                                    ANSWER:
+                                </h3>
+                                <h5 style="padding-left: 25px">{{ game.board.categories[0].questions[0].answer }}</h5>
+                            </h4>
+                        </div>
+                        <hr>
                         <div class="btn-toolbar" role="toolbar">
                             <div class="btn-group mr-2" role="group">
                                 <button class="btn btn-success" id="reveal_category">Reveal Category</button>
@@ -77,6 +78,7 @@
                                 <button class="btn btn-success" id="reveal_question">Reveal Question</button>
                             </div>
                         </div>
+                    </div>
                     {% endif %}
                  <div class="modal fade" id="question_modal" tabindex="-1" role="dialog" aria-labelledby="question-modal-holder" aria-hidden="true" data-keyboard="false" data-backdrop="static">
                   <div class="modal-dialog modal-dialog-centered" role="document">
@@ -169,6 +171,38 @@
                     </div>
                   </div>
                 </div>
+                 <div class="modal fade" id="single_wager_modal" tabindex="-1" role="dialog" aria-labelledby="single-wager-holder" aria-hidden="true" data-keyboard="false" data-backdrop="static">
+                  <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h4 class="modal-title" id="single-wager-holder">Daily Double!</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="modal_dismiss">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <h4 style="padding: 16px;">Who chose the category?</h4>
+                      <div class="modal-body">
+                        <div class="btn-toolbar" role="toolbar">
+                            <div class="btn-group" role="group" id="single_wagerer">
+                            </div>
+                        </div>
+                      </div>
+                      <h4 style="padding: 16px;">Reveal Question:</h4>
+                      <div class="modal-body" id="single_wager_question">
+                      </div>
+                      <div class="modal-footer" id="question_footer">
+                        <div class="btn-toolbar" role="toolbar">
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-light disabled mr-auto" id="player">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</button>
+                                <button class="btn btn-success disabled mr-auto" id="correct_answer">Correct!</button>
+                                <button class="btn btn-danger disabled mr-auto" id="incorrect_answer">Incorrect</button>
+                                <button type="button" class="btn btn-dark mr-auto" id="finished_reading">Finished Reading!</button>
+                            </div>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+            </div>
 
                 </div>
             </div>
@@ -329,7 +363,29 @@
         });
 
         socket.on('round_started', function(message) {
-            $("<form method='POST' action='" + document.URL + "'><input type='hidden' name='room' value='{{ game.room }}'/></form>").appendTo("body").submit();
+            start_round();
+        });
+
+        socket.on('single_player_wager', function(message) {
+            names = message['players'];
+            for (name in names) {
+                $('#single_wagerer').append($('<button class="btn btn-success" id="' + names[name] + '_single_wagered">' + names[name] + '</button>'));
+            };
+
+            $('#single_wagerer').on('click', '.btn', function() {
+                socket.emit('single_wager_prompt', {
+                    'room': '{{ game.room }}',
+                    'name': this.id,
+                });
+
+                $('#single_wager_modal').modal('hide');
+            });
+
+            $('#single_wager_modal').modal({
+                focus: true,
+                backdrop: 'static',
+                keyboard: false
+            }, 'show');
         });
 
         socket.on('wagerer_received', function(message) {
@@ -355,6 +411,9 @@
             $('#wager_answer_holder').collapse('show');
         });
 
+        function start_round() {
+            $("<form method='POST' action='" + document.URL + "'><input type='hidden' name='room' value='{{ game.room }}'/><input type='hidden'/></form>").appendTo("body").submit();
+        };
 
     </script>
 </body>

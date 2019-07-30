@@ -93,6 +93,16 @@
             }
         });
 
+        socket.on('single_wager_player_prompt', function(message) {
+            if (message['players'].includes("{{ session['name'] }}")) {
+                $('#wager_modal').modal({
+                    focus: true,
+                    backdrop: 'static',
+                    keyboard: false
+                }, 'show');
+            }
+        });
+
         socket.on('final_question_revealed', function(message) {
             $('#answer').show();
         });

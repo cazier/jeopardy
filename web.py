@@ -80,7 +80,6 @@ def show_player():
 			return redirect(url_for(u'join_game'))
 
 		else:
-			print(u'adding to session')
 			LIVE_GAME_CONTAINER[room].add_player(name)
 
 			socketio.emit(u'add_player_to_board', {
@@ -124,15 +123,24 @@ def internal_server_error(error):
 
 @socketio.on(u'question_clicked')
 def reveal_host_clue(data):
-	info = LIVE_GAME_CONTAINER[data[u'room']].get(data[u'identifier'])
+	game = LIVE_GAME_CONTAINER[data[u'room']]
+	info = game.get(data[u'identifier'])
 
-	socketio.emit(u'question_revealed', {
-		u'room': data[u'room'],
-		u'identifier': data[u'identifier'],
+	if info[u'wager']:
+		socketio.emit(u'single_player_wager', {
+			u'room': data[u'room'],
+			u'players': list(game.score.keys())
+			})
 
-		u'question': info[u'question'].replace(u'<br />', u'\n'),
-		u'answer': info[u'answer']
-		})
+		print(u'DAILY DOUBLE!!!')
+
+	else: 
+		socketio.emit(u'question_revealed', {
+			u'room': data[u'room'],
+
+			u'question': info[u'question'].replace(u'<br />', u'\n'),
+			u'answer': info[u'answer']
+			})
 
 @socketio.on(u'finished_reading')
 def enable_buzzers(data, incorrect_players: list = list()):
@@ -282,6 +290,13 @@ def incorrect_wager(data):
 		u'room': data[u'room'],
 		u'scores': game.score,
 		u'final': True
+		})
+
+@socketio.on(u'single_wager_prompt')
+def single_wager_prompt(data):
+	socketio.emit(u'single_wager_player_prompt', {
+		u'room': data[u'room'],
+		u'players': [data[u'name'][:-15]]
 		})
 
 
