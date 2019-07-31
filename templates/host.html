@@ -187,16 +187,18 @@
                             </div>
                         </div>
                       </div>
-                      <h4 style="padding: 16px;">Reveal Question:</h4>
+                      <h4 style="padding: 16px;">Question:</h4>
                       <div class="modal-body" id="single_wager_question">
+                      </div>
+                      <h4 style="padding: 16px;">Answer:</h4>
+                      <div class="modal-body" id="single_wager_answer">
                       </div>
                       <div class="modal-footer" id="question_footer">
                         <div class="btn-toolbar" role="toolbar">
                             <div class="btn-group" role="group">
-                                <button class="btn btn-light disabled mr-auto" id="player">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</button>
-                                <button class="btn btn-success disabled mr-auto" id="correct_answer">Correct!</button>
-                                <button class="btn btn-danger disabled mr-auto" id="incorrect_answer">Incorrect</button>
-                                <button type="button" class="btn btn-dark mr-auto" id="finished_reading">Finished Reading!</button>
+                                <button class="btn btn-success disabled mr-auto" id="single_correct_answer">Correct!</button>
+                                <button class="btn btn-danger disabled mr-auto" id="single_incorrect_answer">Incorrect</button>
+                                <button class="btn btn-dark mr-auto" id="single_wager_player">Reveal Question</button>
                             </div>
                         </div>
                     </div>
@@ -338,6 +340,15 @@
             }, 'show');
         });
 
+        socket.on('single_question_revealed', function(message) {
+            $('#single_wager_question').text(message['question']);
+            $('#single_wager_answer').text(message['answer']);
+
+            $('#single_correct_answer').removeClass('disabled');
+            $('#single_incorrect_answer').removeClass('disabled');
+
+        });
+
         socket.on('player_buzzed', function(message) {
             $('#player').text(message['name']);
 
@@ -378,7 +389,6 @@
                     'name': this.id,
                 });
 
-                $('#single_wager_modal').modal('hide');
             });
 
             $('#single_wager_modal').modal({

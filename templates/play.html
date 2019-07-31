@@ -61,6 +61,29 @@
                     </div>
                   </div>
                 </div>
+                 <div class="modal fade" id="single_wager_modal" tabindex="-1" role="dialog" aria-labelledby="single_wager-modal-holder" aria-hidden="true" data-keyboard="false" data-backdrop="static">
+                  <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h3 class="modal-title" id="single_wager-modal-holder"><span id="current_round"></span></h3>
+                      </div>
+                      <div class="modal-body">
+                        <h4>You currently have <br>{{ currency }} <span id="single_scores">0</span>!</h4>
+                        <div class="alert alert-danger collapse" role="alert" id="single_wager_alert">
+                            Your wager must be less than or equal to your current money. Please try again!
+                        </div>
+                        <div class="form-group" id="wager">
+                            <label for="wager">How much would you like to wager?</label>
+                            <input name="wager" type="number" class="form-control" placeholder="0" value="0" required id="single_wager_value">
+                            <small class="form-text text-muted"></small>
+                        </div>
+                    </div>
+                      <div class="modal-footer">
+                        <button class="btn btn-success mr-auto" id="single_wager_submit">Submit!</button>
+                        </div>
+                    </div>
+                  </div>
+                </div>
             </div>
         </div>
     </div>
@@ -81,6 +104,7 @@
         socket.on('update_scores', function (message) {
             $('#score').text(message['scores']['{{ session['name'] }}']);
             $('#scores').text(message['scores']['{{ session['name'] }}']);
+            $('#single_scores').text(message['scores']['{{ session['name'] }}']);
         });
 
         socket.on('start_wager_round', function(message) {
@@ -95,7 +119,7 @@
 
         socket.on('single_wager_player_prompt', function(message) {
             if (message['players'].includes("{{ session['name'] }}")) {
-                $('#wager_modal').modal({
+                $('#single_wager_modal').modal({
                     focus: true,
                     backdrop: 'static',
                     keyboard: false
@@ -131,6 +155,30 @@
                     $('#wager_alert').hide();
 
                     document.getElementById('wager_submit').id = 'answer_submit';
+                }
+
+                else {
+                    $('#wager_alert').show();
+                }
+
+            }
+
+            else if (this.id == 'single_wager_submit') {
+                wager = parseInt($('#single_wager_value').val());
+                score = parseInt($('#score').text());
+
+                if ((wager <= score) | ((wager > score) & (wager <= 1000))) {
+                    socket.emit('single_wager_submitted', {
+                        'room': '{{ game.room }}',
+                        'name': '{{ session['name'] }}',
+                        'wager': wager
+                    });
+
+                    $('#wager_alert').hide();
+                    $('#single_wager_modal').modal('hide');
+                    
+                    $('#single_wager_value').val(0);
+
                 }
 
                 else {

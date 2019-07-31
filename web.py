@@ -274,6 +274,8 @@ def correct_wager(data):
 
 	game.score[data[u'name']] += game.wagered_round[data[u'name']][u'wager']
 
+	game.wagered_round = dict()
+
 	socketio.emit(u'update_scores', {
 		u'room': data[u'room'],
 		u'scores': game.score,
@@ -286,6 +288,8 @@ def incorrect_wager(data):
 
 	game.score[data[u'name']] -= game.wagered_round[data[u'name']][u'wager']
 
+	game.wagered_round = dict()
+
 	socketio.emit(u'update_scores', {
 		u'room': data[u'room'],
 		u'scores': game.score,
@@ -294,10 +298,36 @@ def incorrect_wager(data):
 
 @socketio.on(u'single_wager_prompt')
 def single_wager_prompt(data):
+	game = LIVE_GAME_CONTAINER[data[u'room']]
+
+	game.wagered_round[data[u'name'][:-15]] = dict()
+
 	socketio.emit(u'single_wager_player_prompt', {
 		u'room': data[u'room'],
 		u'players': [data[u'name'][:-15]]
 		})
+
+@socketio.on(u'single_wager_submitted')
+def received_wager(data):
+	game = LIVE_GAME_CONTAINER[data[u'room']]
+
+	info = game.standing_question.get()
+
+	if data[u'name'] in game.wagered_round.keys():
+
+		game.wagered_round[data[u'name']] = {u'wager': data[u'wager']}
+
+		socketio.emit(u'single_question_revealed', {
+			u'room': data[u'room'],
+
+			u'question': info[u'question'].replace(u'<br />', u'\n'),
+			u'answer': info[u'answer']
+			})
+
+	else:
+		pass
+		##TODO ERROR HANDLE THIS!
+
 
 
 @socketio.on(u'join')
