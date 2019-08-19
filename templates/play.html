@@ -109,21 +109,13 @@
 
         socket.on('start_wager_round', function(message) {
             if (message['players'].includes("{{ session['name'] }}")) {
-                $('#wager_modal').modal({
-                    focus: true,
-                    backdrop: 'static',
-                    keyboard: false
-                }, 'show');
+                manageModal('wager_modal', 'show');
             }
         });
 
         socket.on('single_wager_player_prompt', function(message) {
             if (message['players'].includes("{{ session['name'] }}")) {
-                $('#single_wager_modal').modal({
-                    focus: true,
-                    backdrop: 'static',
-                    keyboard: false
-                }, 'show');
+                manageModal('single_wager_modal', 'show');
             }
         });
 
@@ -175,7 +167,7 @@
                     });
 
                     $('#wager_alert').hide();
-                    $('#single_wager_modal').modal('hide');
+                    manageModal('single_wager_modal', 'hide');
                     
                     $('#single_wager_value').val(0);
 
@@ -194,7 +186,7 @@
                     'answer': $('#answer_value').val()
                 });
 
-                $('#wager_modal').modal('hide');
+                manageModal('wager_modal', 'hide');
             }
         });
 </script>

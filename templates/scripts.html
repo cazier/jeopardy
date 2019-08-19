@@ -41,6 +41,20 @@
 	  document.body.appendChild(web_form);
 	  web_form.submit();
 	}
+
+	function manageModal(modal_id, action) {
+		if (action == 'show') {
+			$('#' + modal_id).modal({
+				focus: true,
+				backdrop: 'static',
+				keyboard: false,
+			}, 'show');
+		}
+
+		else if (action == 'hide') {
+			$('#' + modal_id).modal('hide');
+		}
+	};
 </script>
 
 

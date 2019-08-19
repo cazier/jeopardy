@@ -162,15 +162,11 @@
             $('#' + message['identifier']).addClass('disabled');
             $('#question').text(message['question']);
 
-            $('#question_modal').modal({
-                focus: true,
-                backdrop: 'static',
-                keyboard: false
-            }, 'show');
+            manageModal('question_modal', 'show');
         });
 
         socket.on('clear_modal', function(message) {
-            $('#question_modal').modal('hide');
+            manageModal('question_modal', 'hide');
         });
 
         socket.on('update_scores', function (message) {
@@ -179,7 +175,7 @@
             };
 
             if (message.final) {
-                $('#wager_category_modal').modal('hide');
+                manageModal('wager_category_modal', 'hide');
             };
         });
 
@@ -187,11 +183,7 @@
             $('#current_round').text(message['current_round']);
             $('#next_round').text(message['next_round']);
 
-            $('#round_modal').modal({
-                focus: true,
-                backdrop: 'static',
-                keyboard: false
-            }, 'show');
+            manageModal('round_modal', 'show');
         });
 
         socket.on('round_started', function(message) {
@@ -205,11 +197,7 @@
             $('#wager_round_amount').text(message['wager']);
             $('#wager_round_answer').text(message['answer']);
 
-            $('#wager_category_modal').modal({
-                focus: true,
-                backdrop: 'static',
-                keyboard: false
-            }, 'show');
+            manageModal('wager_category_modal', 'show');
         });
 
         socket.on('reveal_wager_answer', function(message) {

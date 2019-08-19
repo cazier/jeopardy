@@ -33,9 +33,11 @@ class Game(object):
     def reset(self, reset_score: bool, reset_players: bool):
         if reset_players:
             self.score = dict()
+            self.round = 1
 
         elif reset_score:
             self.score = {player: 0 for player in self.score.keys()}
+            self.round = 1
 
         else:
             return False
@@ -145,7 +147,9 @@ class Board(object):
 
             self.categories[question[0]].questions[question[1]].wager = True
 
+            print(u'=' * 40)
             print(question)
+            print(u'=' * 40)
 
 
         elif self.round == 2:
@@ -159,7 +163,9 @@ class Board(object):
             self.categories[question_one[0]].questions[question_one[1]].wager = True
             self.categories[question_two[0]].questions[question_two[1]].wager = True
 
+            print(u'=' * 40)
             print(question_one, question_two)
+            print(u'=' * 40)
 
 
     def html_board(self):
