@@ -127,10 +127,14 @@ def reveal_host_clue(data):
     info = game.get(data[u'identifier'])
 
     if info[u'wager']:
-        socketio.emit(u'single_player_wager', {
-            u'room': data[u'room'],
-            u'players': list(game.score.keys())
-            })
+        if game.round == 3:
+            pass
+            
+        else:
+            socketio.emit(u'single_player_wager', {
+                u'room': data[u'room'],
+                u'players': list(game.score.keys())
+                })
 
         print(u'DAILY DOUBLE!!!')
 

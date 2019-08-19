@@ -143,7 +143,7 @@ class Board(object):
 
     def add_wagers(self):
         if self.round == 1:
-            question = (random.randrange(self.size),random.randrange(5))
+            question = (random.randrange(self.size), random.randrange(5))
 
             self.categories[question[0]].questions[question[1]].wager = True
 
@@ -153,11 +153,11 @@ class Board(object):
 
 
         elif self.round == 2:
-            question_one = (random.randrange(self.size),random.randrange(5))
-            question_two = (random.randrange(self.size),random.randrange(5))
+            question_one = (random.randrange(self.size), random.randrange(5))
+            question_two = (random.randrange(self.size), random.randrange(5))
 
             while question_one == question_two:
-                question_two = (random.randrange(self.size),random.randrange(5))
+                question_two = (random.randrange(self.size), random.randrange(5))
 
 
             self.categories[question_one[0]].questions[question_one[1]].wager = True
@@ -166,6 +166,9 @@ class Board(object):
             print(u'=' * 40)
             print(question_one, question_two)
             print(u'=' * 40)
+
+        elif self.round == 2:
+            self.categories[0].questions[0].wager = True
 
 
     def html_board(self):
