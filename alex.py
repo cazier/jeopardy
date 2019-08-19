@@ -10,7 +10,7 @@ class Game(object):
         self.copyright = copyright
         self.room = room
         
-        self.round = 2
+        self.round = 1
 
         self.score = dict()
         self.buzzers = list()
