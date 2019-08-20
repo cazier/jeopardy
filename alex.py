@@ -10,12 +10,15 @@ class Game(object):
         self.copyright = copyright
         self.room = room
         
-        self.round = 1
+        self.round = 2
 
         self.score = dict()
         self.buzzers = list()
 
         self.standing_question = None
+
+        self.add_player('Alex')
+        self.add_player('Carl')
 
 
     def add_player(self, name: str):

@@ -72,7 +72,7 @@
                         <hr>
                         <div class="btn-toolbar" role="toolbar">
                             <div class="btn-group mr-2" role="group">
-                                <button class="btn btn-success" id="reveal_category">Reveal Category</button>
+                                <button class="btn btn-success" id="get_wagers">Prompt for Wagers</button>
                             </div>
                             <div class="btn-group mr-2" role="group">
                                 <button class="btn btn-success disabled" id="reveal_question">Reveal Question</button>
@@ -205,12 +205,48 @@
                   </div>
                 </div>
             </div>
+                 <div class="modal fade" id="new_waager_modal" tabindex="-1" role="dialog" aria-labelledby="new_waager_modal_holder" aria-hidden="true" data-keyboard="false" data-backdrop="static">
+                  <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h4 class="modal-title" id="new_waager_modal_holder"></h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="modal_dismiss">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <h4 style="padding: 16px;">Who chose the category?</h4>
+                      <div class="modal-body">
+                        <div class="btn-toolbar" role="toolbar">
+                            <div class="btn-group" role="group" id="players">
+                            </div>
+                        </div>
+                      </div>
+                      <h4 style="padding: 16px;">Question:</h4>
+                      <div class="modal-body" id="single_wager_question">
+                      </div>
+                      <h4 style="padding: 16px;">Answer:</h4>
+                      <div class="modal-body" id="single_wager_answer">
+                      </div>
+                      <div class="modal-footer" id="question_footer">
+                        <div class="btn-toolbar" role="toolbar">
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-success disabled mr-auto" id="single_correct_answer">Correct!</button>
+                                <button class="btn btn-danger disabled mr-auto" id="single_incorrect_answer">Incorrect</button>
+                                <button class="btn btn-dark mr-auto" id="single_wager_player">Reveal Question</button>
+                            </div>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+            </div>
 
                 </div>
             </div>
         </div>
     </div>
     <script type="text/javascript">
+        var isDailyDouble = false;
+
         $('button').click(function(event) {
             if (!this.className.includes('disabled')) {
                 if (this.className.includes('show-question')) {
@@ -273,10 +309,10 @@
                     });
                 } 
 
-                else if (this.id == 'reveal_category') {
+                else if (this.id == 'get_wagers') {
                     $('#reveal_question').removeClass('disabled');
 
-                    socket.emit('reveal_category', {
+                    socket.emit('get_wagers', {
                         'room': '{{ game.room }}'
                     });
                 } 
@@ -423,6 +459,37 @@
 
         socket.on('reveal_wager_answer', function(message) {
             $('#wager_answer_holder').collapse('show');
+        });
+
+        socket.on('start_wager_round', function(message) {
+            isDailyDouble = message['isDailyDouble'];
+            
+            names = message['players'];
+            for (name in names) {
+                $('#players').append($('<button class="btn btn-success" id="' + names[name] + '_single_wagered">' + names[name] + '</button>'));
+            };
+
+            $('#players').on('click', '.btn', function() {
+                socket.emit('player_selected', {
+                    'room': '{{ game.room }}',
+                    'name': this.id,
+                    'isDailyDouble': isDailyDouble
+                });
+
+            });
+
+            if (isDailyDouble) {
+                $('#new_waager_modal_holder').text('Daily Double!');
+                manageModal('new_waager_modal', 'show');
+
+
+            }
+
+            else if (!isDailyDouble) {
+                $('#new_waager_modal_holder').text('Welcome to {{ copyright_protection }}!');
+            }
+
+
         });
 
         function start_round() {

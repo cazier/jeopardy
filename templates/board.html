@@ -45,7 +45,7 @@
                 </table>
                 <br>
                 {% elif game.round > 2 %}
-                <div id="category_details" class="collapse">
+                <div>
                     <hr>
                     <h3 >
                         The category is:
@@ -202,10 +202,6 @@
 
         socket.on('reveal_wager_answer', function(message) {
             $('#wager_answer_holder').collapse('show');
-        });
-
-        socket.on('final_category_revealed', function(message) {
-            $('#category_details').collapse();
         });
 
         socket.on('final_question_revealed', function(message) {

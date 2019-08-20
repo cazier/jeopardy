@@ -129,10 +129,15 @@ def reveal_host_clue(data):
     if info[u'wager']:
         if game.round == 3:
             pass
-            
+
         else:
-            socketio.emit(u'single_player_wager', {
+            # socketio.emit(u'single_player_wager', {
+            #     u'room': data[u'room'],
+            #     u'players': list(game.score.keys())
+            #     })
+            socketio.emit(u'start_wager_round', {
                 u'room': data[u'room'],
+                u'isDailyDouble': True,
                 u'players': list(game.score.keys())
                 })
 
@@ -214,11 +219,10 @@ def start_next_round(data):
 
     socketio.emit(u'round_started')
 
-@socketio.on(u'reveal_category')
-def reveal_category(data):
+@socketio.on(u'get_wagers')
+def get_wagers(data):
     game = LIVE_GAME_CONTAINER[data[u'room']]
 
-    socketio.emit(u'final_category_revealed');
     socketio.emit(u'start_wager_round', {
         u'room': data[u'room'],
         u'players': list(game.score.keys())
@@ -331,6 +335,13 @@ def received_wager(data):
     else:
         pass
         ##TODO ERROR HANDLE THIS!
+
+@socketio.on(u'player_selected')
+def player_selected(data):
+    game = LIVE_GAME_CONTAINER[data[u'room']]
+
+    if data[u'isDailyDouble']:
+        game.wagered_round[data[u'name']] = {}
 
 
 
