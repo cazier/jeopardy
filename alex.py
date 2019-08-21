@@ -10,7 +10,7 @@ class Game(object):
         self.copyright = copyright
         self.room = room
         
-        self.round = 2
+        self.round = 3
 
         self.score = dict()
         self.buzzers = list()
@@ -170,7 +170,7 @@ class Board(object):
             print(question_one, question_two)
             print(u'=' * 40)
 
-        elif self.round == 2:
+        elif self.round == 3:
             self.categories[0].questions[0].wager = True
 
 

@@ -42,7 +42,15 @@
                             </div>
                         </div>
                     {% else %}
-                    <div>
+                    <script>
+                      $(document).ready(function() {
+                        socket.emit('question_clicked', {
+                          'room': '{{ game.room }}',
+                          'identifier': 'q_0_0'
+                        });
+                      });
+                    </script>
+<!--                     <div>
                         <div class="btn-toolbar" role="toolbar">
                             <div class="btn-group" role="group" id="wagerers">
                                 {% for name in game.score.keys() %}
@@ -79,7 +87,7 @@
                             </div>
                         </div>
                     </div>
-                    {% endif %}
+ -->                    {% endif %}
                  <div class="modal fade" id="question_modal" tabindex="-1" role="dialog" aria-labelledby="question-modal-holder" aria-hidden="true" data-keyboard="false" data-backdrop="static">
                   <div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
@@ -214,7 +222,7 @@
                           <span aria-hidden="true">&times;</span>
                         </button>
                       </div>
-                      <h4 style="padding: 16px;">Who chose the category?</h4>
+                      <h4 style="padding: 16px;" id="round_instruction"></h4>
                       <div class="modal-body">
                         <div class="btn-toolbar" role="toolbar">
                             <div class="btn-group" role="group" id="players">
@@ -227,12 +235,9 @@
                       <h4 style="padding: 16px;">Answer:</h4>
                       <div class="modal-body" id="single_wager_answer">
                       </div>
-                      <div class="modal-footer" id="question_footer">
+                      <div class="modal-footer">
                         <div class="btn-toolbar" role="toolbar">
-                            <div class="btn-group" role="group">
-                                <button class="btn btn-success disabled mr-auto" id="single_correct_answer">Correct!</button>
-                                <button class="btn btn-danger disabled mr-auto" id="single_incorrect_answer">Incorrect</button>
-                                <button class="btn btn-dark mr-auto" id="single_wager_player">Reveal Question</button>
+                            <div class="btn-group" role="group" id='wager_footer'>
                             </div>
                         </div>
                     </div>
@@ -259,6 +264,15 @@
                 }
 
                 else if (this.className.includes('wager_names')) {
+                    socket.emit('final_wagerer_reveal', {
+                        'room': '{{ game.room }}',
+                        'name': this.id,
+                    })
+
+                    $('#' + this.id).addClass('disabled');
+                }
+
+                else if (this.className.includes('wagerers')) {
                     socket.emit('final_wagerer_reveal', {
                         'room': '{{ game.room }}',
                         'name': this.id,
@@ -466,7 +480,12 @@
             
             names = message['players'];
             for (name in names) {
-                $('#players').append($('<button class="btn btn-success" id="' + names[name] + '_single_wagered">' + names[name] + '</button>'));
+                $('#players').append($('<button class="btn btn-success" id="' + names[name] + '">' + names[name] + '</button>'));
+            };
+
+            buttons = message['buttons'];
+            for (button in buttons) {
+                $('#wager_footer').append($('<button class="'+ buttons[button] + '" id="' + button.toLowerCase().replace(' ', '_') + '">' + button + '</button>'));
             };
 
             $('#players').on('click', '.btn', function() {
@@ -480,13 +499,15 @@
 
             if (isDailyDouble) {
                 $('#new_waager_modal_holder').text('Daily Double!');
+                $('#round_instruction').text('Who selected the category?');
                 manageModal('new_waager_modal', 'show');
-
-
             }
 
             else if (!isDailyDouble) {
                 $('#new_waager_modal_holder').text('Welcome to {{ copyright_protection }}!');
+                $('#round_instruction').text('Please read out the category, then press the \'Press for Wagers\' button below!');
+                manageModal('new_waager_modal', 'show');
+
             }
 
 

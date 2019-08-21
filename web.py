@@ -128,18 +128,27 @@ def reveal_host_clue(data):
 
     if info[u'wager']:
         if game.round == 3:
-            pass
+            isDailyDouble = False
+            footer_buttons = {
+                u'Prompt For Wagers': u'btn btn-success',
+                u'Reveal Question': u'btn btn-success disabled'
+                }
 
         else:
-            # socketio.emit(u'single_player_wager', {
-            #     u'room': data[u'room'],
-            #     u'players': list(game.score.keys())
-            #     })
-            socketio.emit(u'start_wager_round', {
-                u'room': data[u'room'],
-                u'isDailyDouble': True,
-                u'players': list(game.score.keys())
-                })
+            isDailyDouble = True
+            footer_buttons = {
+                u'Correct': u'btn btn-success disabled mr-auto',
+                u'Incorrect': u'btn btn-danger disabled mr-auto',
+                u'Reveal Question': u'btn btn-dark mr-auto'
+                }
+
+
+        socketio.emit(u'start_wager_round', {
+            u'room': data[u'room'],
+            u'isDailyDouble': isDailyDouble,
+            u'players': list(game.score.keys()),
+            u'buttons': footer_buttons
+            })
 
         print(u'DAILY DOUBLE!!!')
 
@@ -342,6 +351,8 @@ def player_selected(data):
 
     if data[u'isDailyDouble']:
         game.wagered_round[data[u'name']] = {}
+
+    print(u'WAGERER RECEIVED! They\'re name is:', data[u'name'])
 
 
 
