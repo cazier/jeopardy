@@ -47,25 +47,23 @@ class Game(object):
         else:
             return False
 
-    def round_text(self, next_round: bool = False) -> str:
-        if next_round:
-            next_round = self.round + 1
+    def round_text(self, upcoming: bool = False) -> str:
+        display_round = self.round + 1 if upcoming else self.round
 
-        if (not next_round and self.round == 1) or (next_round == 1):
+        if display_round == 1:
             return "{copyright}!".format(copyright=self.game_name)
 
-        elif (not next_round and self.round == 2) or (next_round == 2):
+        elif display_round == 2:
             return "Double {copyright}!".format(copyright=self.game_name)
 
-        elif (not next_round and self.round == 3) or (next_round == 3):
+        elif display_round == 3:
             return "Final {copyright}!".format(copyright=self.game_name)
 
-        elif not next_round and self.round == 4:
+        elif display_round == 4:
             return "Tiebreaker {copyright}!".format(copyright=self.game_name)
 
         else:
-            print(u"An error has occurred....")
-            return False
+            return u"An error has occurred...."
 
     def next_round(self):
         self.round += 1
