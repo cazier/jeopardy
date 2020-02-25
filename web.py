@@ -26,8 +26,6 @@ socketio = SocketIO(app)
 
 LIVE_GAME_CONTAINER = dict()
 
-DATABASE = u"data/database.db"
-
 
 @app.route(u"/")
 def index_page():
@@ -110,7 +108,11 @@ def show_player():
             session[u"room"] = room
 
     elif request.method == u"GET" and session is not None:
-        room = "ABCD"  # session[u'room']
+        if config.debug:
+            room = "ABCD"
+
+        else:
+            room = session[u"room"]
 
     return render_template(
         template_name_or_list=u"play.html",
@@ -201,7 +203,7 @@ def enable_buzzers(data, incorrect_players: list = list()):
 @socketio.on(u"correct_answer")
 def host_correct_answer(data):
     game = LIVE_GAME_CONTAINER[data[u"room"]]
-    game.score[game.buzzers[-1]] += game.standing_question.value
+    game.score[game.buzz_order[-1]] += game.current_question.value
 
     socketio.emit(u"clear_modal", {u"room": data[u"room"]})
 
@@ -216,11 +218,11 @@ def host_correct_answer(data):
 @socketio.on(u"incorrect_answer")
 def host_incorrect_answer(data):
     game = LIVE_GAME_CONTAINER[data[u"room"]]
-    game.score[game.buzzers[-1]] -= game.standing_question.value
+    game.score[game.buzz_order[-1]] -= game.current_question.value
 
     socketio.emit(u"update_scores", {u"room": data[u"room"], u"scores": game.score})
 
-    enable_buzzers(data, incorrect_players=game.buzzers)
+    enable_buzzers(data, incorrect_players=game.buzz_order)
 
 
 @socketio.on(u"buzzed_in")
@@ -356,7 +358,7 @@ def single_wager_prompt(data):
 def received_wager(data):
     game = LIVE_GAME_CONTAINER[data[u"room"]]
 
-    info = game.standing_question.get()
+    info = game.current_question.get()
 
     if data[u"name"] in game.wagered_round.keys():
 
@@ -392,7 +394,7 @@ def socket_join(data):
 
 
 def generate_room_code() -> str:
-    if app.debug:
+    if config.debug:
         return "ABCD"
 
     else:
@@ -406,8 +408,8 @@ def generate_room_code() -> str:
 def end_question(data):
     game = LIVE_GAME_CONTAINER[data[u"room"]]
 
-    game.buzzers = list()
-    game.standing_question = None
+    game.buzz_order = list()
+    game.current_question = None
 
     print(u"=" * 40)
     print(u"ROUND ENDED", game.round)
@@ -420,7 +422,7 @@ def end_question(data):
                 u"room": data[u"room"],
                 u"current_round": LIVE_GAME_CONTAINER[data[u"room"]].round_text(),
                 u"next_round": LIVE_GAME_CONTAINER[data[u"room"]].round_text(
-                    next_round=True
+                    upcoming=True
                 ),
             },
         )

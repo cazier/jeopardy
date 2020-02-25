@@ -1,8 +1,10 @@
 import sqlite3
 import random
-from pprint import pprint
 
 import config
+
+if config.debug:
+    from pprint import pprint
 
 
 class Game(object):
@@ -125,9 +127,10 @@ class Board(object):
 
             all_categories = sqlite_cleaned(categories)
 
-            # This dataset line is made solely to ensure that the while function below will run.
-            # The while function is used to ensure the actual game does not use any questions with
-            # `external media` as defined in the database.
+            # This dataset line is made solely to ensure that the while function below will run, the
+            # first time it is encountered. The while function is used to ensure the actual game does
+            #  not use any questions with `external media` as defined in the database.
+
             dataset = [(0, 0, 0, 0, 0, 0, 0, 0, 1)]
 
             while sum([datum[8] for datum in dataset]) > 0:
