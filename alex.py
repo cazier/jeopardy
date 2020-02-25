@@ -7,18 +7,18 @@ import config
 
 class Game(object):
     def __init__(self, players: int, size: int, room: str):
-        self.db = config.database
-        self.players = players
-        self.size = size
-        self.game_name = config.game_name
+        self.db: str = config.database
+        self.players: int = players
+        self.size: int = size
+        self.game_name: str = config.game_name
         self.room = room
 
-        self.round = 3
+        self.round = 1
 
-        self.score = dict()
-        self.buzzers = list()
+        self.score: dict = dict()
+        self.buzz_order: list = list()
 
-        self.standing_question = None
+        self.current_question = None
 
         self.add_player("Alex")
         self.add_player("Carl")
@@ -80,7 +80,7 @@ class Game(object):
 
         if entry == u"q":
             response = self.board.categories[int(category)].questions[int(question)]
-            self.standing_question = response.get_question()
+            self.current_question = response.get_question()
             return response.get()
 
         else:
@@ -89,7 +89,7 @@ class Game(object):
 
     def buzz(self, name: str):
         if name in self.score.keys():
-            self.buzzers.append(name)
+            self.buzz_order.append(name)
 
 
 class Board(object):
