@@ -1,5 +1,6 @@
 import sqlite3
 import random
+import itertools
 
 import config
 
@@ -8,14 +9,14 @@ if config.debug:
 
 
 class Game(object):
-    def __init__(self, players: int, size: int, room: str):
-        self.db: str = config.database
-        self.players: int = players
+    """Class definining the game itself, containing each player and the board itself. """
+
+    def __init__(self, size: int, room: str):
         self.size: int = size
         self.game_name: str = config.game_name
         self.room = room
 
-        self.round = 1
+        self.round = 2
 
         self.score: dict = dict()
         self.buzz_order: list = list()
@@ -32,7 +33,7 @@ class Game(object):
 
         Required Arguments:
 
-        name (str) -- The players name
+        name (str) -- The player's name
         """
         self.score[name] = 0
 
@@ -44,7 +45,7 @@ class Game(object):
         """
         self.remaining_questions = 1 if config.debug else self.size * 5
 
-        self.board = Board(database_name=self.db, segment=self.round, size=self.size)
+        self.board = Board(segment=self.round, size=self.size)
 
         self.wagered_round = dict()
 
@@ -92,7 +93,7 @@ class Game(object):
             return "Tiebreaker {copyright}!".format(copyright=self.game_name)
 
         else:
-            return u"An error has occurred...."
+            return "An error has occurred...."
 
     def start_next_round(self):
         """Increment the round counter and remake the board with `self.make_board()`"""
@@ -113,15 +114,15 @@ class Game(object):
         identifier (str) -- A three piece identifier that specifies the question to return
         """
         self.remaining_questions -= 1
-        entry, category, question = identifier.split(u"_")
+        entry, category, question = identifier.split("_")
 
-        if entry == u"q":
+        if entry == "q":
             response = self.board.categories[int(category)].questions[int(question)]
             self.current_question = response.get_question()
             return response.get()
 
         else:
-            print(u"An error has occurred....")
+            print("An error has occurred....")
             return False
 
     def buzz(self, name: str):
@@ -139,95 +140,93 @@ class Game(object):
 class Board(object):
     """Class to hold the Jeopardy game board. Contains methods to get categories and questions."""
 
-    def __init__(self, database_name: str, segment: int, size: int):
-        self.db: str = database_name
+    def __init__(self, segment: int, size: int):
+        self.db: str = config.database
         self.size: int = size if segment < 3 else 1
         self.round: int = segment
         self.categories: list = list()
 
         self.get_questions()
 
-    def __contains__(self, item):
-        if len(self.categories) == 0:
-            return False
-        else:
-            return item[1] in [i.title() for i in self.categories]
+    # def __contains__(self, item):
+    #     if len(self.categories) == 0:
+    #         return False
+    #     else:
+    #         return item[1] in [i.title() for i in self.categories]
 
     def get_questions(self) -> None:
+        """Create a datastructure storing the categories and questions associated with each round of gameplay.
+        This function should perform a number of steps to prevent the appearance of incomplete categories, or 
+        external content.
+        """
         conn = sqlite3.connect(self.db)
         t = conn.cursor()
 
-        shows = t.execute(u"SELECT show FROM questions").fetchall()
-        all_shows = sqlite_cleaned(shows)
+        # Pull a list of all the show numbers in the question database, and randomly select one show for each category
+        # of gameplay. As such, in game, each category will be representing a different actually show number.
+        shows = t.execute("SELECT show FROM questions").fetchall()
+        selected_shows = random.sample(sqlite_cleaned(shows), self.size)
 
-        selected_shows = random.sample(all_shows, self.size)
-
+        # For each aired show/episode, get a list containing all of the category titles. By design this should
+        # only choose categories that are complete (i.e., have 5 questions in the database) and have no external
+        # media (i.e., links/hrefs/images)
         for index, show in enumerate(selected_shows):
             categories = t.execute(
-                u"SELECT category FROM questions WHERE \
+                "SELECT category FROM questions WHERE \
                 segment=? AND show=? AND complete_category=? AND external_media=?",
                 (self.round, show, True, False),
             ).fetchall()
 
-            all_categories = sqlite_cleaned(categories)
+            print(categories)
+            categories = sqlite_cleaned(categories)
+            print(categories)
+            input()
 
-            # This dataset line is made solely to ensure that the while function below will run, the
-            # first time it is encountered. The while function is used to ensure the actual game does
-            #  not use any questions with `external media` as defined in the database.
+            # Loop over the list of categories to generate a new dataset of questions for each. The while loop
+            # will repeat in the event external media is still found, or an incomplete category is found.
+            dataset: list = list()
+            while sum([q[8] for q in dataset]) > 0 or sum([q[7] for q in dataset]) < 5:
 
-            dataset = [(0, 0, 0, 0, 0, 0, 0, 0, 1)]
+                # Technically, this can error out, if all of the categories in the game are incomplete... However,
+                # the included database should already include enough protection against this... 😬
+                category = categories.pop(random.randrange(len(categories)))
 
-            while sum([datum[8] for datum in dataset]) > 0:
-                category = random.choice(all_categories)
-
+                # Finally, fetch all of the questions associated with the specifically checked category and show
                 dataset = t.execute(
-                    u"SELECT * FROM questions WHERE segment=? AND show=? and category=?",
+                    "SELECT * FROM questions WHERE segment=? AND show=? and category=?",
                     (self.round, show, category),
                 ).fetchall()
 
+            # If the while loop has been successfully broken out of, add those questions to the game storage.
             self.categories.append(Category(dataset, index))
 
-        self.values = [question.value for question in self.categories[0].questions]
+    def add_wagers(self) -> None:
+        """Randomly assign the "Daily Double" to the correct number of questions per round."""
+        doubles = list(itertools.product(range(self.size), range(6)))
+        print(doubles)
+        print(self.categories)
+        input()
 
-    def add_wagers(self):
-        if self.round == 1:
-            question = (random.randrange(self.size), random.randrange(5))
+        for daily_double in random.sample(doubles, self.round):
+            if config.debug:
+                print(f"{'=' * 10}\n{daily_double}\n{'=' * 10}")
 
-            self.categories[question[0]].questions[question[1]].wager = True
+            self.categories[daily_double[0]].questions[daily_double[1]].wager = True
 
-            print(u"=" * 40)
-            print(question)
-            print(u"=" * 40)
-
-        elif self.round == 2:
-            question_one = (random.randrange(self.size), random.randrange(5))
-            question_two = (random.randrange(self.size), random.randrange(5))
-
-            while question_one == question_two:
-                question_two = (random.randrange(self.size), random.randrange(5))
-
-            self.categories[question_one[0]].questions[question_one[1]].wager = True
-            self.categories[question_two[0]].questions[question_two[1]].wager = True
-
-            print(u"=" * 40)
-            print(question_one, question_two)
-            print(u"=" * 40)
-
-        elif self.round == 3:
-            self.categories[0].questions[0].wager = True
-
-    def html_board(self):
-        return zip(*[i.questions for i in self.categories])
+    # def html_board(self):
+    #     return zip(*[i.questions for i in self.categories])
 
 
 class Category(object):
     def __init__(self, db_questions: list, index: int):
         self.category = db_questions[0][1]
         self.index = index
-        self.questions = list()
+        self.questions: list = list()
 
-        for question_index, row in enumerate(db_questions):
-            self.add_question(question_info=row, question_index=question_index)
+        for question_index, question_info in enumerate(db_questions):
+            self.add_question(
+                question_info=question_info, question_index=question_index
+            )
 
         self.questions.sort()
 
@@ -255,8 +254,8 @@ class Question(object):
 
         self.wager = False
 
-        self.question = question_info[3].strip(u"'")
-        self.answer = question_info[4].strip(u"'")
+        self.question = question_info[3].strip("'")
+        self.answer = question_info[4].strip("'")
         self.value = question_info[5]
         self.year = question_info[6]
 
@@ -267,7 +266,7 @@ class Question(object):
         return str(self.value)
 
     def id(self):
-        return u"{category}_{question}".format(
+        return "{category}_{question}".format(
             category=self.category_index, question=self.question_index
         )
 
@@ -275,9 +274,9 @@ class Question(object):
         self.shown = True
 
         return {
-            u"question": self.question,
-            u"answer": self.answer,
-            u"wager": self.wager,
+            "question": self.question,
+            "answer": self.answer,
+            "wager": self.wager,
         }
 
     def get_question(self):
