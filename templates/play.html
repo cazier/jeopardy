@@ -1,105 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>{{ copyright_protection }} - Python/WebSocket Trivia!</title>
+    <title>{{ game_name }} - Python/WebSocket Trivia!</title>
 
     {% include "scripts.html" %}
 
-  </head>
-  <body>
+</head>
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-12">
-            {% include "header.html" %}
-            <div class="jumbotron card card-block">
-                <h2>
-                    Hey {{ session['name'] }}!
-                </h2>
-                <div class="input-group-lg mb-3">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">Current Score:
-                            {{ currency }}&nbsp;
-                            <span id="score">{{ game.score[session['name']] }}</span>
-                        </span>
-                    </div>
-                </div>
-                <br>
-                <div id="buzzer_container">
-                    <button id="buzzer" class="btn btn-block btn-danger disabled">BUZZ IN!</button>
-                </div>
+<body>
 
-                 <div class="modal fade" id="wager_modal" tabindex="-1" role="dialog" aria-labelledby="wager-modal-holder" aria-hidden="true" data-keyboard="false" data-backdrop="static">
-                  <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h3 class="modal-title" id="wager-modal-holder"><span id="current_round"></span></h3>
-                      </div>
-                      <div class="modal-body">
-                        <h4>You currently have <br>{{ currency }} <span id="scores">0</span>!</h4>
-                        <div class="alert alert-danger collapse" role="alert" id="wager_alert">
-                            Your wager must be less than or equal to your current money. Please try again!
-                        </div>
-                        <div class="form-group" id="wager">
-                            <label for="wager">How much would you like to wager?</label>
-                            <input name="wager" type="number" class="form-control" placeholder="0" value="0" required id="wager_value">
-                            <small class="form-text text-muted"></small>
-                        </div>
-                        <div class="form-group" id="answer" style="display: none;">
-                            <label for="wager">Please enter an answer!</label>
-                            <input name="wager" type="text" class="form-control" placeholder="" required id="answer_value">
-                            <small class="form-text text-muted"></small>
-                        </div> 
-                    </div>
-                      <div class="modal-footer">
-                        <button class="btn btn-success mr-auto" id="wager_submit">Submit!</button>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                {% include "header.html" %}
+                <div class="jumbotron card card-block">
+                    <h2>
+                        Hey {{ session['name'] }}!
+                    </h2>
+                    <div class="input-group-lg mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Current Score:
+                                {{ currency }}&nbsp;
+                                <span id="score">{{ game.score[session['name']] }}</span>
+                            </span>
                         </div>
                     </div>
-                  </div>
-                </div>
-                 <div class="modal fade" id="single_wager_modal" tabindex="-1" role="dialog" aria-labelledby="single_wager-modal-holder" aria-hidden="true" data-keyboard="false" data-backdrop="static">
-                  <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h3 class="modal-title" id="single_wager-modal-holder"><span id="current_round"></span></h3>
-                      </div>
-                      <div class="modal-body">
-                        <h4>You currently have <br>{{ currency }} <span id="single_scores">0</span>!</h4>
-                        <div class="alert alert-danger collapse" role="alert" id="single_wager_alert">
-                            Your wager must be less than or equal to your current money. Please try again!
-                        </div>
-                        <div class="form-group" id="wager">
-                            <label for="wager">How much would you like to wager?</label>
-                            <input name="wager" type="number" class="form-control" placeholder="0" value="0" required id="single_wager_value">
-                            <small class="form-text text-muted"></small>
+                    <br>
+                    <div id="buzzer_container">
+                        <button id="buzzer" class="btn btn-block btn-danger disabled">BUZZ IN!</button>
+                    </div>
+
+                    <div class="modal fade" id="wager_modal" tabindex="-1" role="dialog"
+                        aria-labelledby="wager-modal-holder" aria-hidden="true" data-keyboard="false"
+                        data-backdrop="static">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h3 class="modal-title" id="wager-modal-holder"><span id="current_round"></span>
+                                    </h3>
+                                </div>
+                                <div class="modal-body">
+                                    <h4>You currently have <br>{{ currency }} <span id="scores">0</span>!</h4>
+                                    <div class="alert alert-danger collapse" role="alert" id="wager_alert">
+                                        Your wager must be less than or equal to your current money. Please try again!
+                                    </div>
+                                    <div class="form-group" id="wager">
+                                        <label for="wager">How much would you like to wager?</label>
+                                        <input name="wager" type="number" class="form-control" placeholder="0" value="0"
+                                            required id="wager_value">
+                                        <small class="form-text text-muted"></small>
+                                    </div>
+                                    <div class="form-group" id="answer" style="display: none;">
+                                        <label for="wager">Please enter an answer!</label>
+                                        <input name="wager" type="text" class="form-control" placeholder="" required
+                                            id="answer_value">
+                                        <small class="form-text text-muted"></small>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button class="btn btn-success mr-auto" id="wager_submit">Submit!</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                      <div class="modal-footer">
-                        <button class="btn btn-success mr-auto" id="single_wager_submit">Submit!</button>
+                    <div class="modal fade" id="single_wager_modal" tabindex="-1" role="dialog"
+                        aria-labelledby="single_wager-modal-holder" aria-hidden="true" data-keyboard="false"
+                        data-backdrop="static">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h3 class="modal-title" id="single_wager-modal-holder"><span
+                                            id="current_round"></span></h3>
+                                </div>
+                                <div class="modal-body">
+                                    <h4>You currently have <br>{{ currency }} <span id="single_scores">0</span>!</h4>
+                                    <div class="alert alert-danger collapse" role="alert" id="single_wager_alert">
+                                        Your wager must be less than or equal to your current money. Please try again!
+                                    </div>
+                                    <div class="form-group" id="wager">
+                                        <label for="wager">How much would you like to wager?</label>
+                                        <input name="wager" type="number" class="form-control" placeholder="0" value="0"
+                                            required id="single_wager_value">
+                                        <small class="form-text text-muted"></small>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button class="btn btn-success mr-auto" id="single_wager_submit">Submit!</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                  </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
-<script type="text/javascript">
-        socket.on('enable_buzzers', function(message) {
+    <script type="text/javascript">
+        socket.on('enable_buzzers', function (message) {
             if (!message['players'].includes("{{ session['name'] }}")) {
                 $('#buzzer').removeClass('disabled btn-danger');
                 $('#buzzer').addClass('btn-success');
             }
-            });
+        });
 
         socket.on('reset_player', function (message) {
             $('#buzzer').removeClass('btn-success');
             $('#buzzer').addClass('disabled btn-danger');
-            });
+        });
 
         socket.on('update_scores', function (message) {
             $('#score').text(message['scores']['{{ session['name'] }}']);
@@ -107,24 +118,24 @@
             $('#single_scores').text(message['scores']['{{ session['name'] }}']);
         });
 
-        socket.on('start_wager_round', function(message) {
+        socket.on('start_wager_round', function (message) {
             if (message['players'].includes("{{ session['name'] }}")) {
                 manageModal('wager_modal', 'show');
             }
         });
 
-        socket.on('single_wager_player_prompt', function(message) {
+        socket.on('single_wager_player_prompt', function (message) {
             if (message['players'].includes("{{ session['name'] }}")) {
                 manageModal('single_wager_modal', 'show');
             }
         });
 
-        socket.on('final_question_revealed', function(message) {
+        socket.on('final_question_revealed', function (message) {
             $('#answer').show();
         });
 
 
-        $('button').click(function(event) {
+        $('button').click(function (event) {
             if (this.id == 'buzzer') {
                 socket.emit('buzzed_in', {
                     'room': '{{ game.room }}',
@@ -143,7 +154,7 @@
                         'wager': wager
                     });
 
-                    $('#wager_value').prop('disabled', function(i, v) {return !v; });
+                    $('#wager_value').prop('disabled', function (i, v) { return !v; });
                     $('#wager_alert').hide();
 
                     document.getElementById('wager_submit').id = 'answer_submit';
@@ -168,7 +179,7 @@
 
                     $('#wager_alert').hide();
                     manageModal('single_wager_modal', 'hide');
-                    
+
                     $('#single_wager_value').val(0);
 
                 }
@@ -189,6 +200,7 @@
                 manageModal('wager_modal', 'hide');
             }
         });
-</script>
+    </script>
 </body>
+
 </html>

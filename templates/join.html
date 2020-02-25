@@ -1,109 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>{{ copyright_protection }} - Python/WebSocket Trivia!</title>
+    <title>{{ game_name }} - Python/WebSocket Trivia!</title>
 
     {% include "scripts.html" %}
 
-  </head>
-  <body>
+</head>
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-12">
-            {% include "header.html" %}
-            <div class="jumbotron card card-block">
-                <h2>
-                    Oh Boy! What a great idea! Let's Play!
-                </h2>
-                <hr>
-                {% if errors %}
+<body>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                {% include "header.html" %}
+                <div class="jumbotron card card-block">
+                    <h2>
+                        Oh Boy! What a great idea! Let's Play!
+                    </h2>
+                    <hr>
+                    {% if errors %}
                     {% for alert in errors %}
-                        <div class="alert alert-danger" role="alert">
-                            {{ alert }}
-                        </div>
+                    <div class="alert alert-danger" role="alert">
+                        {{ alert }}
+                    </div>
                     {% endfor %}
-                {% endif %}                        
-                <div class="accordion" id="jointype">
-                    <div class="card">
-                        <div class="card-header" id="Player">
-                            <h2 class="mb-0">
-                                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#cplayer" aria-expanded="true" aria-controls="cplayer">
-                                    Player Settings
-                                </button>
-                            </h2>
+                    {% endif %}
+                    <div class="accordion" id="jointype">
+                        <div class="card">
+                            <div class="card-header" id="Player">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-link" type="button" data-toggle="collapse"
+                                        data-target="#cplayer" aria-expanded="true" aria-controls="cplayer">
+                                        Player Settings
+                                    </button>
+                                </h2>
+                            </div>
+                            <div id="cplayer" class="collapse show" aria-labelledby="Player" data-parent="#jointype">
+                                <div class="card-body">
+                                    <form action="/play" method="POST">
+                                        <div class="form-group">
+                                            <label for="players">What is your name?</label>
+                                            <input name="name" type="text" class="form-control"
+                                                placeholder="Alex Trebek" required value="Alex">
+                                            <small class="form-text text-muted"></small>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="room">What is the room code?</label>
+                                            <input name="room" type="text" class="form-control" placeholder="ABCD"
+                                                size="4" required value="ABCD">
+                                        </div>
+                                        <div class="form-group">
+                                            <button type="submit" class="btn btn-success">Let's Go!</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
-                        <div id="cplayer" class="collapse show" aria-labelledby="Player" data-parent="#jointype">
-                            <div class="card-body">
-                                <form action="/play" method="POST">
-                                    <div class="form-group">
-                                        <label for="players">What is your name?</label>
-                                        <input name="name" type="text" class="form-control" placeholder="Alex Trebek" required value="Alex">
-                                        <small class="form-text text-muted"></small>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="room">What is the room code?</label>
-                                        <input name="room" type="text" class="form-control" placeholder="ABCD" size="4" required value="ABCD">
-                                    </div>
-                                    <div class="form-group">
-                                        <button type="submit" class="btn btn-success">Let's Go!</button>
-                                    </div>
-                                </form>
+                        <div class="card">
+                            <div class="card-header" id="Board">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse"
+                                        data-target="#cboard" aria-expanded="false" aria-controls="cboard">
+                                        Board Settings
+                                    </button>
+                                </h2>
+                            </div>
+                            <div id="cboard" class="collapse" aria-labelledby="Board" data-parent="#jointype">
+                                <div class="card-body">
+                                    <form action="/board" method="POST">
+                                        <div class="form-group">
+                                            <label for="room">What is the room code?</label>
+                                            <input name="room" type="text" class="form-control" placeholder="ABCD"
+                                                size="4" required value="ABCD">
+                                        </div>
+                                        <div class="form-group">
+                                            <button type="submit" class="btn btn-success">Let's Go!</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header" id="Host">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse"
+                                        data-target="#chost" aria-expanded="false" aria-controls="chost">
+                                        Host Settings
+                                    </button>
+                                </h2>
+                            </div>
+                            <div id="chost" class="collapse" aria-labelledby="Host" data-parent="#jointype">
+                                <div class="card-body">
+                                    <form action="/host" method="POST">
+                                        <div class="form-group">
+                                            <label for="room">What is the room code?</label>
+                                            <input name="room" type="text" class="form-control" placeholder="ABCD"
+                                                size="4" required value="ABCD">
+                                        </div>
+                                        <div class="form-group">
+                                            <button type="submit" class="btn btn-success">Let's Go!</button>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="card">
-                        <div class="card-header" id="Board">
-                            <h2 class="mb-0">
-                                <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#cboard" aria-expanded="false" aria-controls="cboard">
-                                    Board Settings
-                                </button>
-                            </h2>
-                        </div>
-                        <div id="cboard" class="collapse" aria-labelledby="Board" data-parent="#jointype">
-                            <div class="card-body">
-                                <form action="/board" method="POST">
-                                    <div class="form-group">
-                                        <label for="room">What is the room code?</label>
-                                        <input name="room" type="text" class="form-control" placeholder="ABCD" size="4" required value="ABCD">
-                                    </div>
-                                    <div class="form-group">
-                                        <button type="submit" class="btn btn-success">Let's Go!</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header" id="Host">
-                            <h2 class="mb-0">
-                                <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#chost" aria-expanded="false" aria-controls="chost">
-                                    Host Settings
-                                </button>
-                            </h2>
-                        </div>
-                        <div id="chost" class="collapse" aria-labelledby="Host" data-parent="#jointype">
-                            <div class="card-body">
-                                <form action="/host" method="POST">
-                                    <div class="form-group">
-                                        <label for="room">What is the room code?</label>
-                                        <input name="room" type="text" class="form-control" placeholder="ABCD" size="4" required value="ABCD">
-                                    </div>
-                                    <div class="form-group">
-                                        <button type="submit" class="btn btn-success">Let's Go!</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>                
+                </div>
             </div>
         </div>
     </div>
-</div>
 </body>
+
 </html>

@@ -1,214 +1,226 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>{{ copyright_protection }} - Python/WebSocket Trivia!</title>
+    <title>{{ game_name }} - Python/WebSocket Trivia!</title>
 
     {% include "scripts.html" %}
 
-  </head>
-  <body>
+</head>
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-12">
-            {% include "header.html" %}
-            <div class="jumbotron card card-block">
-                <h2>
-                    Let's Play {{ game.round_text() }}
-                </h2>
-                {% if game.round <= 2 %}
-                <table class="table">
-                    <tr>
-                        {% for name in game.board.categories %}
+<body>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                {% include "header.html" %}
+                <div class="jumbotron card card-block">
+                    <h2>
+                        Let's Play {{ game.round_text() }}
+                    </h2>
+                    {% if game.round <= 2 %}
+                    <table class="table">
+                        <tr>
+                            {% for name in game.board.categories %}
                             <th style="width: {{ 100 // game.size }}%; text-align: center;">
                                 <h5>
                                     {{ name.category }}
                                 </h5>
                             </th>
-                        {% endfor %}
-                    </tr>
-                    {% for category in game.html_board() %}
+                            {% endfor %}
+                        </tr>
+                        {% for category in game.html_board() %}
                         <tr>
                             {% for question in category %}
                             <td>
-                                <button class="btn btn-block btn-primary {% if question.shown %}disabled{% endif %}" id="q_{{ question.id() }}">
+                                <button class="btn btn-block btn-primary {% if question.shown %}disabled{% endif %}"
+                                    id="q_{{ question.id() }}">
                                     {{ currency }}{{ question.value }}
                                 </button>
                             </td>
                             {% endfor %}
                         </tr>
-                    {% endfor %}
-                </table>
-                <br>
-                {% elif game.round > 2 %}
-                <div>
+                        {% endfor %}
+                    </table>
+                    <br>
+                    {% elif game.round > 2 %}
+                    <div>
+                        <hr>
+                        <h3>
+                            The category is:
+                        </h3>
+                        <h4 style="padding-left: 25px">{{ game.board.categories[0].category }}</h4>
+                    </div>
+                    <div id="question_details" class="collapse">
+                        <hr>
+                        <h3>
+                            The question is:
+                        </h3>
+                        <h4 style="padding-left: 25px">{{ game.board.categories[0].questions[0].question }}</h4>
+                    </div>
+                    {% endif %}
                     <hr>
-                    <h3 >
-                        The category is:
-                    </h3>
-                    <h4 style="padding-left: 25px">{{ game.board.categories[0].category }}</h4>
-                </div>
-                <div id="question_details" class="collapse">
-                    <hr>
-                    <h3>
-                        The question is:
-                    </h3>
-                    <h4 style="padding-left: 25px">{{ game.board.categories[0].questions[0].question }}</h4>
-                </div>
-                {% endif %}
-                <hr>
-                <table class="table" style="width: 100%;" id="score_board">
-                    <h4>
-                        Scores!
-                    </h4>
-                    <tr id='players'>
-                        {% for name in game.score.keys() %}
+                    <table class="table" style="width: 100%;" id="score_board">
+                        <h4>
+                            Scores!
+                        </h4>
+                        <tr id='players'>
+                            {% for name in game.score.keys() %}
                             <th style="text-align: center;">
                                 {{ name }}
                             </th>
-                        {% endfor %}
-                    </tr>
-                    <tr id='scores'>
-                        {% for name in game.score.keys() %}
+                            {% endfor %}
+                        </tr>
+                        <tr id='scores'>
+                            {% for name in game.score.keys() %}
                             <td style="text-align: center;">
                                 <span>{{ currency }}</span>
                                 <span id="{{ name }}_score">{{ game.score[name] }}</span>
                             </td>
-                        {% endfor %}
-                    </tr>
-                </table>
-                <div class="modal fade" id="question_modal" tabindex="-1" role="dialog" aria-labelledby="question-modal-holder" aria-hidden="true" data-keyboard="false" data-backdrop="static">
-                  <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h3 class="modal-title" id="question-modal-holder">Question:</h3>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                          <span aria-hidden="true">&times;</span>
-                        </button>
-                      </div>
-                      <div class="modal-body" id="question">
-                      </div>
+                            {% endfor %}
+                        </tr>
+                    </table>
+                    <div class="modal fade" id="question_modal" tabindex="-1" role="dialog"
+                        aria-labelledby="question-modal-holder" aria-hidden="true" data-keyboard="false"
+                        data-backdrop="static">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h3 class="modal-title" id="question-modal-holder">Question:</h3>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body" id="question">
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                  </div>
-                </div>
-                 <div class="modal fade" id="round_modal" tabindex="-1" role="dialog" aria-labelledby="round-modal-holder" aria-hidden="true" data-keyboard="false" data-backdrop="static">
-                  <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h3 class="modal-title" id="round-modal-holder">Round Complete!</h3>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                          <span aria-hidden="true">&times;</span>
-                        </button>
-                      </div>
-                      <div class="modal-body">
-                        Congratulations on finishing <span id="current_round"></span>! Are you ready to start <span id="next_round"></span>?!
-                      </div>
+                    <div class="modal fade" id="round_modal" tabindex="-1" role="dialog"
+                        aria-labelledby="round-modal-holder" aria-hidden="true" data-keyboard="false"
+                        data-backdrop="static">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h3 class="modal-title" id="round-modal-holder">Round Complete!</h3>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    Congratulations on finishing <span id="current_round"></span>! Are you ready to
+                                    start <span id="next_round"></span>?!
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                  </div>
-                </div>
-                 <div class="modal fade" id="wager_category_modal" tabindex="-1" role="dialog" aria-labelledby="wager-category-modal-holder" aria-hidden="true" data-keyboard="false" data-backdrop="static">
-                  <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h3 class="modal-title" id="wager-category-modal-holder"><span id="category"></span></h3>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                          <span aria-hidden="true">&times;</span>
-                        </button>
-                      </div>
-                      <div class="modal-body">
-                        <h4 id="wager_clue"></h4>
-                        <table>
-                            <tr>
-                                <th>
-                                    <span id="wager_round_name"></span> has wagered:
-                                </th>
-                            </tr>
-                            <tr>
-                                <td>
-                                    {{ currency }} <span id="wager_round_amount"></span>
-                                </td>
-                            </tr>
-                        </table>
-                        <br>
-                        <table class="collapse" id="wager_answer_holder">
-                            <tr>
-                                <th>
-                                    Answer:
-                                </th>
-                            </tr>
-                            <tr>
-                                <td id="wager_round_answer">
-                                </td>
-                            </tr>
-                        </table>
-                      </div>
+                    <div class="modal fade" id="wager_category_modal" tabindex="-1" role="dialog"
+                        aria-labelledby="wager-category-modal-holder" aria-hidden="true" data-keyboard="false"
+                        data-backdrop="static">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h3 class="modal-title" id="wager-category-modal-holder"><span id="category"></span>
+                                    </h3>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <h4 id="wager_clue"></h4>
+                                    <table>
+                                        <tr>
+                                            <th>
+                                                <span id="wager_round_name"></span> has wagered:
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                {{ currency }} <span id="wager_round_amount"></span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <br>
+                                    <table class="collapse" id="wager_answer_holder">
+                                        <tr>
+                                            <th>
+                                                Answer:
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <td id="wager_round_answer">
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                  </div>
                 </div>
             </div>
         </div>
+        <script type="text/javascript">
+            socket.on('add_player_to_board', function (message) {
+                $('#players').append('<th style="text-align: center;">' + message['player'] + '</th>');
+                $('#scores').append('<td style="text-align: center;"><span>{{ currency }}</span><span id="' + message['player'] + '_score">0</span></td>');
+            })
+
+            socket.on('question_revealed', function (message) {
+                $('#' + message['identifier']).addClass('disabled');
+                $('#question').text(message['question']);
+
+                manageModal('question_modal', 'show');
+            });
+
+            socket.on('clear_modal', function (message) {
+                manageModal('question_modal', 'hide');
+            });
+
+            socket.on('update_scores', function (message) {
+                for (player in message['scores']) {
+                    $('#' + player + '_score').text(message['scores'][player]);
+                };
+
+                if (message.final) {
+                    manageModal('wager_category_modal', 'hide');
+                };
+            });
+
+            socket.on('round_complete', function (message) {
+                $('#current_round').text(message['current_round']);
+                $('#next_round').text(message['next_round']);
+
+                manageModal('round_modal', 'show');
+            });
+
+            socket.on('round_started', function (message) {
+                $("<form method='POST' action='" + document.URL + "'><input type='hidden' name='room' value='{{ game.room }}'/></form>").appendTo("body").submit();
+            });
+
+            socket.on('final_wager_received', function (message) {
+                $('#wager_answer_holder').collapse('hide');
+
+                $('#wager_round_name').text(message['name']);
+                $('#wager_round_amount').text(message['wager']);
+                $('#wager_round_answer').text(message['answer']);
+
+                manageModal('wager_category_modal', 'show');
+            });
+
+            socket.on('reveal_wager_answer', function (message) {
+                $('#wager_answer_holder').collapse('show');
+            });
+
+            socket.on('final_question_revealed', function (message) {
+                $('#question_details').collapse();
+            });
+
+        </script>
     </div>
-    <script type="text/javascript">
-        socket.on('add_player_to_board', function (message) {
-            $('#players').append('<th style="text-align: center;">' + message['player'] + '</th>');
-            $('#scores').append('<td style="text-align: center;"><span>{{ currency }}</span><span id="' + message['player'] + '_score">0</span></td>');
-        })
-
-        socket.on('question_revealed', function(message) {
-            $('#' + message['identifier']).addClass('disabled');
-            $('#question').text(message['question']);
-
-            manageModal('question_modal', 'show');
-        });
-
-        socket.on('clear_modal', function(message) {
-            manageModal('question_modal', 'hide');
-        });
-
-        socket.on('update_scores', function (message) {
-            for (player in message['scores']) {
-                $('#' + player + '_score').text(message['scores'][player]);
-            };
-
-            if (message.final) {
-                manageModal('wager_category_modal', 'hide');
-            };
-        });
-
-        socket.on('round_complete', function(message) {
-            $('#current_round').text(message['current_round']);
-            $('#next_round').text(message['next_round']);
-
-            manageModal('round_modal', 'show');
-        });
-
-        socket.on('round_started', function(message) {
-            $("<form method='POST' action='" + document.URL + "'><input type='hidden' name='room' value='{{ game.room }}'/></form>").appendTo("body").submit();
-        });
-
-        socket.on('final_wager_received', function(message) {
-            $('#wager_answer_holder').collapse('hide');
-
-            $('#wager_round_name').text(message['name']);
-            $('#wager_round_amount').text(message['wager']);
-            $('#wager_round_answer').text(message['answer']);
-
-            manageModal('wager_category_modal', 'show');
-        });
-
-        socket.on('reveal_wager_answer', function(message) {
-            $('#wager_answer_holder').collapse('show');
-        });
-
-        socket.on('final_question_revealed', function(message) {
-            $('#question_details').collapse();
-        });
-
-    </script>
-</div>
 </body>
+
 </html>

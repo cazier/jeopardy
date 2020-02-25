@@ -1,32 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>{{ copyright_protection }} - Python/WebSocket Trivia!</title>
+    <title>{{ game_name }} - Python/WebSocket Trivia!</title>
     {% include "scripts.html" %}
 
-  </head>
-  <body>
+</head>
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-12">
-            {% include "header.html" %}
-            <div class="jumbotron card card-block">
-                <h2>
-                    Welcome to {{ copyright_protection }}!
-                </h2>
-                <hr>
-                <p>
-                    <a class="btn btn-primary btn-large" href="/new">Start a New Game!</a>
-                    <a class="btn btn-primary btn-large" href="/join">Join a Game!</a>
-                </p>
+<body>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                {% include "header.html" %}
+                <div class="jumbotron card card-block">
+                    <h2>
+                        Welcome to {{ game_name }}!
+                    </h2>
+                    <hr>
+                    <p>
+                        <a class="btn btn-primary btn-large" href="/new">Start a New Game!</a>
+                        <a class="btn btn-primary btn-large" href="/join">Join a Game!</a>
+                    </p>
+                </div>
             </div>
         </div>
     </div>
-</div>
 </body>
+
 </html>
