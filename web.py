@@ -21,7 +21,7 @@ app.jinja_env.globals.update(game_name=config.game_name)
 app.jinja_env.globals.update(currency=config.currency)
 
 app.config[u"SECRET_KEY"] = config.app_secret
-app.debug = True
+app.debug = config.debug
 socketio = SocketIO(app)
 
 LIVE_GAME_CONTAINER = dict()
@@ -47,11 +47,11 @@ def join_game():
 @app.route(u"/host", methods=[u"POST"])
 def show_host():
     if request.form.get(u"players") and request.form.get(u"categories"):
+
         room = generate_room_code()
+
         LIVE_GAME_CONTAINER[room] = alex.Game(
-            room=room,
-            players=int(request.form.get(u"players")),
-            size=int(request.form.get(u"categories")),
+            room=room, size=int(request.form.get(u"categories", default=6)),
         )
 
         LIVE_GAME_CONTAINER[room].make_board()
@@ -235,7 +235,7 @@ def player_buzzed_in(data):
         u"player_buzzed",
         {
             u"room": data[u"room"],
-            u"name": LIVE_GAME_CONTAINER[data[u"room"]].buzzers[-1],
+            u"name": LIVE_GAME_CONTAINER[data[u"room"]].buzz_order[-1],
         },
     )
 
@@ -251,7 +251,7 @@ def dismiss_modal(data):
 def start_next_round(data):
     game = LIVE_GAME_CONTAINER[data[u"room"]]
 
-    game.next_round()
+    game.start_next_round()
 
     socketio.emit(u"round_started")
 
