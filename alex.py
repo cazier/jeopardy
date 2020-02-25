@@ -22,15 +22,28 @@ class Game(object):
 
         self.current_question = None
 
-        self.add_player("Alex")
-        self.add_player("Carl")
+        if config.debug:
+            self.add_player("Alex")
+            self.add_player("Brad")
+            self.add_player("Carl")
 
     def add_player(self, name: str):
+        """Add a player to the game with a starting score of zero (0).
+
+        Required Arguments:
+
+        name (str) -- The players name
+        """
         self.score[name] = 0
 
     def make_board(self):
-        self.remaining_questions = self.size * 5
-        self.remaining_questions = 1
+        """Create a game board.
+
+        This will track the number of questions in each round, and runs the function `self.board.add_wagers()`
+        to ensure the "Daily Doubles" are placed around the board.
+        """
+        self.remaining_questions = 1 if config.debug else self.size * 5
+
         self.board = Board(database_name=self.db, segment=self.round, size=self.size)
 
         self.wagered_round = dict()
@@ -38,6 +51,13 @@ class Game(object):
         self.board.add_wagers()
 
     def reset(self, reset_score: bool, reset_players: bool):
+        """Reset the game to play again!
+
+        Required Arguments:
+
+        `reset_score` (bool) -- Keep the players, but set score to zero. (Basically, rematch)
+        `reset_players` (bool) -- Reset both players and score (Basically, a whole new game)
+        """
         if reset_players:
             self.score = dict()
             self.round = 1
@@ -50,6 +70,13 @@ class Game(object):
             return False
 
     def round_text(self, upcoming: bool = False) -> str:
+        """Return the text describing the title of the, by default, current round.
+
+        Optional arguments:
+
+        `upcoming` (bool) -- Setting to display the future round title (default `False`)
+
+        """
         display_round = self.round + 1 if upcoming else self.round
 
         if display_round == 1:
@@ -67,14 +94,24 @@ class Game(object):
         else:
             return u"An error has occurred...."
 
-    def next_round(self):
+    def start_next_round(self):
+        """Increment the round counter and remake the board with `self.make_board()`"""
+
         self.round += 1
         self.make_board()
 
     def html_board(self):
+        """Using `zip()` return the game board, transposed, as needed to make the HTML representation"""
         return zip(*[category.questions for category in self.board.categories])
 
     def get(self, identifier: str):
+        """Returns the question object referred to by a specific identifier. Additionally ensures the remaining
+        question counter is decremented, as required to play.
+
+        Required Arguments:
+
+        identifier (str) -- A three piece identifier that specifies the question to return
+        """
         self.remaining_questions -= 1
         entry, category, question = identifier.split(u"_")
 
@@ -88,6 +125,13 @@ class Game(object):
             return False
 
     def buzz(self, name: str):
+        """Method tracking that a player has "buzzed in". Because the method `.appends()` the player name,
+        the game uses the `index` -1 to get the _first_ buzzer.
+
+        Required Arguments:
+
+        name (str) -- The name of the player that buzzed in.
+        """
         if name in self.score.keys():
             self.buzz_order.append(name)
 
