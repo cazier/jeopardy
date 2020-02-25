@@ -2,14 +2,17 @@ import sqlite3
 import random
 from pprint import pprint
 
+import config
+
+
 class Game(object):
-    def __init__(self, database_name: str, players: int, size: int, copyright: str, room: str):
-        self.db = database_name
+    def __init__(self, players: int, size: int, room: str):
+        self.db = config.database
         self.players = players
         self.size = size
-        self.copyright = copyright
+        self.game_name = config.game_name
         self.room = room
-        
+
         self.round = 3
 
         self.score = dict()
@@ -17,9 +20,8 @@ class Game(object):
 
         self.standing_question = None
 
-        self.add_player('Alex')
-        self.add_player('Carl')
-
+        self.add_player("Alex")
+        self.add_player("Carl")
 
     def add_player(self, name: str):
         self.score[name] = 0
@@ -27,8 +29,8 @@ class Game(object):
     def make_board(self):
         self.remaining_questions = self.size * 5
         self.remaining_questions = 1
-        self.board = Board(database_name = self.db, segment = self.round, size = self.size)
-        
+        self.board = Board(database_name=self.db, segment=self.round, size=self.size)
+
         self.wagered_round = dict()
 
         self.board.add_wagers()
@@ -50,19 +52,19 @@ class Game(object):
             next_round = self.round + 1
 
         if (not next_round and self.round == 1) or (next_round == 1):
-            return '{copyright}!'.format(copyright = self.copyright)
+            return "{copyright}!".format(copyright=self.game_name)
 
         elif (not next_round and self.round == 2) or (next_round == 2):
-            return 'Double {copyright}!'.format(copyright = self.copyright)
+            return "Double {copyright}!".format(copyright=self.game_name)
 
         elif (not next_round and self.round == 3) or (next_round == 3):
-            return 'Final {copyright}!'.format(copyright = self.copyright)
+            return "Final {copyright}!".format(copyright=self.game_name)
 
-        elif (not next_round and self.round == 4):
-            return 'Tiebreaker {copyright}!'.format(copyright = self.copyright)
+        elif not next_round and self.round == 4:
+            return "Tiebreaker {copyright}!".format(copyright=self.game_name)
 
         else:
-            print(u'An error has occurred....')
+            print(u"An error has occurred....")
             return False
 
     def next_round(self):
@@ -74,15 +76,15 @@ class Game(object):
 
     def get(self, identifier: str):
         self.remaining_questions -= 1
-        entry, category, question = identifier.split(u'_')
+        entry, category, question = identifier.split(u"_")
 
-        if entry == u'q':
+        if entry == u"q":
             response = self.board.categories[int(category)].questions[int(question)]
             self.standing_question = response.get_question()
             return response.get()
 
-        else: 
-            print(u'An error has occurred....')
+        else:
+            print(u"An error has occurred....")
             return False
 
     def buzz(self, name: str):
@@ -90,9 +92,9 @@ class Game(object):
             self.buzzers.append(name)
 
 
-
 class Board(object):
     """Class to hold the Jeopardy game board. Contains methods to get categories and questions."""
+
     def __init__(self, database_name: str, segment: int, size: int):
         self.db = database_name
         self.size = size if segment < 3 else 1
@@ -101,44 +103,47 @@ class Board(object):
 
         self.get_questions()
 
-
     def __contains__(self, item):
         if len(self.categories) == 0:
             return False
         else:
             return item[1] in [i.title() for i in self.categories]
 
-
     def get_questions(self) -> list:
         questions = list()
         categories = list()
-        category_list = [u'']
+        category_list = [u""]
 
         conn = sqlite3.connect(self.db)
         t = conn.cursor()
 
-        shows = t.execute(u'SELECT show FROM questions').fetchall()
+        shows = t.execute(u"SELECT show FROM questions").fetchall()
         all_shows = sqlite_cleaned(shows)
 
         selected_shows = random.sample(all_shows, self.size)
-        
 
         for index, show in enumerate(selected_shows):
-            categories = t.execute(u'SELECT category FROM questions WHERE \
-                segment=? AND show=? AND complete_category=? AND external_media=?',
-                (self.round, show, True, False)).fetchall()
+            categories = t.execute(
+                u"SELECT category FROM questions WHERE \
+                segment=? AND show=? AND complete_category=? AND external_media=?",
+                (self.round, show, True, False),
+            ).fetchall()
 
             all_categories = sqlite_cleaned(categories)
 
             dataset = [(0, 0, 0, 0, 0, 0, 0, 0, 1)]
 
-            category = u''
+            category = u""
 
-            while sum([datum[8] for datum in dataset]) > 0 and category in category_list:
+            while (
+                sum([datum[8] for datum in dataset]) > 0 and category in category_list
+            ):
                 category = random.choice(all_categories)
-                
-                dataset = t.execute(u'SELECT * FROM questions WHERE segment=? AND show=? and category=?',
-                    (self.round, show, category)).fetchall()
+
+                dataset = t.execute(
+                    u"SELECT * FROM questions WHERE segment=? AND show=? and category=?",
+                    (self.round, show, category),
+                ).fetchall()
 
             self.categories.append(Category(dataset, index))
 
@@ -150,10 +155,9 @@ class Board(object):
 
             self.categories[question[0]].questions[question[1]].wager = True
 
-            print(u'=' * 40)
+            print(u"=" * 40)
             print(question)
-            print(u'=' * 40)
-
+            print(u"=" * 40)
 
         elif self.round == 2:
             question_one = (random.randrange(self.size), random.randrange(5))
@@ -162,20 +166,19 @@ class Board(object):
             while question_one == question_two:
                 question_two = (random.randrange(self.size), random.randrange(5))
 
-
             self.categories[question_one[0]].questions[question_one[1]].wager = True
             self.categories[question_two[0]].questions[question_two[1]].wager = True
 
-            print(u'=' * 40)
+            print(u"=" * 40)
             print(question_one, question_two)
-            print(u'=' * 40)
+            print(u"=" * 40)
 
         elif self.round == 3:
             self.categories[0].questions[0].wager = True
 
-
     def html_board(self):
         return zip(*[i.questions for i in self.categories])
+
 
 class Category(object):
     def __init__(self, db_questions: list, index: int):
@@ -184,9 +187,7 @@ class Category(object):
         self.questions = list()
 
         for question_index, row in enumerate(db_questions):
-            self.add_question(
-                question_info = row,
-                question_index = question_index)
+            self.add_question(question_info=row, question_index=question_index)
 
         self.questions.sort()
 
@@ -199,9 +200,11 @@ class Category(object):
     def add_question(self, question_info: tuple, question_index: int):
         self.questions.append(
             Question(
-                question_info = question_info, 
-                question_index = question_index,
-                category_index = self.index))
+                question_info=question_info,
+                question_index=question_index,
+                category_index=self.index,
+            )
+        )
 
 
 class Question(object):
@@ -212,8 +215,8 @@ class Question(object):
 
         self.wager = False
 
-        self.question = question_info[3].strip(u'\'')
-        self.answer = question_info[4].strip(u'\'')
+        self.question = question_info[3].strip(u"'")
+        self.answer = question_info[4].strip(u"'")
         self.value = question_info[5]
         self.year = question_info[6]
 
@@ -224,14 +227,18 @@ class Question(object):
         return str(self.value)
 
     def id(self):
-        return u'{category}_{question}'.format(
-            category = self.category_index,
-            question = self.question_index)
+        return u"{category}_{question}".format(
+            category=self.category_index, question=self.question_index
+        )
 
     def get(self):
         self.shown = True
 
-        return {u'question': self.question, u'answer': self.answer, u'wager': self.wager}
+        return {
+            u"question": self.question,
+            u"answer": self.answer,
+            u"wager": self.wager,
+        }
 
     def get_question(self):
         return self
@@ -239,6 +246,7 @@ class Question(object):
 
 def sqlite_cleaned(items: list) -> list:
     return list(set([item[0] for item in items]))
+
 
 # board = Board(database_name = u'database.db', segment = 1)
 # board.get_questions()
