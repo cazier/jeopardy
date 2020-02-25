@@ -1,7 +1,9 @@
+import os
+
 game_name = u"Jeopardy"
 currency = u"¢"
 
-database = u"data/database.db"
+database = os.path.join(os.path.abspath(os.getcwd()), u"data", u"database.db")
 
 app_secret = u"secret!"
 
