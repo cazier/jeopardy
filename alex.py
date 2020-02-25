@@ -69,7 +69,7 @@ class Game(object):
         self.round += 1
         self.make_board()
 
-    def html_board(self) -> str:
+    def html_board(self):
         return zip(*[category.questions for category in self.board.categories])
 
     def get(self, identifier: str):
@@ -94,10 +94,10 @@ class Board(object):
     """Class to hold the Jeopardy game board. Contains methods to get categories and questions."""
 
     def __init__(self, database_name: str, segment: int, size: int):
-        self.db = database_name
-        self.size = size if segment < 3 else 1
-        self.round = segment
-        self.categories = list()
+        self.db: str = database_name
+        self.size: int = size if segment < 3 else 1
+        self.round: int = segment
+        self.categories: list = list()
 
         self.get_questions()
 
@@ -107,11 +107,7 @@ class Board(object):
         else:
             return item[1] in [i.title() for i in self.categories]
 
-    def get_questions(self) -> list:
-        questions = list()
-        categories = list()
-        category_list = [u""]
-
+    def get_questions(self) -> None:
         conn = sqlite3.connect(self.db)
         t = conn.cursor()
 
@@ -129,13 +125,12 @@ class Board(object):
 
             all_categories = sqlite_cleaned(categories)
 
+            # This dataset line is made solely to ensure that the while function below will run.
+            # The while function is used to ensure the actual game does not use any questions with
+            # `external media` as defined in the database.
             dataset = [(0, 0, 0, 0, 0, 0, 0, 0, 1)]
 
-            category = u""
-
-            while (
-                sum([datum[8] for datum in dataset]) > 0 and category in category_list
-            ):
+            while sum([datum[8] for datum in dataset]) > 0:
                 category = random.choice(all_categories)
 
                 dataset = t.execute(
