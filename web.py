@@ -15,6 +15,7 @@ import random
 
 import alex
 import config
+import storage
 
 app = Flask(__name__)
 app.jinja_env.globals.update(game_name=config.game_name)
@@ -24,37 +25,63 @@ app.config[u"SECRET_KEY"] = config.app_secret
 app.debug = config.debug
 socketio = SocketIO(app)
 
-LIVE_GAME_CONTAINER = dict()
 
-
-@app.route(u"/")
-def index_page():
+@app.route(u"/", methods=[u"GET"])
+def route_index():
+    """Display the home (index) page, with two buttons to start or join a game
+    
+    Only allows GET requests.
+    """
     return render_template(template_name_or_list=u"index.html")
 
 
 @app.route(u"/new", methods=[u"GET"])
-def new_game():
+def route_new():
+    """Display the option(s) available to start a new game. As of now, this only supports selecting the
+    number of categories with which to play. Conceivably "infinte" number of players can join.
+    
+    Only allows GET requests.
+    """
     return render_template(template_name_or_list=u"new.html")
 
 
 @app.route(u"/join", methods=[u"GET"])
-def join_game():
+def route_join():
+    """Display the page to join a game. This does include some error handling, but largely is messy...
+    
+    - Players will enter their name, and the room code created by the host. No two players can have the same name
+    - The "Board" will just enter a room code.
+    - If the host gets disconnected, they can rejoin here too.
+    
+    Only allows GET requests.
+    """
     return render_template(
         template_name_or_list=u"join.html", errors=get_flashed_messages()
     )
 
 
 @app.route(u"/host", methods=[u"POST"])
-def show_host():
+def route_host():
+    """Displays the page used by the game host to manage the gameplay. It can be "accessed" either from the `/new`
+    endpoint or the `/join` endpoint, and will do different things, as needed.
+
+    Only allows POST requests.
+    """
     if request.form.get(u"players") and request.form.get(u"categories"):
 
         room = generate_room_code()
 
-        LIVE_GAME_CONTAINER[room] = alex.Game(
-            room=room, size=int(request.form.get(u"categories", default=6)),
+        storage.push(
+            room=room,
+            value=alex.Game(
+                room=room, size=int(request.form.get(u"categories", default=6)),
+            ),
         )
 
-        LIVE_GAME_CONTAINER[room].make_board()
+        storage.pull(room=room).make_board()
+
+        session[u"name"] = u"host"
+        session[u"room"] = room
 
     elif request.form.get(u"room"):
         room = request.form.get(u"room")
@@ -63,33 +90,41 @@ def show_host():
         abort(500)
 
     return render_template(
-        template_name_or_list=u"host.html", game=LIVE_GAME_CONTAINER[room]
+        template_name_or_list=u"host.html",
+        session=session,
+        game=storage.pull(room=room),
     )
 
 
 @app.route(u"/play", methods=[u"GET", u"POST"])
-def show_player():
+def route_player():
+    """Displays the page used by the players to "compete". The page will initially run a number of checks
+    to verify that the room code was valid, or that the name entered can be done. If anything is invalid,
+    reroute back to `/join` and display the messages.
+
+    Allows both GET and POST requests.
+    """
     if request.method == u"POST":
         error_occurred = False
 
         room = request.form.get(u"room").upper()
         name = request.form.get(u"name")
 
-        if room not in LIVE_GAME_CONTAINER.keys():
+        if room not in storage.rooms():
             flash(
                 message=u"The room code you entered was invalid. Please try again!",
                 category=u"error",
             )
             error_occurred = True
 
-        elif name in LIVE_GAME_CONTAINER[room].score.keys():
+        if name in storage.pull(room=room).score.keys():
             flash(
                 message=u"The name you selected already exists. Please choose another one!",
                 category=u"error",
             )
             error_occurred = True
 
-        if (len(name) < 1) or (name.isspace()):
+        elif (len(name) < 1) or (name.isspace()):
             flash(
                 message=u"The name you entered was invalid. Please try again!",
                 category=u"error",
@@ -97,10 +132,10 @@ def show_player():
             error_occurred = True
 
         if error_occurred:
-            return redirect(url_for(u"join_game"))
+            return redirect(url_for(u"route_join"))
 
         else:
-            LIVE_GAME_CONTAINER[room].add_player(name)
+            storage.pull(room=room).add_player(name)
 
             socketio.emit(u"add_player_to_board", {u"room": room, u"player": name})
 
@@ -115,25 +150,28 @@ def show_player():
             room = session[u"room"]
 
     return render_template(
-        template_name_or_list=u"play.html",
-        session=session,
-        game=LIVE_GAME_CONTAINER[room],
+        template_name_or_list=u"play.html", session=session, game=storage.pull(room),
     )
 
 
 @app.route(u"/board", methods=[u"POST"])
-def show_board():
+def route_board():
+    """Displays the page used to display the board. As with `/play`, performs a small amount of error checking
+    to ensure the room exists.
+
+    Allows only POST requests.
+    """
     room = request.form.get(u"room").upper()
 
-    if room not in LIVE_GAME_CONTAINER.keys():
+    if room not in storage.rooms():
         flash(
             message=u"The room code you entered was invalid. Please try again!",
             category=u"error",
         )
-        return redirect(url_for(u"join_game"))
+        return redirect(url_for(u"route_join"))
 
     return render_template(
-        template_name_or_list=u"board.html", game=LIVE_GAME_CONTAINER[room]
+        template_name_or_list=u"board.html", game=storage.pull(room=room)
     )
 
 
@@ -146,6 +184,7 @@ def show_board():
 
 @app.errorhandler(500)
 def internal_server_error(error):
+    """Directs Flask to load the error handling page on HTTP Status Code 500 (Server Errors)"""
     return render_template(template_name_or_list=u"errors.html", error_code=error), 500
 
 
