@@ -26,6 +26,11 @@ app.debug = config.debug
 socketio = SocketIO(app)
 
 
+@app.route(u"/test")
+def route_test():
+    return render_template(template_name_or_list=u"testing.html")
+
+
 @app.route(u"/", methods=[u"GET"])
 def route_index():
     """Display the home (index) page, with two buttons to start or join a game
