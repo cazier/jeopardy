@@ -9,6 +9,10 @@
     <title>{{ game_name }} - Python/WebSocket Trivia!</title>
 
     {% include "scripts.html" %}
+    <script>
+        var socket = io('http://' + document.domain + ':' + location.port);
+    </script>
+
 
 </head>
 
