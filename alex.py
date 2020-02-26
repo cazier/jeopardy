@@ -16,7 +16,7 @@ class Game(object):
         self.game_name: str = config.game_name
         self.room = room
 
-        self.round = 2
+        self.round: int = 3
 
         self.score: dict = dict()
         self.buzz_order: list = list()
@@ -148,12 +148,6 @@ class Board(object):
 
         self.get_questions()
 
-    # def __contains__(self, item):
-    #     if len(self.categories) == 0:
-    #         return False
-    #     else:
-    #         return item[1] in [i.title() for i in self.categories]
-
     def get_questions(self) -> None:
         """Create a datastructure storing the categories and questions associated with each round of gameplay.
         This function should perform a number of steps to prevent the appearance of incomplete categories, or 
@@ -177,41 +171,41 @@ class Board(object):
                 (self.round, show, True, False),
             ).fetchall()
 
-            print(categories)
             categories = sqlite_cleaned(categories)
-            print(categories)
-            input()
 
             # Loop over the list of categories to generate a new dataset of questions for each. The while loop
             # will repeat in the event external media is still found, or an incomplete category is found.
-            dataset: list = list()
-            while sum([q[8] for q in dataset]) > 0 or sum([q[7] for q in dataset]) < 5:
+            qs: list = list()
+            while sum([q[8] for q in qs]) > 0 or sum([q[7] for q in qs]) < self.size:
 
                 # Technically, this can error out, if all of the categories in the game are incomplete... However,
                 # the included database should already include enough protection against this... 😬
                 category = categories.pop(random.randrange(len(categories)))
 
                 # Finally, fetch all of the questions associated with the specifically checked category and show
-                dataset = t.execute(
+                qs = t.execute(
                     "SELECT * FROM questions WHERE segment=? AND show=? and category=?",
                     (self.round, show, category),
                 ).fetchall()
 
             # If the while loop has been successfully broken out of, add those questions to the game storage.
-            self.categories.append(Category(dataset, index))
+            self.categories.append(Category(qs, index))
 
     def add_wagers(self) -> None:
         """Randomly assign the "Daily Double" to the correct number of questions per round."""
-        doubles = list(itertools.product(range(self.size), range(6)))
-        print(doubles)
-        print(self.categories)
-        input()
+        doubles = itertools.product(range(len(self.categories)), range(self.size))
 
-        for daily_double in random.sample(doubles, self.round):
+        for daily_double in random.sample(list(doubles), [1, 2, 0, 0][self.round]):
             if config.debug:
                 print(f"{'=' * 10}\n{daily_double}\n{'=' * 10}")
 
             self.categories[daily_double[0]].questions[daily_double[1]].wager = True
+
+    # def __contains__(self, item):
+    #     if len(self.categories) == 0:
+    #         return False
+    #     else:
+    #         return item[1] in [i.title() for i in self.categories]
 
     # def html_board(self):
     #     return zip(*[i.questions for i in self.categories])
