@@ -212,6 +212,8 @@ class Board(object):
 
 
 class Category(object):
+    """Class to hold one of the categories (ostensibly columns) on a Jeopardy game board."""
+
     def __init__(self, db_questions: list, index: int):
         self.category = db_questions[0][1]
         self.index = index
@@ -225,12 +227,21 @@ class Category(object):
         self.questions.sort()
 
     def __str__(self):
+        """Creates a string representation of the category, returning just the title"""
         return self.category
 
     def __repr__(self):
-        return self.category
+        """Duplicates `__str__`"""
+        return str(self)
 
     def add_question(self, question_info: tuple, question_index: int):
+        """Add a question to the category, making use of the `Question` class.
+
+        Required Arguments:
+
+        `question_info` (tuple) -- Details about the question (question, answer, value, etc.)
+        `question_index` (int) -- The number of the question in terms of the game.
+        """
         self.questions.append(
             Question(
                 question_info=question_info,
@@ -241,6 +252,8 @@ class Category(object):
 
 
 class Question(object):
+    """Class to hold a single question"""
+
     def __init__(self, question_info: tuple, question_index: int, category_index: int):
         self.category_index = category_index
         self.question_index = question_index
@@ -253,18 +266,23 @@ class Question(object):
         self.value = question_info[5]
         self.year = question_info[6]
 
-    def __lt__(self, other):
-        return self.value < other.value
+    # def __lt__(self, other):
+    #     return self.value < other.value
 
-    def __repr__(self):
+    def __str__(self):
+        """Creates a string representation of the question's value"""
         return str(self.value)
 
+    def __repr__(self):
+        """Duplicates `__str__`"""
+        return str(self)
+
     def id(self):
-        return "{category}_{question}".format(
-            category=self.category_index, question=self.question_index
-        )
+        """Returns the unique identifier of the question"""
+        return f"{self.category_index}_{self.question_index}"
 
     def get(self):
+        """Gets the question, as done within the Jinja loading of the webpage"""
         self.shown = True
 
         return {
@@ -274,14 +292,15 @@ class Question(object):
         }
 
     def get_question(self):
+        """Gets the question, as done within the Jinja loading of the webpage"""
         return self
 
 
 def sqlite_cleaned(items: list) -> list:
+    """A helper function to clean up data pulled from the sqlite database.
+
+    - Required Arguments:
+
+    `items` (list) -- A list with rows from a sqlite database
+    """
     return list(set([item[0] for item in items]))
-
-
-# board = Board(database_name = u'database.db', segment = 1)
-# board.get_questions()
-
-# game = Game(database_name = u'database.db')
