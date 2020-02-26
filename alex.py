@@ -16,7 +16,7 @@ class Game(object):
         self.game_name: str = config.game_name
         self.room = room
 
-        self.round: int = 3
+        self.round: int = config.round_
 
         self.score: dict = dict()
         self.buzz_order: list = list()
@@ -43,7 +43,7 @@ class Game(object):
         This will track the number of questions in each round, and runs the function `self.board.add_wagers()`
         to ensure the "Daily Doubles" are placed around the board.
         """
-        self.remaining_questions = 1 if config.debug else self.size * 5
+        self.remaining_questions = config.questions if config.debug else self.size * 5
 
         self.board = Board(segment=self.round, size=self.size)
 
@@ -158,8 +158,10 @@ class Board(object):
 
         # Pull a list of all the show numbers in the question database, and randomly select one show for each category
         # of gameplay. As such, in game, each category will be representing a different actually show number.
-        shows = t.execute("SELECT show FROM questions").fetchall()
-        selected_shows = random.sample(sqlite_cleaned(shows), self.size)
+        selected_shows = random.sample(
+            sqlite_cleaned(t.execute("SELECT show FROM questions").fetchall()),
+            self.size,
+        )
 
         # For each aired show/episode, get a list containing all of the category titles. By design this should
         # only choose categories that are complete (i.e., have 5 questions in the database) and have no external
@@ -176,7 +178,9 @@ class Board(object):
             # Loop over the list of categories to generate a new dataset of questions for each. The while loop
             # will repeat in the event external media is still found, or an incomplete category is found.
             qs: list = list()
-            while sum([q[8] for q in qs]) > 0 or sum([q[7] for q in qs]) < self.size:
+            while sum([q[8] for q in qs]) > 0 or sum([q[7] for q in qs]) < len(
+                categories
+            ):
 
                 # Technically, this can error out, if all of the categories in the game are incomplete... However,
                 # the included database should already include enough protection against this... 😬
@@ -193,9 +197,11 @@ class Board(object):
 
     def add_wagers(self) -> None:
         """Randomly assign the "Daily Double" to the correct number of questions per round."""
-        doubles = itertools.product(range(len(self.categories)), range(self.size))
+        doubles = itertools.product(
+            range(len(self.categories)), range(len(self.categories[0].questions))
+        )
 
-        for daily_double in random.sample(list(doubles), [1, 2, 0, 0][self.round]):
+        for daily_double in random.sample(list(doubles), [0, 1, 2, 0, 0][self.round]):
             if config.debug:
                 print(f"{'=' * 10}\n{daily_double}\n{'=' * 10}")
 
@@ -266,8 +272,8 @@ class Question(object):
         self.value = question_info[5]
         self.year = question_info[6]
 
-    # def __lt__(self, other):
-    #     return self.value < other.value
+    def __lt__(self, other):
+        return self.value < other.value
 
     def __str__(self):
         """Creates a string representation of the question's value"""
