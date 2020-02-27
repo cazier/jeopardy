@@ -28,6 +28,17 @@ socketio = SocketIO(app)
 
 @app.route(u"/test")
 def route_test():
+    room = generate_room_code()
+
+    storage.push(
+        room=room,
+        value=alex.Game(
+            room=room, size=int(request.form.get(u"categories", default=6)),
+        ),
+    )
+
+    storage.pull(room=room).make_board()
+
     return render_template(template_name_or_list=u"testing.html")
 
 
@@ -85,7 +96,7 @@ def route_host():
 
         storage.pull(room=room).make_board()
 
-        session[u"name"] = u"host"
+        session[u"name"] = u"Host"
         session[u"room"] = room
 
     elif request.form.get(u"room"):
@@ -149,10 +160,10 @@ def route_player():
 
     elif request.method == u"GET" and session is not None:
         if config.debug:
-            room = "ABCD"
+            session[u"name"] = request.args.get(key="name")
+            session[u"room"] = request.args.get(key="room")
 
-        else:
-            room = session[u"room"]
+        room = session[u"room"]
 
     return render_template(
         template_name_or_list=u"play.html", session=session, game=storage.pull(room),
@@ -246,7 +257,7 @@ def enable_buzzers(data, incorrect_players: list = list()):
 
 @socketio.on(u"correct_answer")
 def host_correct_answer(data):
-    game = LIVE_GAME_CONTAINER[data[u"room"]]
+    game = storage.pull(data[u"room"])
     game.score[game.buzz_order[-1]] += game.current_question.value
 
     socketio.emit(u"clear_modal", {u"room": data[u"room"]})
