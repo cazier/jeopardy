@@ -206,7 +206,7 @@ def internal_server_error(error):
 
 @socketio.on(u"question_clicked")
 def reveal_host_clue(data):
-    game = LIVE_GAME_CONTAINER[data[u"room"]]
+    game = storage.pull(data[u"room"])
     info = game.get(data[u"identifier"])
 
     if info[u"wager"]:
@@ -272,7 +272,7 @@ def host_correct_answer(data):
 
 @socketio.on(u"incorrect_answer")
 def host_incorrect_answer(data):
-    game = LIVE_GAME_CONTAINER[data[u"room"]]
+    game = storage.pull(data[u"room"])
     game.score[game.buzz_order[-1]] -= game.current_question.value
 
     socketio.emit(u"update_scores", {u"room": data[u"room"], u"scores": game.score})
@@ -282,16 +282,13 @@ def host_incorrect_answer(data):
 
 @socketio.on(u"buzzed_in")
 def player_buzzed_in(data):
-    LIVE_GAME_CONTAINER[data[u"room"]].buzz(data[u"name"])
+    game = storage.pull(data[u"room"])
+    game.buzz(data[u"name"])
 
     socketio.emit(u"reset_player", {u"room": data[u"room"], u"player": None})
 
     socketio.emit(
-        u"player_buzzed",
-        {
-            u"room": data[u"room"],
-            u"name": LIVE_GAME_CONTAINER[data[u"room"]].buzz_order[-1],
-        },
+        u"player_buzzed", {u"room": data[u"room"], u"name": game.buzz_order[-1],},
     )
 
 
@@ -304,7 +301,7 @@ def dismiss_modal(data):
 
 @socketio.on(u"start_next_round")
 def start_next_round(data):
-    game = LIVE_GAME_CONTAINER[data[u"room"]]
+    game = storage.pull(data[u"room"])
 
     game.start_next_round()
 
@@ -313,7 +310,7 @@ def start_next_round(data):
 
 @socketio.on(u"get_wagers")
 def get_wagers(data):
-    game = LIVE_GAME_CONTAINER[data[u"room"]]
+    game = storage.pull(data[u"room"])
 
     socketio.emit(
         u"start_wager_round",
@@ -323,14 +320,14 @@ def get_wagers(data):
 
 @socketio.on(u"reveal_question")
 def reveal_question(data):
-    game = LIVE_GAME_CONTAINER[data[u"room"]]
+    game = storage.pull(data[u"room"])
 
     socketio.emit(u"final_question_revealed")
 
 
 @socketio.on(u"wager_submitted")
 def received_wager(data):
-    game = LIVE_GAME_CONTAINER[data[u"room"]]
+    game = storage.pull(data[u"room"])
 
     game.wagered_round[data[u"name"]] = {u"wager": data[u"wager"]}
 
@@ -339,7 +336,7 @@ def received_wager(data):
 
 @socketio.on(u"answer_submitted")
 def received_answer(data):
-    game = LIVE_GAME_CONTAINER[data[u"room"]]
+    game = storage.pull(data[u"room"])
 
     game.wagered_round[data[u"name"]][u"answer"] = data[u"answer"]
 
@@ -348,7 +345,7 @@ def received_answer(data):
 
 @socketio.on(u"final_wagerer_reveal")
 def wagerer_reveal(data):
-    game = LIVE_GAME_CONTAINER[data[u"room"]]
+    game = storage.pull(data[u"room"])
     name = data[u"name"][:-8]
 
     socketio.emit(
@@ -364,14 +361,14 @@ def wagerer_reveal(data):
 
 @socketio.on(u"reveal_answer")
 def reveal_answer(data):
-    game = LIVE_GAME_CONTAINER[data[u"room"]]
+    game = storage.pull(data[u"room"])
 
     socketio.emit(u"reveal_wager_answer", {u"room": data[u"room"],})
 
 
 @socketio.on(u"correct_wager")
 def correct_wager(data):
-    game = LIVE_GAME_CONTAINER[data[u"room"]]
+    game = storage.pull(data[u"room"])
 
     game.score[data[u"name"]] += game.wagered_round[data[u"name"]][u"wager"]
 
@@ -385,7 +382,7 @@ def correct_wager(data):
 
 @socketio.on(u"incorrect_wager")
 def incorrect_wager(data):
-    game = LIVE_GAME_CONTAINER[data[u"room"]]
+    game = storage.pull(data[u"room"])
 
     game.score[data[u"name"]] -= game.wagered_round[data[u"name"]][u"wager"]
 
@@ -399,7 +396,7 @@ def incorrect_wager(data):
 
 @socketio.on(u"single_wager_prompt")
 def single_wager_prompt(data):
-    game = LIVE_GAME_CONTAINER[data[u"room"]]
+    game = storage.pull(data[u"room"])
 
     game.wagered_round[data[u"name"][:-15]] = dict()
 
@@ -411,7 +408,7 @@ def single_wager_prompt(data):
 
 @socketio.on(u"single_wager_submitted")
 def received_wager(data):
-    game = LIVE_GAME_CONTAINER[data[u"room"]]
+    game = storage.pull(data[u"room"])
 
     info = game.current_question.get()
 
@@ -435,7 +432,7 @@ def received_wager(data):
 
 @socketio.on(u"player_selected")
 def player_selected(data):
-    game = LIVE_GAME_CONTAINER[data[u"room"]]
+    game = storage.pull(data[u"room"])
 
     if data[u"isDailyDouble"]:
         game.wagered_round[data[u"name"]] = {}
@@ -454,14 +451,14 @@ def generate_room_code() -> str:
 
     else:
         letters = u"".join(random.sample(list(u"ABCDEFGHIJKLMNOPQRSTUVWXYZ"), 4))
-        while letters in LIVE_GAME_CONTAINER.keys():
+        while letters in storage.rooms():
             return generate_room_code()
 
         return letters
 
 
 def end_question(data):
-    game = LIVE_GAME_CONTAINER[data[u"room"]]
+    game = storage.pull(data[u"room"])
 
     game.buzz_order = list()
     game.current_question = None
@@ -475,10 +472,8 @@ def end_question(data):
             u"round_complete",
             {
                 u"room": data[u"room"],
-                u"current_round": LIVE_GAME_CONTAINER[data[u"room"]].round_text(),
-                u"next_round": LIVE_GAME_CONTAINER[data[u"room"]].round_text(
-                    upcoming=True
-                ),
+                u"current_round": game.round_text(),
+                u"next_round": game.round_text(upcoming=True),
             },
         )
 
