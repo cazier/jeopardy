@@ -11,6 +11,8 @@
     {% include "scripts.html" %}
     <script>
         var socket = io('http://' + document.domain + ':' + location.port);
+
+        var type = 'host';
     </script>
 
 </head>
@@ -468,6 +470,7 @@
         });
 
         socket.on('round_started', function (message) {
+            manageModal('question_modal', "hide");
             start_round();
         });
 
