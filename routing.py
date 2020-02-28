@@ -210,3 +210,14 @@ def internal_server_error(error):
     """Directs Flask to load the error handling page on HTTP Status Code 500 (Server Errors)"""
     return render_template(template_name_or_list=u"errors.html", error_code=error), 500
 
+
+def generate_room_code() -> str:
+    if config.debug:
+        return "ABCD"
+
+    else:
+        letters = u"".join(random.sample(list(u"ABCDEFGHIJKLMNOPQRSTUVWXYZ"), 4))
+        while letters in storage.rooms():
+            return generate_room_code()
+
+        return letters

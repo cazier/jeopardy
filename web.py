@@ -193,18 +193,6 @@ def socket_join(data):
     join_room(data[u"room"])
 
 
-def generate_room_code() -> str:
-    if config.debug:
-        return "ABCD"
-
-    else:
-        letters = u"".join(random.sample(list(u"ABCDEFGHIJKLMNOPQRSTUVWXYZ"), 4))
-        while letters in storage.rooms():
-            return generate_room_code()
-
-        return letters
-
-
 def end_question(data):
     game = storage.pull(data[u"room"])
 
