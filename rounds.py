@@ -8,25 +8,45 @@ rounds = Blueprint(name=u"rounds", import_name=__name__)
 socketio = SocketIO()
 
 
-@socketio.on(u"question_clicked")
-def reveal_host_clue(data):
+@socketio.on(u"host_clicked_question")
+def host_clicked_question(data):
+    """The host has selected a question from their device.
+
+    Required Arguments: 
+
+    - `data` (dict) - A dictionary containing the information associated with the selected 
+    question; the identifier of the question, and the room it was selected from.
+    """
     game = storage.pull(data[u"room"])
     info = game.get(data[u"identifier"])
 
-    if info[u"wager"]:
-        if game.round == 3:
-            isDailyDouble = False
-            footer_buttons = {
-                u"Prompt For Wagers": u"btn btn-success",
-                u"Reveal Question": u"btn btn-success disabled",
-            }
+    # If the question is not a Daily Double or Final Round (which would require a wager!)
+    if not info[u"wager"]:
+        socketio.emit(
+            u"question_revealed",
+            {
+                u"room": data[u"room"],
+                u"question": info[u"question"].replace(u"<br />", u"\n"),
+                u"answer": info[u"answer"],
+            },
+        )
 
-        else:
+    # If the question is a DD or in one of the final rounds, need to request a wager prior to
+    # showing the
+    else:
+        if game.round < 3:
             isDailyDouble = True
             footer_buttons = {
                 u"Correct": u"btn btn-success disabled mr-auto",
                 u"Incorrect": u"btn btn-danger disabled mr-auto",
                 u"Reveal Question": u"btn btn-dark mr-auto",
+            }
+
+        elif game.round >= 3:
+            isDailyDouble = False
+            footer_buttons = {
+                u"Prompt For Wagers": u"btn btn-success",
+                u"Reveal Question": u"btn btn-success disabled",
             }
 
         socketio.emit(
@@ -36,18 +56,6 @@ def reveal_host_clue(data):
                 u"isDailyDouble": isDailyDouble,
                 u"players": list(game.score.keys()),
                 u"buttons": footer_buttons,
-            },
-        )
-
-        print(u"DAILY DOUBLE!!!")
-
-    else:
-        socketio.emit(
-            u"question_revealed",
-            {
-                u"room": data[u"room"],
-                u"question": info[u"question"].replace(u"<br />", u"\n"),
-                u"answer": info[u"answer"],
             },
         )
 
@@ -94,3 +102,22 @@ def player_buzzed_in(data):
     socketio.emit(
         u"player_buzzed", {u"room": data[u"room"], u"name": game.buzz_order[-1],},
     )
+
+
+def end_question(data):
+    game = storage.pull(data[u"room"])
+
+    game.buzz_order = list()
+    game.current_question = None
+
+    print(game.remaining_questions)
+
+    if game.remaining_questions <= 0 and game.round <= 3:
+        socketio.emit(
+            u"round_complete",
+            {
+                u"room": data[u"room"],
+                u"current_round": game.round_text(),
+                u"next_round": game.round_text(upcoming=True),
+            },
+        )

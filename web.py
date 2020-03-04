@@ -29,8 +29,12 @@ app.jinja_env.globals.update(currency=config.currency)
 
 app.config[u"SECRET_KEY"] = config.app_secret
 app.debug = config.debug
-rounds.socketio.init_app(app)
-socketio = SocketIO(app)
+
+socketio = rounds.socketio
+socketio.init_app(app)
+
+# rounds.socketio.init_app(app)
+# socketio = SocketIO(app)
 
 
 # @app.route(u'/score/<string:user>/<int:incrementer>')
@@ -191,27 +195,6 @@ def player_selected(data):
 @socketio.on(u"join")
 def socket_join(data):
     join_room(data[u"room"])
-
-
-def end_question(data):
-    game = storage.pull(data[u"room"])
-
-    game.buzz_order = list()
-    game.current_question = None
-
-    print(u"=" * 40)
-    print(u"ROUND ENDED", game.round)
-    print(u"=" * 40)
-
-    if game.remaining_questions <= 0 and game.round <= 3:
-        socketio.emit(
-            u"round_complete",
-            {
-                u"room": data[u"room"],
-                u"current_round": game.round_text(),
-                u"next_round": game.round_text(upcoming=True),
-            },
-        )
 
 
 if __name__ == u"__main__":
