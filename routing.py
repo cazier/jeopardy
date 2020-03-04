@@ -10,6 +10,8 @@ from flask import (
     get_flashed_messages,
 )
 
+import random
+
 import alex
 import config
 import storage
