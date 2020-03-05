@@ -62,7 +62,7 @@ def route_host():
     testing (using the `testing.html` template).
     """
     if request.method == u"POST":
-        if request.form.get(u"players") and request.form.get(u"categories"):
+        if request.form.get(u"categories"):
 
             room = generate_room_code()
 
