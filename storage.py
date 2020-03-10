@@ -1,10 +1,10 @@
 import config
 
 if config.storage == u"dict":
-    from stores.dict import *
+    from stores.storage_dict import *
 
 elif config.storage == u"sqlite":
-    import stores.sqlite as storage
+    from stores.storage_sqlite import *
 
 # pull = storage.pull
 # push = storage.push
