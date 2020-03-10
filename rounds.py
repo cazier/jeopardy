@@ -1,14 +1,17 @@
+import time
+
 from flask import Flask, Blueprint
 from flask_socketio import SocketIO, join_room
 
+import config
 import storage
 
-rounds = Blueprint(name=u"rounds", import_name=__name__)
+rounds = Blueprint(name="rounds", import_name=__name__)
 
 socketio = SocketIO()
 
 
-@socketio.on(u"host_clicked_question")
+@socketio.on("host_clicked_question_h-s")
 def host_clicked_question(data):
     """The host has selected a question from their device.
 
@@ -17,17 +20,20 @@ def host_clicked_question(data):
     - `data` (dict) - A dictionary containing the information associated with the selected 
     question; the identifier of the question, and the room it was selected from.
     """
-    game = storage.pull(data[u"room"])
-    info = game.get(data[u"identifier"])
+    game = storage.pull(data["room"])
+    info = game.get(data["identifier"])
 
     # If the question is not a Daily Double or Final Round (which would require a wager!)
-    if not info[u"wager"]:
+    if not info["wager"]:
         socketio.emit(
-            u"question_revealed",
+            "reveal_standard_question_s-bh",
             {
-                u"room": data[u"room"],
-                u"question": info[u"question"].replace(u"<br />", u"\n"),
-                u"answer": info[u"answer"],
+                "room": data["room"],
+                "updates": {
+                    "question": info["question"].replace("<br />", "\n"),
+                    "answer": info["answer"],
+                },
+                "identifier": f'#{data[u"identifier"]}',
             },
         )
 
@@ -37,87 +43,120 @@ def host_clicked_question(data):
         if game.round < 3:
             isDailyDouble = True
             footer_buttons = {
-                u"Correct": u"btn btn-success disabled mr-auto",
-                u"Incorrect": u"btn btn-danger disabled mr-auto",
-                u"Reveal Question": u"btn btn-dark mr-auto",
+                "Correct": "btn btn-success disabled mr-auto",
+                "Incorrect": "btn btn-danger disabled mr-auto",
+                "Reveal Question": "btn btn-dark mr-auto",
             }
 
         elif game.round >= 3:
             isDailyDouble = False
             footer_buttons = {
-                u"Prompt For Wagers": u"btn btn-success",
-                u"Reveal Question": u"btn btn-success disabled",
+                "Prompt For Wagers": "btn btn-success",
+                "Reveal Question": "btn btn-success disabled",
             }
 
         socketio.emit(
-            u"start_wager_round",
+            "start_wager_round",
             {
-                u"room": data[u"room"],
-                u"isDailyDouble": isDailyDouble,
-                u"players": list(game.score.keys()),
-                u"buttons": footer_buttons,
+                "room": data["room"],
+                "isDailyDouble": isDailyDouble,
+                "players": list(game.score.keys()),
+                "buttons": footer_buttons,
             },
         )
 
 
-@socketio.on(u"finished_reading")
+@socketio.on("finished_reading_h-s")
 def enable_buzzers(data, incorrect_players: list = list()):
+    """After receiving the `socket.on` that the host has finished reading the question, `socket.emit` the
+    signal to enable the buzzers for each player.
+
+    This takes an optional argument `incorrect_players` prohiting players who have already guessed
+    incorrectly to try to do so again.
+    """
     socketio.emit(
-        u"enable_buzzers", {u"room": data[u"room"], u"players": incorrect_players}
+        "enable_buzzers_s-p", {"room": data["room"], "players": incorrect_players}
     )
 
 
-@socketio.on(u"correct_answer")
+@socketio.on("buzz_in_p-s")
+def player_buzzed_in(data):
+    """After receiving the `socket.on` that a player is buzzing in, `socket.emit` the player's name to the
+    host.
+    """
+    game = storage.pull(data["room"])
+    game.buzz(data["name"])
+
+    socketio.emit("reset_buzzers_s-p", {"room": data["room"]})
+
+    socketio.emit(
+        "player_buzzed_s-h", {"room": data["room"], "name": game.buzz_order[-1],},
+    )
+
+
+@socketio.on("correct_answer_h-s")
 def host_correct_answer(data):
-    game = storage.pull(data[u"room"])
+    """After receiving the `socket.on` that the player guessed the correct answer, update the game record,
+    and `socket.emit` the updated scores to that player and the game board.
+
+    Then reset any data in the existing modals and `end_question`.
+    """
+    game = storage.pull(data["room"])
     game.score[game.buzz_order[-1]] += game.current_question.value
 
-    socketio.emit(u"clear_modal", {u"room": data[u"room"]})
-
     socketio.emit(
-        u"update_scores",
-        {u"room": data[u"room"], u"scores": game.score, u"final": False},
+        "update_scores_s-ph",
+        {"room": data["room"], "scores": game.score, "final": False},
     )
+
+    socketio.emit("clear_modal", {"room": data["room"]})
 
     end_question(data)
 
 
-@socketio.on(u"incorrect_answer")
+@socketio.on("incorrect_answer_h-s")
 def host_incorrect_answer(data):
-    game = storage.pull(data[u"room"])
+    """After receiving the `socket.on` that the player guessed the incorrect answer, update the game record,
+    and `socket.emit` the updated scores to that player and the game board.
+
+    Then resume the buzzing in availability for the remaining players.
+    """
+    game = storage.pull(data["room"])
     game.score[game.buzz_order[-1]] -= game.current_question.value
 
-    socketio.emit(u"update_scores", {u"room": data[u"room"], u"scores": game.score})
+    socketio.emit("update_scores_s-ph", {"room": data["room"], "scores": game.score})
 
-    enable_buzzers(data, incorrect_players=game.buzz_order)
+    if len(game.score.keys()) == len(game.buzz_order):
+        end_question(data)
 
-
-@socketio.on(u"buzzed_in")
-def player_buzzed_in(data):
-    game = storage.pull(data[u"room"])
-    game.buzz(data[u"name"])
-
-    socketio.emit(u"reset_player", {u"room": data[u"room"], u"player": None})
-
-    socketio.emit(
-        u"player_buzzed", {u"room": data[u"room"], u"name": game.buzz_order[-1],},
-    )
+    else:
+        enable_buzzers(data, incorrect_players=game.buzz_order)
 
 
 def end_question(data):
-    game = storage.pull(data[u"room"])
+    """Clean up some variables and code whenever a question is completed. Firstly clear the buzzers list
+    and the current question, and check to see if the round is over.
+    """
+    game = storage.pull(data["room"])
 
     game.buzz_order = list()
     game.current_question = None
 
-    print(game.remaining_questions)
+    socketio.emit("clear_modal_s-bh", {"room": data["room"]})
+
+    if config.debug:
+        print(game.remaining_questions)
 
     if game.remaining_questions <= 0 and game.round <= 3:
+        time.sleep(1)
         socketio.emit(
-            u"round_complete",
+            "round_complete_s-bh",
             {
-                u"room": data[u"room"],
-                u"current_round": game.round_text(),
-                u"next_round": game.round_text(upcoming=True),
+                "room": data["room"],
+                "updates": {
+                    "current_round": game.round_text(),
+                    "next_round": game.round_text(upcoming=True),
+                },
             },
         )
+

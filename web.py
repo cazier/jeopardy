@@ -48,7 +48,7 @@ socketio.init_app(app)
 def dismiss_modal(data):
     socketio.emit(u"clear_modal", {u"room": data[u"room"]})
 
-    end_question(data)
+    rounds.end_question(data)
 
 
 @socketio.on(u"start_next_round")

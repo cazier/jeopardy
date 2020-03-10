@@ -39,9 +39,17 @@
 		web_form.submit();
 	}
 
-	function manageModal(modal_id, action) {
+	function manageModal({ action, modal_id = '#master-modal', updates = false }) {
+		if (!(updates === false)) {
+			for (var item in updates) {
+				$('#' + item).text(updates[item]);
+			};
+		}
+
 		if (action == 'show') {
-			$('#' + modal_id).modal({
+			$(displayedInModal).css("display", "block");
+
+			$(modal_id).modal({
 				focus: true,
 				backdrop: 'static',
 				keyboard: false,
@@ -49,7 +57,9 @@
 		}
 
 		else if (action == 'hide') {
-			$('#' + modal_id).modal('hide');
+			$(modal_id).modal('hide');
+
+			$(displayedInModal).css("display", "none");
 		}
 	};
 

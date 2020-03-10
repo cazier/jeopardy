@@ -4,3 +4,8 @@
     border-right-color: rgb(0, 0, 0);
     border-bottom-color: rgb(0, 0, 0);
 }
+
+div.modal-custom {
+    padding: 16px;
+    font-size: 1.75rem;
+}

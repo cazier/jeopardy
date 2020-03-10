@@ -105,19 +105,19 @@
         </div>
     </div>
     <script type="text/javascript">
-        socket.on('enable_buzzers', function (message) {
+        socket.on('enable_buzzers_s-p', function (message) {
             if (!message['players'].includes("{{ session['name'] }}")) {
                 $('#buzzer').removeClass('disabled btn-danger');
                 $('#buzzer').addClass('btn-success');
             }
         });
 
-        socket.on('reset_player', function (message) {
+        socket.on('reset_buzzers_s-p', function (message) {
             $('#buzzer').removeClass('btn-success');
             $('#buzzer').addClass('disabled btn-danger');
         });
 
-        socket.on('update_scores', function (message) {
+        socket.on('update_scores_s-ph', function (message) {
             $('#score').text(message['scores']['{{ session['name'] }}']);
             $('#scores').text(message['scores']['{{ session['name'] }}']);
             $('#single_scores').text(message['scores']['{{ session['name'] }}']);
@@ -142,7 +142,7 @@
 
         $('button').click(function (event) {
             if (this.id == 'buzzer') {
-                socket.emit('buzzed_in', {
+                socket.emit('buzz_in_p-s', {
                     'room': '{{ game.room }}',
                     'name': '{{ session['name'] }}'
                 });
