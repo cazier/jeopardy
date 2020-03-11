@@ -203,7 +203,7 @@ class Board(object):
 
         for daily_double in random.sample(list(doubles), [0, 1, 2, 0, 0][self.round]):
             if config.debug:
-                print(f"{'=' * 10}\n{daily_double}\n{'=' * 10}")
+                daily_double = (0, 0)
 
             self.categories[daily_double[0]].questions[daily_double[1]].wager = True
 
