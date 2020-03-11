@@ -19,6 +19,7 @@ import storage
 
 import rounds
 import routing
+import sockets
 
 app = Flask(__name__)
 app.register_blueprint(blueprint=rounds.rounds)
@@ -30,7 +31,7 @@ app.jinja_env.globals.update(currency=config.currency)
 app.config[u"SECRET_KEY"] = config.app_secret
 app.debug = config.debug
 
-socketio = rounds.socketio
+socketio = sockets.socketio
 socketio.init_app(app)
 
 # rounds.socketio.init_app(app)

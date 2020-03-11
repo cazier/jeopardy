@@ -1,14 +1,11 @@
-import time
-
 from flask import Flask, Blueprint
 from flask_socketio import SocketIO, join_room
 
 import config
 import storage
+from sockets import socketio
 
 rounds = Blueprint(name="rounds", import_name=__name__)
-
-socketio = SocketIO()
 
 
 @socketio.on("host_clicked_question_h-s")
@@ -148,7 +145,7 @@ def end_question(data):
         print(game.remaining_questions)
 
     if game.remaining_questions <= 0 and game.round <= 3:
-        time.sleep(1)
+        socketio.sleep(0.5)
         socketio.emit(
             "round_complete_s-bh",
             {

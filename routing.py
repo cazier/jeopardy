@@ -16,6 +16,8 @@ import alex
 import config
 import storage
 
+from sockets import socketio
+
 routing = Blueprint(name=u"routing", import_name=__name__)
 
 
@@ -134,12 +136,12 @@ def route_player():
             error_occurred = True
 
         if error_occurred:
-            return redirect(url_for(u"route_join"))
+            return redirect(url_for(u"routing.route_join"))
 
         else:
             storage.pull(room=room).add_player(name)
 
-            socketio.emit(u"add_player_to_board", {u"room": room, u"player": name})
+            socketio.emit(u"add_player_to_board_s-b", {u"room": room, u"player": name})
 
             session[u"name"] = name
             session[u"room"] = room
@@ -172,7 +174,7 @@ def route_board():
                 message=u"The room code you entered was invalid. Please try again!",
                 category=u"error",
             )
-            return redirect(url_for(u"route_join"))
+            return redirect(url_for(u"routing.route_join"))
 
     elif request.method == u"GET":
         if config.debug:
