@@ -121,22 +121,25 @@
                             </div>
                             <div class="modal-content" id="wager-start" style="display: none;">
                                 <div class="modal-text">
-                                    <div class="modal-custom" id="wager-type">Daily Double!</div>
-                                    <div class="modal-custom small" id="wager-text">Who chose the category?</div>
+                                    <div class="modal-custom">{% if game.round < 3 %}Daily Double!{% else %}Welcome to Jeopardy!{% endif %}</div>
+                                    <div class="modal-custom small">{% if game.round < 3 %}Who chose the category?{% else %}Please 
+                                        read out the category, then press the \'Press for Wagers\' button below!{% endif%}</div>
                                     <div class="btn-toolbar" role="toolbar" style="padding: 16px;">
                                         <div class="btn-group" role="group" id="players">
                                         </div>
                                     </div>
-                                </div>
-                                <!-- <h4 style="padding: 16px;">Question:</h4>
-                                <div class="modal-body" id="single_wager_question">
-                                </div>
-                                <h4 style="padding: 16px;">Answer:</h4>
-                                <div class="modal-body" id="single_wager_answer">
-                                </div> -->
-                                <div class="modal-footer">
-                                    <div class="btn-toolbar" role="toolbar">
-                                        <div class="btn-group" role="group" id='wager_footer'>
+                                    <div class="modal-custom" id="wager_1" style="display: none;">
+                                        <div>Question:</div>
+                                        <div id="wager_question"></div>
+                                    </div>
+                                    <div class="modal-custom" id="wager_2" style="display: none;">
+                                        <div>Answer:</div>
+                                        <div id="wager_answer"></div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <div class="btn-toolbar" role="toolbar">
+                                            <div class="btn-group" role="group" id='wager_footer'>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -206,7 +209,6 @@
         </div>
     </div>
     <script type="text/javascript">
-        var isDailyDouble = false;
         var displayedInModal = null;
 
         $('button').click(function (event) {
@@ -388,7 +390,6 @@
 
         socket.on('start_wager_round_s-bh', function (message) {
             displayedInModal = '#wager-start';
-            isDailyDouble = message['isDailyDouble'];
 
             names = message['players'];
             for (name in names) {
@@ -401,23 +402,16 @@
             };
 
             $('#players').on('click', '.btn', function () {
+                for (button in $('#players').children('.btn')) {
+                    $(button).attr('disabled', true);
+                };
+
                 socket.emit('wager_identified_h-s', {
                     'room': '{{ game.room }}',
                     'name': this.id,
-                    'isDailyDouble': isDailyDouble
                 });
 
             });
-
-            if (isDailyDouble) {
-                $('#wager-type').text('Daily Double!');
-                $('#wager-prompt').text('Who selected the category?');
-            }
-
-            else if (!isDailyDouble) {
-                $('#wager-type').text('Welcome to {{ game_name }}!');
-                $('#wager-prompt').text('Please read out the category, then press the \'Press for Wagers\' button below!');
-            }
 
             manageModal({ action: 'show' });
 

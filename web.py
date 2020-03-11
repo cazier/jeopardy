@@ -180,7 +180,7 @@ def received_wager(data):
 def player_selected(data):
     game = storage.pull(data[u"room"])
 
-    if data[u"isDailyDouble"]:
+    if game.round < 3:
         game.wagered_round[data[u"name"]] = {}
 
     print(u"WAGERER RECEIVED! They're name is:", data[u"name"])

@@ -22,7 +22,6 @@ def start_wager(game):
         "start_wager_round_s-bh",
         {
             "room": game.room,
-            "isDailyDouble": game.round < 3,
             "players": list(game.score.keys()),
             "buttons": footer_buttons,
         },
@@ -33,13 +32,15 @@ def start_wager(game):
 def single_wager_identified(data):
     game = storage.pull(room=data["room"])
 
-    game.wagers = {data["name"]: 0}
+    if game.round < 3:
+        game.wagers["single"] = data["name"]
 
     socketio.emit(
-        "wager_amount_prompt_s-p",
-        {
-            "room": data["room"],
-            "isDailyDouble": game.round < 3,
-            "players": [data["name"]],
-        },
+        "wager_amount_prompt_s-p", {"room": data["room"], "players": [data["name"]],},
     )
+
+
+@socketio.on("wager_submitted_p-s")
+def wager_receipt(data):
+    if game.round < 3:
+        game = storage.pull()

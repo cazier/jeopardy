@@ -45,7 +45,8 @@
                         <div class="modal-dialog modal-dialog-centered" role="document">
                             <div class="modal-content" id="wager-amount" style="display: none;">
                                 <div class="modal-text">
-                                    <div class="modal-custom" id="current_round"></div>
+                                    <div class="modal-custom" id="current_round">{% if game.round < 3 %}Daily Double!{% else %}Welcome 
+                                        to Jeopardy!{% endif %}</div>
                                     <div class="modal-custom small">You currently have {{ currency }}<span
                                             id="scores">0</span>!</h4>
                                         <div class="alert alert-danger collapse" role="alert" id="wager_alert">
@@ -158,13 +159,12 @@
             });
 
             socket.on('wager_amount_prompt_s-p', function (message) {
+
                 if (message['players'].includes('{{ session["name"] }}')) {
                     displayedInModal = '#wager-amount';
 
                     manageModal({
-                        action: 'show', updates: {
-                            'current_round': message['isDailyDouble'] ? 'Daily Double!' : '{{ game_name }}'
-                        }
+                        action: 'show'
                     });
                 }
             });
@@ -193,10 +193,10 @@
                     score = parseInt($('#score').text());
 
                     if ((wager <= score) | ((wager > score) & (wager <= 1000))) {
-                        socket.emit('wager_submitted', {
+                        socket.emit('wager_submitted_p-s', {
                             'room': '{{ game.room }}',
                             'name': '{{ session["name"] }}',
-                            'wager': wager
+                            'wager': wager,
                         });
 
                         $('#wager_value').prop('disabled', function (i, v) { return !v; });
