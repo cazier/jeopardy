@@ -21,6 +21,8 @@ import rounds
 import routing
 import sockets
 
+import wagers
+
 app = Flask(__name__)
 app.register_blueprint(blueprint=rounds.rounds)
 app.register_blueprint(blueprint=routing.routing)
@@ -50,15 +52,6 @@ def dismiss_modal(data):
     socketio.emit(u"clear_modal", {u"room": data[u"room"]})
 
     rounds.end_question(data)
-
-
-@socketio.on(u"start_next_round")
-def start_next_round(data):
-    game = storage.pull(data[u"room"])
-
-    game.start_next_round()
-
-    socketio.emit(u"round_started")
 
 
 @socketio.on(u"get_wagers")

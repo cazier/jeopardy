@@ -2,6 +2,7 @@ from flask import Flask, Blueprint
 from flask_socketio import SocketIO, join_room
 
 import config
+import wagers
 import storage
 from sockets import socketio
 
@@ -37,30 +38,7 @@ def host_clicked_question(data):
     # If the question is a DD or in one of the final rounds, need to request a wager prior to
     # showing the
     else:
-        if game.round < 3:
-            isDailyDouble = True
-            footer_buttons = {
-                "Correct": "btn btn-success disabled mr-auto",
-                "Incorrect": "btn btn-danger disabled mr-auto",
-                "Reveal Question": "btn btn-dark mr-auto",
-            }
-
-        elif game.round >= 3:
-            isDailyDouble = False
-            footer_buttons = {
-                "Prompt For Wagers": "btn btn-success",
-                "Reveal Question": "btn btn-success disabled",
-            }
-
-        socketio.emit(
-            "start_wager_round",
-            {
-                "room": data["room"],
-                "isDailyDouble": isDailyDouble,
-                "players": list(game.score.keys()),
-                "buttons": footer_buttons,
-            },
-        )
+        wagers.start_wager(game=game)
 
 
 @socketio.on("finished_reading_h-s")
@@ -128,6 +106,18 @@ def host_incorrect_answer(data):
 
     else:
         enable_buzzers(data, incorrect_players=game.buzz_order)
+
+
+@socketio.on("start_next_round_h-s")
+def start_next_round(data):
+    """After receiving the `socket.on` that the host has clicked to start the next round, run
+    the game logic that does so, and then `socket.emit` to the board and host to move on.
+    """
+    game = storage.pull(data["room"])
+
+    game.start_next_round()
+
+    socketio.emit("next_round_started_s-bh")
 
 
 def end_question(data):
