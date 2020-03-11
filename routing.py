@@ -18,29 +18,29 @@ import storage
 
 from sockets import socketio
 
-routing = Blueprint(name=u"routing", import_name=__name__)
+routing = Blueprint(name="routing", import_name=__name__)
 
 
-@routing.route(u"/", methods=[u"GET"])
+@routing.route("/", methods=["GET"])
 def route_index():
     """Display the home (index) page, with two buttons to start or join a game
     
     Only allows GET requests.
     """
-    return render_template(template_name_or_list=u"index.html")
+    return render_template(template_name_or_list="index.html")
 
 
-@routing.route(u"/new", methods=[u"GET"])
+@routing.route("/new", methods=["GET"])
 def route_new():
     """Display the option(s) available to start a new game. As of now, this only supports selecting the
     number of categories with which to play. Conceivably "infinte" number of players can join.
     
     Only allows GET requests.
     """
-    return render_template(template_name_or_list=u"new.html")
+    return render_template(template_name_or_list="new.html")
 
 
-@routing.route(u"/join", methods=[u"GET"])
+@routing.route("/join", methods=["GET"])
 def route_join():
     """Display the page to join a game. This does include some error handling, but largely is messy...
     
@@ -51,11 +51,11 @@ def route_join():
     Only allows GET requests.
     """
     return render_template(
-        template_name_or_list=u"join.html", errors=get_flashed_messages()
+        template_name_or_list="join.html", errors=get_flashed_messages()
     )
 
 
-@routing.route(u"/host", methods=[u"GET", u"POST"])
+@routing.route("/host", methods=["GET", "POST"])
 def route_host():
     """Displays the page used by the game host to manage the gameplay. It can be "accessed" either from the `/new`
     endpoint or the `/join` endpoint, and will do different things, as needed.
@@ -63,44 +63,61 @@ def route_host():
     Allows both GET and POST requests, though the GET request is primarily intended for use in
     testing (using the `testing.html` template).
     """
-    if request.method == u"POST":
-        if request.form.get(u"categories"):
 
+    # Typical (Production) routing will use a POST request.
+    if request.method == "POST":
+        # If the request has a room code supplied, the host is `/join`ing the game.
+        if (room := request.form.get("room")) :
+            if room not in storage.rooms():
+                flash(
+                    message="The room code you entered was invalid. Please try again!",
+                    category="error",
+                )
+                return redirect(url_for("routing.route_join"))
+
+        # If the method has a number of categories supplied, the host is starting a
+        # `/new` game.
+        elif (category := request.form.get("categories")) :
             room = generate_room_code()
 
             storage.push(
-                room=room,
-                value=alex.Game(
-                    room=room, size=int(request.form.get(u"categories", default=6)),
-                ),
+                room=room, value=alex.Game(room=room, size=int(category)),
             )
 
             storage.pull(room=room).make_board()
 
-            session[u"name"] = u"Host"
-            session[u"room"] = room
-
-        elif request.form.get(u"room"):
-            room = request.form.get(u"room")
+            session["name"] = "Host"
+            session["room"] = room
 
         else:
             abort(500)
 
-    elif request.method == u"GET":
-        if config.debug:
-            session[u"name"] = u"Host"
-            session[u"room"] = request.args.get(key="room")
+    elif request.method == "GET":
+        if (room := request.args.get(key="room", default=False)) :
+            if config.debug:
+                session["name"] = "Host"
+                session["room"] = room
 
-        room = session[u"room"]
+            if room not in storage.rooms():
+                flash(
+                    message="The room code you entered was invalid. Please try again!",
+                    category="error",
+                )
+                return redirect(url_for("routing.route_join"))
+
+        else:
+            abort(500)
+
+        room = session["room"]
 
     return render_template(
-        template_name_or_list=u"host.html",
+        template_name_or_list="host.html",
         session=session,
         game=storage.pull(room=room),
     )
 
 
-@routing.route(u"/play", methods=[u"GET", u"POST"])
+@routing.route("/play", methods=["GET", "POST"])
 def route_player():
     """Displays the page used by the players to "compete". The page will initially run a number of checks
     to verify that the room code was valid, or that the name entered can be done. If anything is invalid,
@@ -108,57 +125,57 @@ def route_player():
 
     Allows both GET and POST requests.
     """
-    if request.method == u"POST":
+    if request.method == "POST":
         error_occurred = False
 
-        room = request.form.get(u"room").upper()
-        name = request.form.get(u"name")
+        room = request.form.get("room").upper()
+        name = request.form.get("name")
 
         if room not in storage.rooms():
             flash(
-                message=u"The room code you entered was invalid. Please try again!",
-                category=u"error",
+                message="The room code you entered was invalid. Please try again!",
+                category="error",
             )
             error_occurred = True
 
         if name in storage.pull(room=room).score.keys():
             flash(
-                message=u"The name you selected already exists. Please choose another one!",
-                category=u"error",
+                message="The name you selected already exists. Please choose another one!",
+                category="error",
             )
             error_occurred = True
 
         elif (len(name) < 1) or (name.isspace()):
             flash(
-                message=u"The name you entered was invalid. Please try again!",
-                category=u"error",
+                message="The name you entered was invalid. Please try again!",
+                category="error",
             )
             error_occurred = True
 
         if error_occurred:
-            return redirect(url_for(u"routing.route_join"))
+            return redirect(url_for("routing.route_join"))
 
         else:
             storage.pull(room=room).add_player(name)
 
-            socketio.emit(u"add_player_to_board_s-b", {u"room": room, u"player": name})
+            socketio.emit("add_player_to_board_s-b", {"room": room, "player": name})
 
-            session[u"name"] = name
-            session[u"room"] = room
+            session["name"] = name
+            session["room"] = room
 
-    elif request.method == u"GET" and session is not None:
+    elif request.method == "GET" and session is not None:
         if config.debug:
-            session[u"name"] = request.args.get(key="name")
-            session[u"room"] = request.args.get(key="room")
+            session["name"] = request.args.get(key="name")
+            session["room"] = request.args.get(key="room")
 
-        room = session[u"room"]
+        room = session["room"]
 
     return render_template(
-        template_name_or_list=u"play.html", session=session, game=storage.pull(room),
+        template_name_or_list="play.html", session=session, game=storage.pull(room),
     )
 
 
-@routing.route(u"/board", methods=[u"GET", u"POST"])
+@routing.route("/board", methods=["GET", "POST"])
 def route_board():
     """Displays the page used to display the board. As with `/play`, performs a small amount of error checking
     to ensure the room exists.
@@ -166,28 +183,28 @@ def route_board():
     Allows both GET and POST requests, though the GET request is primarily intended for use in
     testing (using the `testing.html` template).
     """
-    if request.method == u"POST":
-        room = request.form.get(u"room").upper()
+    if request.method == "POST":
+        room = request.form.get("room").upper()
 
         if room not in storage.rooms():
             flash(
-                message=u"The room code you entered was invalid. Please try again!",
-                category=u"error",
+                message="The room code you entered was invalid. Please try again!",
+                category="error",
             )
-            return redirect(url_for(u"routing.route_join"))
+            return redirect(url_for("routing.route_join"))
 
-    elif request.method == u"GET":
+    elif request.method == "GET":
         if config.debug:
-            session[u"room"] = request.args.get(key="room")
+            session["room"] = request.args.get(key="room")
 
-        room = session[u"room"]
+        room = session["room"]
 
     return render_template(
-        template_name_or_list=u"board.html", game=storage.pull(room=room)
+        template_name_or_list="board.html", game=storage.pull(room=room)
     )
 
 
-@routing.route(u"/test", methods=[u"GET"])
+@routing.route("/test", methods=["GET"])
 def route_test():
     """Displays a (rather convoluted) testing page with a number of iframes to show each user
     type. The test sets the `config.debug` variable to true, because it is assumed to be so,
@@ -200,19 +217,19 @@ def route_test():
     storage.push(
         room=room,
         value=alex.Game(
-            room=room, size=int(request.form.get(u"categories", default=6)),
+            room=room, size=int(request.form.get("categories", default=6)),
         ),
     )
 
     storage.pull(room=room).make_board()
 
-    return render_template(template_name_or_list=u"testing.html")
+    return render_template(template_name_or_list="testing.html")
 
 
 @routing.errorhandler(500)
 def internal_server_error(error):
     """Directs Flask to load the error handling page on HTTP Status Code 500 (Server Errors)"""
-    return render_template(template_name_or_list=u"errors.html", error_code=error), 500
+    return render_template(template_name_or_list="errors.html", error_code=error), 500
 
 
 def generate_room_code() -> str:
@@ -220,7 +237,7 @@ def generate_room_code() -> str:
         return "ABCD"
 
     else:
-        letters = u"".join(random.sample(list(u"ABCDEFGHIJKLMNOPQRSTUVWXYZ"), 4))
+        letters = "".join(random.sample(list("ABCDEFGHIJKLMNOPQRSTUVWXYZ"), 4))
         while letters in storage.rooms():
             return generate_room_code()
 
