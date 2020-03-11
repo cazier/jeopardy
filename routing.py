@@ -68,12 +68,7 @@ def route_host():
     if request.method == "POST":
         # If the request has a room code supplied, the host is `/join`ing the game.
         if (room := request.form.get("room")) :
-            if room not in storage.rooms():
-                flash(
-                    message="The room code you entered was invalid. Please try again!",
-                    category="error",
-                )
-                return redirect(url_for("routing.route_join"))
+            room = room
 
         # If the method has a number of categories supplied, the host is starting a
         # `/new` game.
@@ -98,17 +93,17 @@ def route_host():
                 session["name"] = "Host"
                 session["room"] = room
 
-            if room not in storage.rooms():
-                flash(
-                    message="The room code you entered was invalid. Please try again!",
-                    category="error",
-                )
-                return redirect(url_for("routing.route_join"))
-
         else:
             abort(500)
 
         room = session["room"]
+
+    if room not in storage.rooms():
+        flash(
+            message="The room code you entered was invalid. Please try again!",
+            category="error",
+        )
+        return redirect(url_for("routing.route_join"))
 
     return render_template(
         template_name_or_list="host.html",
