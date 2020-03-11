@@ -30,7 +30,7 @@
                     <div class="input-group-lg mb-3">
                         <div class="input-group-prepend">
                             <span class="input-group-text">Current Score:
-                                {{ currency }}&nbsp;
+                                {{ currency }}
                                 <span id="score">{{ game.score[session['name']] }}</span>
                             </span>
                         </div>
@@ -39,8 +39,40 @@
                     <div id="buzzer_container">
                         <button id="buzzer" class="btn btn-block btn-danger disabled">BUZZ IN!</button>
                     </div>
+                    <div class="modal fade" id="master-modal" tabindex="-1" role="dialog"
+                        aria-labelledby="master-modal-holder" aria-hidden="true" data-keyboard="false"
+                        data-backdrop="static">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content" id="wager-amount" style="display: none;">
+                                <div class="modal-text">
+                                    <div class="modal-custom" id="current_round"></div>
+                                    <div class="modal-custom small">You currently have {{ currency }}<span
+                                            id="scores">0</span>!</h4>
+                                        <div class="alert alert-danger collapse" role="alert" id="wager_alert">
+                                            Your wager must be less than or equal to your current money. Please try
+                                            again!
+                                        </div>
+                                        <div class="form-group" id="wager">
+                                            <label for="wager">How much would you like to wager?</label>
+                                            <input name="wager" type="number" class="form-control" placeholder="0"
+                                                value="0" required id="wager_value">
+                                            <small class="form-text text-muted"></small>
+                                        </div>
+                                        <div class="form-group" id="answer" style="display: none;">
+                                            <label for="wager">Please enter an answer!</label>
+                                            <input name="wager" type="text" class="form-control" placeholder="" required
+                                                id="answer_value">
+                                            <small class="form-text text-muted"></small>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button class="btn btn-success mr-auto" id="wager_submit">Submit!</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                    <div class="modal fade" id="wager_modal" tabindex="-1" role="dialog"
+                        <!-- <div class="modal fade" id="wager_modal" tabindex="-1" role="dialog"
                         aria-labelledby="wager-modal-holder" aria-hidden="true" data-keyboard="false"
                         data-backdrop="static">
                         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -99,113 +131,121 @@
                                 </div>
                             </div>
                         </div>
+                    </div> -->
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <script type="text/javascript">
-        socket.on('enable_buzzers_s-p', function (message) {
-            if (!message['players'].includes("{{ session['name'] }}")) {
-                $('#buzzer').removeClass('disabled btn-danger');
-                $('#buzzer').addClass('btn-success');
-            }
-        });
+        <script type="text/javascript">
+            var displayedInModal = null;
 
-        socket.on('reset_buzzers_s-p', function (message) {
-            $('#buzzer').removeClass('btn-success');
-            $('#buzzer').addClass('disabled btn-danger');
-        });
+            socket.on('enable_buzzers_s-p', function (message) {
+                if (!message['players'].includes("{{ session['name'] }}")) {
+                    $('#buzzer').removeClass('disabled btn-danger');
+                    $('#buzzer').addClass('btn-success');
+                }
+            });
 
-        socket.on('update_scores_s-ph', function (message) {
-            $('#score').text(message['scores']['{{ session['name'] }}']);
-            $('#scores').text(message['scores']['{{ session['name'] }}']);
-            $('#single_scores').text(message['scores']['{{ session['name'] }}']);
-        });
+            socket.on('reset_buzzers_s-p', function (message) {
+                $('#buzzer').removeClass('btn-success');
+                $('#buzzer').addClass('disabled btn-danger');
+            });
 
-        socket.on('start_wager_round', function (message) {
-            if (message['players'].includes("{{ session['name'] }}")) {
-                manageModal('wager_modal', 'show');
-            }
-        });
+            socket.on('update_scores_s-ph', function (message) {
+                $('#score').text(message['scores']['{{ session["name"] }}']);
+                $('#scores').text(message['scores']['{{ session["name"] }}']);
+                $('#single_scores').text(message['scores']['{{ session["name"] }}']);
+            });
 
-        socket.on('single_wager_player_prompt', function (message) {
-            if (message['players'].includes("{{ session['name'] }}")) {
-                manageModal('single_wager_modal', 'show');
-            }
-        });
+            socket.on('wager_amount_prompt_s-p', function (message) {
+                if (message['players'].includes('{{ session["name"] }}')) {
+                    displayedInModal = '#wager-amount';
 
-        socket.on('final_question_revealed', function (message) {
-            $('#answer').show();
-        });
+                    manageModal({
+                        action: 'show', updates: {
+                            'current_round': message['isDailyDouble'] ? 'Daily Double!' : '{{ game_name }}'
+                        }
+                    });
+                }
+            });
+
+            socket.on('single_wager_player_prompt', function (message) {
+                if (message['players'].includes("{{ session['name'] }}")) {
+                    manageModal('single_wager_modal', 'show');
+                }
+            });
+
+            socket.on('final_question_revealed', function (message) {
+                $('#answer').show();
+            });
 
 
-        $('button').click(function (event) {
-            if (this.id == 'buzzer') {
-                socket.emit('buzz_in_p-s', {
-                    'room': '{{ game.room }}',
-                    'name': '{{ session['name'] }}'
-                });
-            }
-
-            else if (this.id == 'wager_submit') {
-                wager = parseInt($('#wager_value').val());
-                score = parseInt($('#score').text());
-
-                if ((wager <= score) | ((wager > score) & (wager <= 1000))) {
-                    socket.emit('wager_submitted', {
+            $('button').click(function (event) {
+                if (this.id == 'buzzer') {
+                    socket.emit('buzz_in_p-s', {
                         'room': '{{ game.room }}',
-                        'name': '{{ session['name'] }}',
-                        'wager': wager
+                        'name': '{{ session["name"] }}'
+                    });
+                }
+
+                else if (this.id == 'wager_submit') {
+                    wager = parseInt($('#wager_value').val());
+                    score = parseInt($('#score').text());
+
+                    if ((wager <= score) | ((wager > score) & (wager <= 1000))) {
+                        socket.emit('wager_submitted', {
+                            'room': '{{ game.room }}',
+                            'name': '{{ session["name"] }}',
+                            'wager': wager
+                        });
+
+                        $('#wager_value').prop('disabled', function (i, v) { return !v; });
+                        $('#wager_alert').hide();
+
+                        document.getElementById('wager_submit').id = 'answer_submit';
+                    }
+
+                    else {
+                        $('#wager_alert').show();
+                    }
+
+                }
+
+                else if (this.id == 'single_wager_submit') {
+                    wager = parseInt($('#single_wager_value').val());
+                    score = parseInt($('#score').text());
+
+                    if ((wager <= score) | ((wager > score) & (wager <= 1000))) {
+                        socket.emit('single_wager_submitted', {
+                            'room': '{{ game.room }}',
+                            'name': '{{ session["name"] }}',
+                            'wager': wager
+                        });
+
+                        $('#wager_alert').hide();
+                        manageModal('single_wager_modal', 'hide');
+
+                        $('#single_wager_value').val(0);
+
+                    }
+
+                    else {
+                        $('#wager_alert').show();
+                    }
+
+                }
+
+                else if (this.id == 'answer_submit') {
+                    socket.emit('answer_submitted', {
+                        'room': '{{ game.room }}',
+                        'name': '{{ session["name"] }}',
+                        'answer': $('#answer_value').val()
                     });
 
-                    $('#wager_value').prop('disabled', function (i, v) { return !v; });
-                    $('#wager_alert').hide();
-
-                    document.getElementById('wager_submit').id = 'answer_submit';
+                    manageModal('wager_modal', 'hide');
                 }
-
-                else {
-                    $('#wager_alert').show();
-                }
-
-            }
-
-            else if (this.id == 'single_wager_submit') {
-                wager = parseInt($('#single_wager_value').val());
-                score = parseInt($('#score').text());
-
-                if ((wager <= score) | ((wager > score) & (wager <= 1000))) {
-                    socket.emit('single_wager_submitted', {
-                        'room': '{{ game.room }}',
-                        'name': '{{ session['name'] }}',
-                        'wager': wager
-                    });
-
-                    $('#wager_alert').hide();
-                    manageModal('single_wager_modal', 'hide');
-
-                    $('#single_wager_value').val(0);
-
-                }
-
-                else {
-                    $('#wager_alert').show();
-                }
-
-            }
-
-            else if (this.id == 'answer_submit') {
-                socket.emit('answer_submitted', {
-                    'room': '{{ game.room }}',
-                    'name': '{{ session['name'] }}',
-                    'answer': $('#answer_value').val()
-                });
-
-                manageModal('wager_modal', 'hide');
-            }
-        });
-    </script>
+            });
+        </script>
 </body>
 
 </html>
