@@ -47,7 +47,7 @@ class Game(object):
 
         self.board = Board(segment=self.round, size=self.size)
 
-        self.wagered_round = dict()
+        self.wagers = {u'wagers': {player: 0 for player in self.score.keys()}, u'single': ''}
 
         self.board.add_wagers()
 
