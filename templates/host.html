@@ -119,6 +119,28 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="modal-content" id="wager-start" style="display: none;">
+                                <div class="modal-text">
+                                    <div class="modal-custom" id="wager-type">Daily Double!</div>
+                                    <div class="modal-custom small" id="wager-text">Who chose the category?</div>
+                                    <div class="btn-toolbar" role="toolbar" style="padding: 16px;">
+                                        <div class="btn-group" role="group" id="players">
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- <h4 style="padding: 16px;">Question:</h4>
+                                <div class="modal-body" id="single_wager_question">
+                                </div>
+                                <h4 style="padding: 16px;">Answer:</h4>
+                                <div class="modal-body" id="single_wager_answer">
+                                </div> -->
+                                <div class="modal-footer">
+                                    <div class="btn-toolbar" role="toolbar">
+                                        <div class="btn-group" role="group" id='wager_footer'>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="modal-content" id="round_transition" style="display: none;">
                                 <div id="modal-text">
                                     <div class="modal-custom">Round Complete!</div>
@@ -177,241 +199,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="modal-content" id="daily_double_start" style="display: none;">
-                                <div class="modal-header">
-                                    <h4 class="modal-title" id="single-wager-holder">Daily Double!</h4>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"
-                                        id="modal_dismiss">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <h4 style="padding: 16px;">Who chose the category?</h4>
-                                <div class="modal-body">
-                                    <div class="btn-toolbar" role="toolbar">
-                                        <div class="btn-group" role="group" id="single_wagerer">
-                                        </div>
-                                    </div>
-                                </div>
-                                <h4 style="padding: 16px;">Question:</h4>
-                                <div class="modal-body" id="single_wager_question">
-                                </div>
-                                <h4 style="padding: 16px;">Answer:</h4>
-                                <div class="modal-body" id="single_wager_answer">
-                                </div>
-                                <div class="modal-footer" id="question_footer">
-                                    <div class="btn-toolbar" role="toolbar">
-                                        <div class="btn-group" role="group">
-                                            <button class="btn btn-success disabled mr-auto"
-                                                id="single_correct_answer">Correct!</button>
-                                            <button class="btn btn-danger disabled mr-auto"
-                                                id="single_incorrect_answer">Incorrect</button>
-                                            <button class="btn btn-dark mr-auto" id="single_wager_player">Reveal
-                                                Question</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- <div class="modal-content">
-                                <div class="modal-header">
-                                    <h4 class="modal-title" id="new_waager_modal_holder"></h4>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"
-                                        id="modal_dismiss">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <h4 style="padding: 16px;" id="round_instruction"></h4>
-                                <div class="modal-body">
-                                    <div class="btn-toolbar" role="toolbar">
-                                        <div class="btn-group" role="group" id="players">
-                                        </div>
-                                    </div>
-                                </div>
-                                <h4 style="padding: 16px;">Question:</h4>
-                                <div class="modal-body" id="single_wager_question">
-                                </div>
-                                <h4 style="padding: 16px;">Answer:</h4>
-                                <div class="modal-body" id="single_wager_answer">
-                                </div>
-                                <div class="modal-footer">
-                                    <div class="btn-toolbar" role="toolbar">
-                                        <div class="btn-group" role="group" id='wager_footer'>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div> -->
                         </div>
                     </div>
-
-                    <!-- <div class="modal fade" id="old-master-modal" tabindex="-1" role="dialog"
-                        aria-labelledby="master-modal-holder" aria-hidden="true" data-keyboard="false"
-                        data-backdrop="static">
-                        <div class="modal-dialog modal-dialog-centered" role="document">
-                            <div class="modal-content">
-                                <div id="modal-text">
-                                    <div class="modal-custom">Question:</div>
-                                    <div class="modal-body" id="question"></div>
-                                    <div class="modal-custom">Answer:</div>
-                                    <div class="modal-body" id="answer"></div>
-                                </div>
-                                <div class="modal-footer" id="question_footer">
-                                    <div class="btn-toolbar" role="toolbar">
-                                        <div class="btn-group" role="group">
-                                            <button class="btn btn-light disabled mr-auto"
-                                                id="player">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</button>
-                                            <button class="btn btn-success disabled mr-auto"
-                                                id="correct_answer">Correct!</button>
-                                            <button class="btn btn-danger disabled mr-auto"
-                                                id="incorrect_answer">Incorrect</button>
-                                            <button class="btn btn-dark mr-auto" id="finished_reading">Finished
-                                                Reading!</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal fade" id="round_modal" tabindex="-1" role="dialog"
-                        aria-labelledby="round-modal-holder" aria-hidden="true" data-keyboard="false"
-                        data-backdrop="static">
-                        <div class="modal-dialog modal-dialog-centered" role="document">
-                            <div class="modal-content">
-                                <h3 style="padding: 16px;">Round Complete!</h3>
-                                <div class="modal-body">
-                                    Congratulations on finishing <span id="current_round"></span>! Are you ready to
-                                    start <span id="next_round"></span>?!
-                                </div>
-                                <div class="modal-footer">
-                                    <button class="btn btn-success mr-auto" id="start_next_round">Start the next
-                                        round!</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal fade" id="wager_category_modal" tabindex="-1" role="dialog"
-                        aria-labelledby="wager-category-modal-holder" aria-hidden="true" data-keyboard="false"
-                        data-backdrop="static">
-                        <div class="modal-dialog modal-dialog-centered" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h3 class="modal-title" id="wager-category-modal-holder"><span id="category"></span>
-                                    </h3>
-                                </div>
-                                <div class="modal-body">
-                                    <h4 id="wager_clue"></h4>
-                                    <table>
-                                        <tr>
-                                            <th>
-                                                <span id="wager_round_name"></span> has wagered:
-                                            </th>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                {{ currency }} <span id="wager_round_amount"></span>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                    <br>
-                                    <table class="collapse" id="wager_answer_holder">
-                                        <tr>
-                                            <th>
-                                                Answer:
-                                            </th>
-                                        </tr>
-                                        <tr>
-                                            <td id="wager_round_answer">
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                <div class="modal-footer" id="question_footer">
-                                    <div class="btn-toolbar" role="toolbar">
-                                        <div class="btn-group" role="group">
-                                            <button class="btn btn-warning mr-auto" id="reveal_answer">Reveal
-                                                Answer!</button>
-                                            <button class="btn btn-success disabled mr-auto"
-                                                id="correct_wager">Correct!</button>
-                                            <button class="btn btn-danger disabled mr-auto"
-                                                id="incorrect_wager">Incorrect</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal fade" id="single_wager_modal" tabindex="-1" role="dialog"
-                        aria-labelledby="single-wager-holder" aria-hidden="true" data-keyboard="false"
-                        data-backdrop="static">
-                        <div class="modal-dialog modal-dialog-centered" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h4 class="modal-title" id="single-wager-holder">Daily Double!</h4>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"
-                                        id="modal_dismiss">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <h4 style="padding: 16px;">Who chose the category?</h4>
-                                <div class="modal-body">
-                                    <div class="btn-toolbar" role="toolbar">
-                                        <div class="btn-group" role="group" id="single_wagerer">
-                                        </div>
-                                    </div>
-                                </div>
-                                <h4 style="padding: 16px;">Question:</h4>
-                                <div class="modal-body" id="single_wager_question">
-                                </div>
-                                <h4 style="padding: 16px;">Answer:</h4>
-                                <div class="modal-body" id="single_wager_answer">
-                                </div>
-                                <div class="modal-footer" id="question_footer">
-                                    <div class="btn-toolbar" role="toolbar">
-                                        <div class="btn-group" role="group">
-                                            <button class="btn btn-success disabled mr-auto"
-                                                id="single_correct_answer">Correct!</button>
-                                            <button class="btn btn-danger disabled mr-auto"
-                                                id="single_incorrect_answer">Incorrect</button>
-                                            <button class="btn btn-dark mr-auto" id="single_wager_player">Reveal
-                                                Question</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal fade" id="new_waager_modal" tabindex="-1" role="dialog"
-                        aria-labelledby="new_waager_modal_holder" aria-hidden="true" data-keyboard="false"
-                        data-backdrop="static">
-                        <div class="modal-dialog modal-dialog-centered" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h4 class="modal-title" id="new_waager_modal_holder"></h4>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"
-                                        id="modal_dismiss">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <h4 style="padding: 16px;" id="round_instruction"></h4>
-                                <div class="modal-body">
-                                    <div class="btn-toolbar" role="toolbar">
-                                        <div class="btn-group" role="group" id="players">
-                                        </div>
-                                    </div>
-                                </div>
-                                <h4 style="padding: 16px;">Question:</h4>
-                                <div class="modal-body" id="single_wager_question">
-                                </div>
-                                <h4 style="padding: 16px;">Answer:</h4>
-                                <div class="modal-body" id="single_wager_answer">
-                                </div>
-                                <div class="modal-footer">
-                                    <div class="btn-toolbar" role="toolbar">
-                                        <div class="btn-group" role="group" id='wager_footer'>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div> -->
                 </div>
             </div>
         </div>
@@ -487,7 +276,7 @@
                 }
 
                 else if (this.id == 'start_next_round') {
-                    socket.emit('start_next_round', {
+                    socket.emit('start_next_round_h-s', {
                         'room': '{{ game.room }}'
                     });
                 }
@@ -593,36 +382,46 @@
             manageModal({ action: 'show', updates: message['updates'] });
         });
 
-        socket.on('single_question_revealed', function (message) {
-            $('#single_wager_question').text(message['question']);
-            $('#single_wager_answer').text(message['answer']);
-
-            $('#single_correct_answer').removeClass('disabled');
-            $('#single_incorrect_answer').removeClass('disabled');
-
-        });
-
-
-        socket.on('round_started', function (message) {
-            manageModal({ action: 'hide' });
+        socket.on('next_round_started_s-bh', function (message) {
             start_round();
         });
 
-        socket.on('single_player_wager', function (message) {
+        socket.on('start_wager_round_s-bh', function (message) {
+            displayedInModal = '#wager-start';
+            isDailyDouble = message['isDailyDouble'];
+
             names = message['players'];
             for (name in names) {
-                $('#single_wagerer').append($('<button class="btn btn-success" id="' + names[name] + '_single_wagered">' + names[name] + '</button>'));
+                $('#players').append($('<button class="btn btn-success" id="' + names[name] + '">' + names[name] + '</button>'));
             };
 
-            $('#single_wagerer').on('click', '.btn', function () {
-                socket.emit('single_wager_prompt', {
+            buttons = message['buttons'];
+            for (button in buttons) {
+                $('#wager_footer').append($('<button class="' + buttons[button] + '" id="' + button.toLowerCase().replace(' ', '_') + '">' + button + '</button>'));
+            };
+
+            $('#players').on('click', '.btn', function () {
+                socket.emit('wager_identified_h-s', {
                     'room': '{{ game.room }}',
                     'name': this.id,
+                    'isDailyDouble': isDailyDouble
                 });
 
             });
 
-            manageModal('single_wager_modal', 'show');
+            if (isDailyDouble) {
+                $('#wager-type').text('Daily Double!');
+                $('#wager-prompt').text('Who selected the category?');
+            }
+
+            else if (!isDailyDouble) {
+                $('#wager-type').text('Welcome to {{ game_name }}!');
+                $('#wager-prompt').text('Please read out the category, then press the \'Press for Wagers\' button below!');
+            }
+
+            manageModal({ action: 'show' });
+
+
         });
 
         socket.on('wagerer_received', function (message) {
@@ -646,46 +445,9 @@
             $('#wager_answer_holder').collapse('show');
         });
 
-        socket.on('start_wager_round', function (message) {
-            isDailyDouble = message['isDailyDouble'];
-
-            names = message['players'];
-            for (name in names) {
-                $('#players').append($('<button class="btn btn-success" id="' + names[name] + '">' + names[name] + '</button>'));
-            };
-
-            buttons = message['buttons'];
-            for (button in buttons) {
-                $('#wager_footer').append($('<button class="' + buttons[button] + '" id="' + button.toLowerCase().replace(' ', '_') + '">' + button + '</button>'));
-            };
-
-            $('#players').on('click', '.btn', function () {
-                socket.emit('player_selected', {
-                    'room': '{{ game.room }}',
-                    'name': this.id,
-                    'isDailyDouble': isDailyDouble
-                });
-
-            });
-
-            if (isDailyDouble) {
-                $('#new_waager_modal_holder').text('Daily Double!');
-                $('#round_instruction').text('Who selected the category?');
-                manageModal('new_waager_modal', 'show');
-            }
-
-            else if (!isDailyDouble) {
-                $('#new_waager_modal_holder').text('Welcome to {{ game_name }}!');
-                $('#round_instruction').text('Please read out the category, then press the \'Press for Wagers\' button below!');
-                manageModal('new_waager_modal', 'show');
-
-            }
-
-
-        });
 
         function start_round() {
-            $("<form method='POST' action='" + document.URL + "'><input type='hidden' name='room' value='{{ game.room }}'/><input type='hidden'/></form>").appendTo("body").submit();
+            $("<form method='POST' action='" + document.URL + "'><input type='hidden' name='room' value='{{ game.room }}'/></form>").appendTo("body").submit();
         };
 
     </script>
