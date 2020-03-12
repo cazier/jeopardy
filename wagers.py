@@ -5,25 +5,9 @@ from sockets import socketio
 
 
 def start_wager(game):
-    if game.round < 3:
-        footer_buttons = {
-            "Correct": "btn btn-success mr-auto",
-            "Incorrect": "btn btn-danger mr-auto",
-        }
-
-    else:
-        footer_buttons = {
-            "Prompt For Wagers": "btn btn-success",
-            "Reveal Question": "btn btn-success disabled",
-        }
-
     socketio.emit(
         "start_wager_round_s-bh",
-        {
-            "room": game.room,
-            "players": list(game.score.keys()),
-            "buttons": footer_buttons,
-        },
+        {"room": game.room, "players": list(game.score.keys())},
     )
 
 
@@ -60,3 +44,9 @@ def wager_receipt(data):
             },
         )
 
+
+@socketio.on("wager_answered_h-s")
+def wager_answered(data):
+    game = storage.pull(room=data["room"])
+
+    print(data)

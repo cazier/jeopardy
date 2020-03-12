@@ -69,39 +69,27 @@ def player_buzzed_in(data):
     )
 
 
-@socketio.on("correct_answer_h-s")
-def host_correct_answer(data):
-    """After receiving the `socket.on` that the player guessed the correct answer, update the game record,
+@socketio.on("question_answered_h-s")
+def question_answered(data):
+    """After receiving the `socket.on` that the player guessed an answer, update the game record,
     and `socket.emit` the updated scores to that player and the game board.
 
-    Then reset any data in the existing modals and `end_question`.
+    If the player was correct, clean up the board and continue the game. Otherwise, allow the buzzing
+    in availability for the remaining players.
     """
     game = storage.pull(data["room"])
-    game.score[game.buzz_order[-1]] += game.current_question.value
 
-    socketio.emit(
-        "update_scores_s-ph",
-        {"room": data["room"], "scores": game.score, "final": False},
-    )
+    if data["correct"]:
+        game.score[game.buzz_order[-1]] += game.current_question.value
 
-    socketio.emit("clear_modal", {"room": data["room"]})
-
-    end_question(data)
-
-
-@socketio.on("incorrect_answer_h-s")
-def host_incorrect_answer(data):
-    """After receiving the `socket.on` that the player guessed the incorrect answer, update the game record,
-    and `socket.emit` the updated scores to that player and the game board.
-
-    Then resume the buzzing in availability for the remaining players.
-    """
-    game = storage.pull(data["room"])
-    game.score[game.buzz_order[-1]] -= game.current_question.value
+    else:
+        game.score[game.buzz_order[-1]] -= game.current_question.value
 
     socketio.emit("update_scores_s-ph", {"room": data["room"], "scores": game.score})
 
-    if len(game.score.keys()) == len(game.buzz_order):
+    if data["correct"] or len(game.score.keys()) == len(game.buzz_order):
+        socketio.emit("clear_modal", {"room": data["room"]})
+
         end_question(data)
 
     else:
