@@ -21,3 +21,4 @@
     - i.e. Show 1 is Season 1 Show 1 ***AND*** Super Jeopardy Show 1...
 - On Final Jeopardy game automatically loads final question on both host and board. Need to allow wagers, and category display and stuff
 - Remove player numbers from game setup (in the HTML)
+- Wager rules all follow DD, not specifically FJ/TB rounds.

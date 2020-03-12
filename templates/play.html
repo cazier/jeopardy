@@ -49,9 +49,8 @@
                                         to Jeopardy!{% endif %}</div>
                                     <div class="modal-custom small">You currently have {{ currency }}<span
                                             id="scores">0</span>!</h4>
-                                        <div class="alert alert-danger collapse" role="alert" id="wager_alert">
-                                            Your wager must be less than or equal to your current money. Please try
-                                            again!
+                                        <div class="alert alert-danger collapse tiny" role="alert" id="wager_alert">
+                                            This is an invalid wager. Please try again!<br>(Click <a href="https://www.j-archive.com/help.php#dailydouble" target="_blank"> here</a> for details.)
                                         </div>
                                         <div class="form-group" id="wager">
                                             <label for="wager">How much would you like to wager?</label>
@@ -192,7 +191,7 @@
                     wager = parseInt($('#wager_value').val());
                     score = parseInt($('#score').text());
 
-                    if ((wager <= score) | ((wager > score) & (wager <= 1000))) {
+                    if (((wager <= score) | ((wager > score) & (wager <= 1000))) & wager > 0) {
                         socket.emit('wager_submitted_p-s', {
                             'room': '{{ game.room }}',
                             'name': '{{ session["name"] }}',

@@ -14,3 +14,7 @@ div.modal-custom.small {
     padding: 0px 16px 0px 16px;
     font-size: 1.5rem;
 }
+
+div.tiny {
+    font-size: 0.75rem;
+}
