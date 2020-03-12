@@ -15,6 +15,10 @@ div.modal-custom.small {
     font-size: 1.5rem;
 }
 
+div.smaller {
+    font-size: 1rem;
+}
+
 div.tiny {
     font-size: 0.75rem;
 }

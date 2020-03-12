@@ -119,26 +119,33 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="modal-content" id="wager-start" style="display: none;">
+                            <div class="modal-content" id="wager_round" style="display: none;">
                                 <div class="modal-text">
-                                    <div class="modal-custom">{% if game.round < 3 %}Daily Double!{% else %}Welcome to Jeopardy!{% endif %}</div>
-                                    <div class="modal-custom small">{% if game.round < 3 %}Who chose the category?{% else %}Please 
-                                        read out the category, then press the \'Press for Wagers\' button below!{% endif%}</div>
-                                    <div class="btn-toolbar" role="toolbar" style="padding: 16px;">
-                                        <div class="btn-group" role="group" id="players">
+                                    <div class="modal-custom">{% if game.round < 3 %}Daily Double!{% else %}Welcome to
+                                        Jeopardy!{% endif %}</div>
+                                    <div id="wager_1">
+                                        <div class="modal-custom small">{% if game.round < 3 %}Who chose the
+                                            category?{% else %}Please
+                                            read out the category, then press the \'Press for Wagers\' button
+                                            below!{% endif%}</div>
+                                        <div class="btn-toolbar" role="toolbar" style="padding: 16px;">
+                                            <div class="btn-group" role="group" id="players">
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="modal-custom" id="wager_1" style="display: none;">
-                                        <div>Question:</div>
-                                        <div id="wager_question"></div>
-                                    </div>
-                                    <div class="modal-custom" id="wager_2" style="display: none;">
-                                        <div>Answer:</div>
-                                        <div id="wager_answer"></div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <div class="btn-toolbar" role="toolbar">
-                                            <div class="btn-group" role="group" id='wager_footer'>
+                                    <div id="wager_2" style="display: none;">
+                                        <div class="modal-custom">
+                                            <div>Question:</div>
+                                            <div id="wager_question" class="smaller"></div>
+                                        </div>
+                                        <div class="modal-custom">
+                                            <div>Answer:</div>
+                                            <div id="wager_answer" class="smaller"></div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <div class="btn-toolbar" role="toolbar">
+                                                <div class="btn-group" role="group" id='wager_footer'>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -389,7 +396,7 @@
         });
 
         socket.on('start_wager_round_s-bh', function (message) {
-            displayedInModal = '#wager-start';
+            displayedInModal = '#wager_round';
 
             names = message['players'];
             for (name in names) {
@@ -402,9 +409,7 @@
             };
 
             $('#players').on('click', '.btn', function () {
-                for (button in $('#players').children('.btn')) {
-                    $(button).attr('disabled', true);
-                };
+                $('#wager_1').toggle();
 
                 socket.emit('wager_identified_h-s', {
                     'room': '{{ game.room }}',
@@ -414,9 +419,15 @@
             });
 
             manageModal({ action: 'show' });
+        });
 
+        socket.on('reveal_wager_question_s-bh', function (message) {
+            manageModal({ action: 'none', updates: message['updates'] });
+
+            $('#wager_2').toggle();
 
         });
+
 
         socket.on('wagerer_received', function (message) {
             $('#' + message['name'] + '_wagered').removeClass('btn-danger');

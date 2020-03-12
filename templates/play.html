@@ -45,34 +45,38 @@
                         <div class="modal-dialog modal-dialog-centered" role="document">
                             <div class="modal-content" id="wager-amount" style="display: none;">
                                 <div class="modal-text">
-                                    <div class="modal-custom" id="current_round">{% if game.round < 3 %}Daily Double!{% else %}Welcome 
+                                    <div class="modal-custom" id="current_round">{% if game.round < 3 %}Daily
+                                        Double!{% else %}Welcome
                                         to Jeopardy!{% endif %}</div>
                                     <div class="modal-custom small">You currently have {{ currency }}<span
-                                            id="scores">0</span>!</h4>
-                                        <div class="alert alert-danger collapse tiny" role="alert" id="wager_alert">
-                                            This is an invalid wager. Please try again!<br>(Click <a href="https://www.j-archive.com/help.php#dailydouble" target="_blank"> here</a> for details.)
-                                        </div>
-                                        <div class="form-group" id="wager">
-                                            <label for="wager">How much would you like to wager?</label>
-                                            <input name="wager" type="number" class="form-control" placeholder="0"
-                                                value="0" required id="wager_value">
-                                            <small class="form-text text-muted"></small>
-                                        </div>
-                                        <div class="form-group" id="answer" style="display: none;">
-                                            <label for="wager">Please enter an answer!</label>
-                                            <input name="wager" type="text" class="form-control" placeholder="" required
-                                                id="answer_value">
-                                            <small class="form-text text-muted"></small>
-                                        </div>
+                                            id="scores">0</span>!</div>
+                                    <div class="alert alert-danger collapse tiny" role="alert" id="wager_alert">
+                                        This is an invalid wager. Please try again!<br>(Click <a
+                                            href="https://www.j-archive.com/help.php#dailydouble" target="_blank">
+                                            here</a> for details.)
                                     </div>
-                                    <div class="modal-footer">
-                                        <button class="btn btn-success mr-auto" id="wager_submit">Submit!</button>
+                                    <br>
+                                    <div class="form-group modal-custom smaller" id="wager">
+                                        <label for="wager">How much would you like to wager?</label>
+                                        <input name="wager" type="number" class="form-control" placeholder="0" value="0"
+                                            required id="wager_value">
+                                        <small class="form-text text-muted"></small>
                                     </div>
+                                    <div class="form-group modal-custom" id="answer" style="display: none;">
+                                        <label for="wager">Please enter an answer!</label>
+                                        <input name="wager" type="text" class="form-control" placeholder="" required
+                                            id="answer_value">
+                                        <small class="form-text text-muted"></small>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button class="btn btn-success mr-auto" id="wager_submit">Submit!</button>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- <div class="modal fade" id="wager_modal" tabindex="-1" role="dialog"
+                    <!-- <div class="modal fade" id="wager_modal" tabindex="-1" role="dialog"
                         aria-labelledby="wager-modal-holder" aria-hidden="true" data-keyboard="false"
                         data-backdrop="static">
                         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -132,119 +136,119 @@
                             </div>
                         </div>
                     </div> -->
-                    </div>
                 </div>
             </div>
         </div>
-        <script type="text/javascript">
-            var displayedInModal = null;
+    </div>
+    <script type="text/javascript">
+        var displayedInModal = null;
 
-            socket.on('enable_buzzers_s-p', function (message) {
-                if (!message['players'].includes("{{ session['name'] }}")) {
-                    $('#buzzer').removeClass('disabled btn-danger');
-                    $('#buzzer').addClass('btn-success');
-                }
-            });
+        socket.on('enable_buzzers_s-p', function (message) {
+            if (!message['players'].includes("{{ session['name'] }}")) {
+                $('#buzzer').removeClass('disabled btn-danger');
+                $('#buzzer').addClass('btn-success');
+            }
+        });
 
-            socket.on('reset_buzzers_s-p', function (message) {
-                $('#buzzer').removeClass('btn-success');
-                $('#buzzer').addClass('disabled btn-danger');
-            });
+        socket.on('reset_buzzers_s-p', function (message) {
+            $('#buzzer').removeClass('btn-success');
+            $('#buzzer').addClass('disabled btn-danger');
+        });
 
-            socket.on('update_scores_s-ph', function (message) {
-                $('#score').text(message['scores']['{{ session["name"] }}']);
-                $('#scores').text(message['scores']['{{ session["name"] }}']);
-                $('#single_scores').text(message['scores']['{{ session["name"] }}']);
-            });
+        socket.on('update_scores_s-ph', function (message) {
+            $('#score').text(message['scores']['{{ session["name"] }}']);
+            $('#scores').text(message['scores']['{{ session["name"] }}']);
+            $('#single_scores').text(message['scores']['{{ session["name"] }}']);
+        });
 
-            socket.on('wager_amount_prompt_s-p', function (message) {
+        socket.on('wager_amount_prompt_s-p', function (message) {
 
-                if (message['players'].includes('{{ session["name"] }}')) {
-                    displayedInModal = '#wager-amount';
+            if (message['players'].includes('{{ session["name"] }}')) {
+                displayedInModal = '#wager-amount';
 
-                    manageModal({
-                        action: 'show'
-                    });
-                }
-            });
+                manageModal({
+                    action: 'show'
+                });
+            }
+        });
 
-            socket.on('single_wager_player_prompt', function (message) {
-                if (message['players'].includes("{{ session['name'] }}")) {
-                    manageModal('single_wager_modal', 'show');
-                }
-            });
+        socket.on('single_wager_player_prompt', function (message) {
+            if (message['players'].includes("{{ session['name'] }}")) {
+                manageModal('single_wager_modal', 'show');
+            }
+        });
 
-            socket.on('final_question_revealed', function (message) {
-                $('#answer').show();
-            });
+        socket.on('final_question_revealed', function (message) {
+            $('#answer').show();
+        });
 
 
-            $('button').click(function (event) {
-                if (this.id == 'buzzer') {
-                    socket.emit('buzz_in_p-s', {
-                        'room': '{{ game.room }}',
-                        'name': '{{ session["name"] }}'
-                    });
-                }
+        $('button').click(function (event) {
+            if (this.id == 'buzzer') {
+                socket.emit('buzz_in_p-s', {
+                    'room': '{{ game.room }}',
+                    'name': '{{ session["name"] }}'
+                });
+            }
 
-                else if (this.id == 'wager_submit') {
-                    wager = parseInt($('#wager_value').val());
-                    score = parseInt($('#score').text());
+            else if (this.id == 'wager_submit') {
+                wager = parseInt($('#wager_value').val());
+                score = parseInt($('#score').text());
 
-                    if (((wager <= score) | ((wager > score) & (wager <= 1000))) & wager > 0) {
-                        socket.emit('wager_submitted_p-s', {
-                            'room': '{{ game.room }}',
-                            'name': '{{ session["name"] }}',
-                            'wager': wager,
-                        });
-
-                        $('#wager_value').prop('disabled', function (i, v) { return !v; });
-                        $('#wager_alert').hide();
-
-                        document.getElementById('wager_submit').id = 'answer_submit';
-                    }
-
-                    else {
-                        $('#wager_alert').show();
-                    }
-
-                }
-
-                else if (this.id == 'single_wager_submit') {
-                    wager = parseInt($('#single_wager_value').val());
-                    score = parseInt($('#score').text());
-
-                    if ((wager <= score) | ((wager > score) & (wager <= 1000))) {
-                        socket.emit('single_wager_submitted', {
-                            'room': '{{ game.room }}',
-                            'name': '{{ session["name"] }}',
-                            'wager': wager
-                        });
-
-                        $('#wager_alert').hide();
-                        manageModal('single_wager_modal', 'hide');
-
-                        $('#single_wager_value').val(0);
-
-                    }
-
-                    else {
-                        $('#wager_alert').show();
-                    }
-
-                }
-
-                else if (this.id == 'answer_submit') {
-                    socket.emit('answer_submitted', {
+                if (((wager <= score) | ((wager > score) & (wager <= 1000))) & wager >= 0) {
+                    socket.emit('wager_submitted_p-s', {
                         'room': '{{ game.room }}',
                         'name': '{{ session["name"] }}',
-                        'answer': $('#answer_value').val()
+                        'wager': wager,
                     });
 
-                    manageModal('wager_modal', 'hide');
+                    $('#wager_value').prop('disabled', function (i, v) { return !v; });
+                    $('#wager_alert').hide();
+
+                    document.getElementById('wager_submit').id = 'answer_submit';
                 }
-            });
-        </script>
+
+                else {
+                    $('#wager_alert').show();
+                }
+
+            }
+
+            else if (this.id == 'single_wager_submit') {
+                wager = parseInt($('#single_wager_value').val());
+                score = parseInt($('#score').text());
+
+                if ((wager <= score) | ((wager > score) & (wager <= 1000))) {
+                    socket.emit('single_wager_submitted', {
+                        'room': '{{ game.room }}',
+                        'name': '{{ session["name"] }}',
+                        'wager': wager
+                    });
+
+                    $('#wager_alert').hide();
+                    manageModal('single_wager_modal', 'hide');
+
+                    $('#single_wager_value').val(0);
+
+                }
+
+                else {
+                    $('#wager_alert').show();
+                }
+
+            }
+
+            else if (this.id == 'answer_submit') {
+                socket.emit('answer_submitted', {
+                    'room': '{{ game.room }}',
+                    'name': '{{ session["name"] }}',
+                    'answer': $('#answer_value').val()
+                });
+
+                manageModal('wager_modal', 'hide');
+            }
+        });
+    </script>
 </body>
 
 </html>
