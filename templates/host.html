@@ -155,8 +155,8 @@
                                 <div id="modal-text">
                                     <div class="modal-custom">Round Complete!</div>
                                     <div class="modal-body">
-                                        Congratulations on finishing <span id="current_round"></span>! Are you ready to
-                                        start <span id="next_round"></span>?!
+                                        Congratulations on finishing <span id="current_round"></span> Are you ready to
+                                        start <span id="next_round"></span>?
                                     </div>
                                 </div>
                                 <div class="modal-footer">
@@ -255,6 +255,11 @@
                         'room': '{{ game.room }}'
                     });
 
+                    $('#finished_reading').removeClass('disabled');
+
+                    $('#correct_answer').addClass('disabled');
+                    $('#incorrect_answer').addClass('disabled');
+
                 }
 
                 else if (this.className.includes('wager_names')) {
@@ -280,8 +285,7 @@
                         'room': '{{ game.room }}'
                     });
 
-                    $('#correct_answer').addClass('disabled');
-                    $('#incorrect_answer').addClass('disabled');
+                    $('#finished_reading').addClass('disabled');
                 }
 
                 else if (this.id.endsWith('correct_answer')) {
