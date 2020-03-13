@@ -47,11 +47,9 @@ class Game(object):
 
         self.board = Board(segment=self.round, size=self.size)
 
-        self.wagers = {
-            "wagers": {player: 0 for player in self.score.keys()},
-            "single": "",
-            "received": 0,
-        }
+        self.wager = (
+            [[]] if self.round < 3 else [[player, 0] for player in self.score.keys()]
+        )
 
         self.board.add_wagers()
 

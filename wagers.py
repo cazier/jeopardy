@@ -1,4 +1,5 @@
 import config
+import rounds
 import storage
 
 from sockets import socketio
@@ -15,8 +16,7 @@ def start_wager(game):
 def single_wager_identified(data):
     game = storage.pull(room=data["room"])
 
-    if game.round < 3:
-        game.wagers["single"] = data["name"]
+    game.wager[0] = [data["name"], 0]
 
     socketio.emit(
         "wager_amount_prompt_s-p", {"room": data["room"], "players": [data["name"]],},
@@ -29,24 +29,33 @@ def wager_receipt(data):
 
     info = game.current_question.get()
 
-    game.wagers["wagers"][data["name"]] = int(data["wager"])
-    game.wagers["received"] += 1 if game.round > 3 else len(game.score.keys())
+    game.wager[0][1] = int(data["wager"])
+    print(game.wager)
 
-    if game.wagers["received"] >= len(game.score.keys()):
-        socketio.emit(
-            "reveal_wager_question_s-bh",
-            {
-                "room": game.room,
-                "updates": {
-                    "wager_question": info["question"].replace("<br />", "\n"),
-                    "wager_answer": info["answer"],
-                },
+    socketio.emit(
+        "reveal_wager_question_s-bh",
+        {
+            "room": game.room,
+            "updates": {
+                "wager_question": info["question"].replace("<br />", "\n"),
+                "wager_answer": info["answer"],
             },
-        )
+        },
+    )
 
 
 @socketio.on("wager_answered_h-s")
 def wager_answered(data):
     game = storage.pull(room=data["room"])
 
-    print(data)
+    if data["correct"]:
+        game.score[game.wager[0][0]] += game.wager[0][1]
+
+    else:
+        game.score[game.wager[0][0]] -= game.wager[0][1]
+
+    socketio.emit("update_scores_s-ph", {"room": data["room"], "scores": game.score})
+
+    socketio.emit("clear_modal", {"room": data["room"]})
+
+    rounds.end_question(data)

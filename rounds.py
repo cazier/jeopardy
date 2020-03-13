@@ -88,7 +88,7 @@ def question_answered(data):
     socketio.emit("update_scores_s-ph", {"room": data["room"], "scores": game.score})
 
     if data["correct"] or len(game.score.keys()) == len(game.buzz_order):
-        socketio.emit("clear_modal", {"room": data["room"]})
+        # socketio.emit("clear_modal", {"room": data["room"]})
 
         end_question(data)
 

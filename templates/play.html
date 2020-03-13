@@ -199,11 +199,8 @@
                         'name': '{{ session["name"] }}',
                         'wager': wager,
                     });
-
-                    $('#wager_value').prop('disabled', function (i, v) { return !v; });
+                    manageModal({ action: 'hide' })
                     $('#wager_alert').hide();
-
-                    document.getElementById('wager_submit').id = 'answer_submit';
                 }
 
                 else {
