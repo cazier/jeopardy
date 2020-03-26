@@ -7,16 +7,13 @@ from sockets import socketio
 
 def start_wager(game):
     socketio.emit(
-        "start_wager_round_s-bh",
-        {"room": game.room, "players": list(game.score.keys())},
+        "start_wager_round_s-bh", {"room": game.room, "players": game.score.keys()},
     )
 
 
 @socketio.on("wager_identified_h-s")
 def single_wager_identified(data):
     game = storage.pull(room=data["room"])
-
-    game.wager[0] = [data["name"], 0]
 
     socketio.emit(
         "wager_amount_prompt_s-p", {"room": data["room"], "players": [data["name"]],},
@@ -29,8 +26,7 @@ def wager_receipt(data):
 
     info = game.current_question.get()
 
-    game.wager[0][1] = int(data["wager"])
-    print(game.wager)
+    game.score[data["name"]] = int(data["wager"])
 
     socketio.emit(
         "reveal_wager_question_s-bh",
@@ -48,13 +44,11 @@ def wager_receipt(data):
 def wager_answered(data):
     game = storage.pull(room=data["room"])
 
-    if data["correct"]:
-        game.score[game.wager[0][0]] += game.wager[0][1]
+    game.score.update(game=game, correct=int(data["correct"]), round_=u"wager")
 
-    else:
-        game.score[game.wager[0][0]] -= game.wager[0][1]
-
-    socketio.emit("update_scores_s-ph", {"room": data["room"], "scores": game.score})
+    socketio.emit(
+        "update_scores_s-ph", {"room": data["room"], "scores": game.score.emit()}
+    )
 
     socketio.emit("clear_modal", {"room": data["room"]})
 

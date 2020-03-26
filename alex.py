@@ -18,7 +18,8 @@ class Game(object):
 
         self.round: int = config.round_
 
-        self.score: dict = dict()
+        self.score = Scoreboard()
+
         self.buzz_order: list = list()
 
         self.current_question = None
@@ -35,7 +36,7 @@ class Game(object):
 
         name (str) -- The player's name
         """
-        self.score[name] = 0
+        self.score << name
 
     def make_board(self):
         """Create a game board.
@@ -47,13 +48,9 @@ class Game(object):
 
         self.board = Board(segment=self.round, size=self.size)
 
-        self.wager = (
-            [[]] if self.round < 3 else [[player, 0] for player in self.score.keys()]
-        )
-
         self.board.add_wagers()
 
-    def reset(self, reset_score: bool, reset_players: bool):
+    def reset(self, reset_score: bool = False, reset_players: bool = False):
         """Reset the game to play again!
 
         Required Arguments:
@@ -62,15 +59,12 @@ class Game(object):
         `reset_players` (bool) -- Reset both players and score (Basically, a whole new game)
         """
         if reset_players:
-            self.score = dict()
-            self.round = 1
+            self.score.reset(type_="players")
 
         elif reset_score:
-            self.score = {player: 0 for player in self.score.keys()}
-            self.round = 1
+            self.score.reset(type_="score")
 
-        else:
-            return False
+        self.round = 1
 
     def round_text(self, upcoming: bool = False) -> str:
         """Return the text describing the title of the, by default, current round.
@@ -135,8 +129,60 @@ class Game(object):
 
         name (str) -- The name of the player that buzzed in.
         """
-        if name in self.score.keys():
+        if name in self.score:
             self.buzz_order.append(name)
+
+
+class Scoreboard(object):
+    def __init__(self):
+        self.players: dict = dict()
+
+    def __contains__(self, item: str) -> bool:
+        return item in self.players.keys()
+
+    def __lshift__(self, other: str) -> bool:
+        if other not in self:
+            self.players[other] = {"score": 0, "wager": 0}
+
+            return True
+
+        else:
+            return False
+
+    def __len__(self) -> int:
+        return len(self.players.keys())
+
+    def __getitem__(self, player: str) -> int:
+        return self.players[player]["score"]
+
+    def __setitem__(self, player: str, wager: int) -> None:
+        self.players[player]["wager"] = wager
+
+    def emit(self) -> dict:
+        return {i: self.players[i]["score"] for i in self.players.keys()}
+
+    def keys(self) -> list:
+        return list(self.players.keys())
+
+    def reset(self, type_: str) -> None:
+        if type_ == "players":
+            self.players = dict()
+
+        elif type_ == "score":
+            self.players = {i: {"score": 0, "wager": 0} for i in self.players}
+
+    def update(self, game, correct: int, round_: str = "standard") -> None:
+        if round_ == "standard":
+            player = game.buzz_order[-1]
+            value = game.current_question.value * (-1 + (2 * correct))
+
+            self.players[player]["score"] += value
+
+        elif round_ == "wager":
+            for player in self.players:
+                value = self.players[player]["wager"] * (-1 + (2 * correct))
+
+                self.players[player]["score"] += value
 
 
 class Board(object):

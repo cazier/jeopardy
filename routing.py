@@ -133,7 +133,7 @@ def route_player():
             )
             error_occurred = True
 
-        if name in storage.pull(room=room).score.keys():
+        if name in storage.pull(room=room).score:
             flash(
                 message="The name you selected already exists. Please choose another one!",
                 category="error",

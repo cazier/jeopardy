@@ -79,17 +79,13 @@ def question_answered(data):
     """
     game = storage.pull(data["room"])
 
-    if data["correct"]:
-        game.score[game.buzz_order[-1]] += game.current_question.value
+    game.score.update(game=game, correct=int(data["correct"]))
 
-    else:
-        game.score[game.buzz_order[-1]] -= game.current_question.value
+    socketio.emit(
+        "update_scores_s-ph", {"room": data["room"], "scores": game.score.emit()}
+    )
 
-    socketio.emit("update_scores_s-ph", {"room": data["room"], "scores": game.score})
-
-    if data["correct"] or len(game.score.keys()) == len(game.buzz_order):
-        # socketio.emit("clear_modal", {"room": data["room"]})
-
+    if data["correct"] or len(game.score) == len(game.buzz_order):
         end_question(data)
 
     else:
@@ -134,4 +130,3 @@ def end_question(data):
                 },
             },
         )
-
