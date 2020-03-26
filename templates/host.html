@@ -83,7 +83,7 @@
                             <hr>
                             <div class="btn-toolbar" role="toolbar">
                                 <div class="btn-group mr-2" role="group">
-                                    <button class="btn btn-success" id="get_wagers">Prompt for Wagers</button>
+                                    <button class="btn btn-success" id="get_wager">Prompt for Wagers</button>
                                 </div>
                                 <div class="btn-group mr-2" role="group">
                                     <button class="btn btn-success disabled" id="reveal_question">Reveal
@@ -262,24 +262,6 @@
 
                 }
 
-                else if (this.className.includes('wager_names')) {
-                    socket.emit('final_wagerer_reveal', {
-                        'room': '{{ game.room }}',
-                        'name': this.id,
-                    })
-
-                    $('#' + this.id).addClass('disabled');
-                }
-
-                else if (this.className.includes('wagerers')) {
-                    socket.emit('final_wagerer_reveal', {
-                        'room': '{{ game.room }}',
-                        'name': this.id,
-                    })
-
-                    $('#' + this.id).addClass('disabled');
-                }
-
                 else if (this.id == 'finished_reading') {
                     socket.emit('finished_reading_h-s', {
                         'room': '{{ game.room }}'
@@ -318,40 +300,12 @@
                     });
                 }
 
-                else if (this.id == 'modal_dismiss') {
-                    socket.emit('dismiss_modal', {
-                        'room': '{{ game.room }}'
-                    });
-                }
-
-
-                else if (this.id == 'get_wagers') {
-                    $('#reveal_question').removeClass('disabled');
-
-                    socket.emit('get_wagers', {
-                        'room': '{{ game.room }}'
-                    });
-                }
-
-
-                else if (this.id == 'single_correct_answer') {
-                    manageModal('single_wager_modal', 'hide');
-
-                    socket.emit('correct_wager', {
+                else if (this.id == 'get_wager') {
+                    socket.emit('get_wager_h-s', {
                         'room': '{{ game.room }}',
-                        'name': $('#single_wagerer').text()
+                        'name': null
                     });
                 }
-
-                else if (this.id == 'single_incorrect_answer') {
-                    manageModal('single_wager_modal', 'hide');
-
-                    socket.emit('incorrect_wager', {
-                        'room': '{{ game.room }}',
-                        'name': $('#single_wagerer').text()
-                    });
-                }
-
             }
         });
 
@@ -382,7 +336,7 @@
         });
 
         socket.on('next_round_started_s-bh', function (message) {
-            start_round();
+            $("<form method='POST' action='" + document.URL + "'><input type='hidden' name='room' value='{{ game.room }}'/></form>").appendTo("body").submit();
         });
 
         socket.on('start_wager_round_s-bh', function (message) {
@@ -396,7 +350,7 @@
             $('#players').on('click', '.btn', function () {
                 $('#wager_1').toggle();
 
-                socket.emit('wager_identified_h-s', {
+                socket.emit('get_wager_h-s', {
                     'room': '{{ game.room }}',
                     'name': this.id,
                 });
@@ -418,28 +372,6 @@
             $('#' + message['name'] + '_wagered').removeClass('btn-danger');
             $('#' + message['name'] + '_wagered').addClass('btn-success');
         });
-
-        socket.on('final_wager_received', function (message) {
-            $('#wager_answer_holder').collapse('hide');
-
-            $('#wager_round_name').text(message['name']);
-            $('#wager_round_amount').text(message['wager']);
-            $('#wager_round_answer').text(message['answer']);
-
-            alert('Doing somethign with wager_category');
-
-            manageModal('wager_category_modal', 'show');
-        });
-
-        socket.on('reveal_wager_answer', function (message) {
-            $('#wager_answer_holder').collapse('show');
-        });
-
-
-        function start_round() {
-            $("<form method='POST' action='" + document.URL + "'><input type='hidden' name='room' value='{{ game.room }}'/></form>").appendTo("body").submit();
-        };
-
     </script>
 </body>
 

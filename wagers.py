@@ -11,12 +11,18 @@ def start_wager(game):
     )
 
 
-@socketio.on("wager_identified_h-s")
-def single_wager_identified(data):
+@socketio.on("get_wager_h-s")
+def wager_answered(data):
     game = storage.pull(room=data["room"])
 
+    if game.round <= 2:
+        players = [data["name"]]
+
+    else:
+        players = game.score.keys()
+
     socketio.emit(
-        "wager_amount_prompt_s-p", {"room": data["room"], "players": [data["name"]],},
+        "wager_amount_prompt_s-p", {"room": data["room"], "players": players},
     )
 
 

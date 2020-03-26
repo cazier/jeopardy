@@ -160,6 +160,7 @@
         });
 
         socket.on('wager_amount_prompt_s-p', function (message) {
+            $('#wager_value').val(0);
 
             if (message['players'].includes('{{ session["name"] }}')) {
                 displayedInModal = '#wager-amount';
