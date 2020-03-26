@@ -153,7 +153,7 @@ def single_wager_prompt(data):
 
 
 @socketio.on(u"single_wager_submitted")
-def received_wager(data):
+def received_dwfager(data):
     game = storage.pull(data[u"room"])
 
     info = game.current_question.get()
@@ -174,16 +174,6 @@ def received_wager(data):
     else:
         pass
         ##TODO ERROR HANDLE THIS!
-
-
-@socketio.on(u"player_selected")
-def player_selected(data):
-    game = storage.pull(data[u"room"])
-
-    if game.round < 3:
-        game.wagered_round[data[u"name"]] = {}
-
-    print(u"WAGERER RECEIVED! They're name is:", data[u"name"])
 
 
 @socketio.on(u"join")
