@@ -30,20 +30,27 @@ def wager_answered(data):
 def wager_receipt(data):
     game = storage.pull(room=data["room"])
 
-    info = game.current_question.get()
-
     game.score[data["name"]] = int(data["wager"])
 
-    socketio.emit(
-        "reveal_wager_question_s-bh",
-        {
-            "room": game.room,
-            "updates": {
-                "wager_question": info["question"].replace("<br />", "\n"),
-                "wager_answer": info["answer"],
+    if game.round < 3 or (game.round >= 3 and (game.score.num > len(game.score))):
+        info = game.current_question.get()
+
+        socketio.emit(
+            "reveal_wager_question_s-bh",
+            {
+                "room": game.room,
+                "updates": {
+                    "wager_question": info["question"].replace("<br />", "\n"),
+                    "wager_answer": info["answer"],
+                },
             },
-        },
-    )
+        )
+
+    else:
+        socketio.emit(
+            "wager_submitted_s-h",
+            {"room": game.room, "updates": {"wager_player": data["name"]}},
+        )
 
 
 @socketio.on("wager_answered_h-s")

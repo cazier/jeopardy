@@ -136,6 +136,7 @@ class Game(object):
 class Scoreboard(object):
     def __init__(self):
         self.players: dict = dict()
+        self.num = 0
 
     def __contains__(self, item: str) -> bool:
         return item in self.players.keys()
@@ -157,6 +158,7 @@ class Scoreboard(object):
 
     def __setitem__(self, player: str, wager: int) -> None:
         self.players[player]["wager"] = wager
+        self.num += 1
 
     def emit(self) -> dict:
         return {i: self.players[i]["score"] for i in self.players.keys()}
@@ -183,6 +185,7 @@ class Scoreboard(object):
                 value = self.players[player]["wager"] * (-1 + (2 * correct))
 
                 self.players[player]["score"] += value
+                self.players[player]["wager"] = 0
 
 
 class Board(object):

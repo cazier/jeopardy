@@ -50,49 +50,6 @@
                             {% endfor %}
                         </div>
                     </div>
-                    {% else %}
-                    <!-- Section loaded for the wagering rounds. (Final and Tiebreaker) -->
-                    <div>
-                        <div class="btn-toolbar" role="toolbar">
-                            <div class="btn-group" role="group" id="wagerers">
-                                {% for name in game.score.keys() %}
-                                <button class="btn btn-danger wager_names" id="{{ name }}_wagered">{{ name }}</button>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        <div>
-                            <hr>
-                            <h4>
-                                CATEGORY:
-                            </h4>
-                            <h5 style="padding-left: 25px">{{ game.board.categories[0].category }}</h5>
-                            <div id='final_question_answer_reveal' class="collapse">
-                                <hr>
-                                <h4>
-                                    QUESTION:
-                                </h4>
-                                <h5 style="padding-left: 25px">{{ game.board.categories[0].questions[0].question }}</h5>
-                                <hr>
-                                <h4>
-                                    ANSWER:
-                                    </h3>
-                                    <h5 style="padding-left: 25px">{{ game.board.categories[0].questions[0].answer }}
-                                    </h5>
-                                </h4>
-                            </div>
-                            <hr>
-                            <div class="btn-toolbar" role="toolbar">
-                                <div class="btn-group mr-2" role="group">
-                                    <button class="btn btn-success" id="get_wager">Prompt for Wagers</button>
-                                </div>
-                                <div class="btn-group mr-2" role="group">
-                                    <button class="btn btn-success disabled" id="reveal_question">Reveal
-                                        Question</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endif %}
                     <div class="modal fade" id="master-modal" tabindex="-1" role="dialog"
                         aria-labelledby="master-modal-holder" aria-hidden="true" data-keyboard="false"
                         data-backdrop="static">
@@ -237,6 +194,49 @@
                             </div>
                         </div>
                     </div>
+                    {% else %}
+                    <!-- Section loaded for the wagering rounds. (Final and Tiebreaker) -->
+                    <div>
+                        <div class="btn-toolbar" role="toolbar">
+                            <div class="btn-group" role="group" id="wagerers">
+                                {% for name in game.score.keys() %}
+                                <button class="btn btn-danger wager_names" id="{{ name }}_wagered">{{ name }}</button>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div>
+                            <hr>
+                            <h4>
+                                CATEGORY:
+                            </h4>
+                            <h5 style="padding-left: 25px">{{ game.board.categories[0].category }}</h5>
+                            <div id='final_question_answer_reveal' class="collapse">
+                                <hr>
+                                <h4>
+                                    QUESTION:
+                                </h4>
+                                <h5 style="padding-left: 25px">{{ game.board.categories[0].questions[0].question }}</h5>
+                                <hr>
+                                <h4>
+                                    ANSWER:
+                                    </h3>
+                                    <h5 style="padding-left: 25px">{{ game.board.categories[0].questions[0].answer }}
+                                    </h5>
+                                </h4>
+                            </div>
+                            <hr>
+                            <div class="btn-toolbar" role="toolbar">
+                                <div class="btn-group mr-2" role="group">
+                                    <button class="btn btn-success" id="get_wager">Prompt for Wagers</button>
+                                </div>
+                                <div class="btn-group mr-2" role="group">
+                                    <button class="btn btn-success disabled" id="reveal_question">Reveal
+                                        Question</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -367,11 +367,11 @@
 
         });
 
-
-        socket.on('wagerer_received', function (message) {
+        socket.on('wager_submitted_s-h', function (message) {
             $('#' + message['name'] + '_wagered').removeClass('btn-danger');
             $('#' + message['name'] + '_wagered').addClass('btn-success');
         });
+
     </script>
 </body>
 
