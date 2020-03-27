@@ -12,7 +12,7 @@ def start_wager(game):
 
 
 @socketio.on("get_wager_h-s")
-def wager_answered(data):
+def wager_receipt(data):
     game = storage.pull(room=data["room"])
 
     if game.round <= 2:
@@ -27,30 +27,46 @@ def wager_answered(data):
 
 
 @socketio.on("wager_submitted_p-s")
-def wager_receipt(data):
+def wager_submittal(data):
     game = storage.pull(room=data["room"])
 
     game.score[data["name"]] = int(data["wager"])
 
-    if game.round < 3 or (game.round >= 3 and (game.score.num > len(game.score))):
-        info = game.current_question.get()
+    updates: dict = dict()
 
-        socketio.emit(
-            "reveal_wager_question_s-bh",
-            {
-                "room": game.room,
-                "updates": {
-                    "wager_question": info["question"].replace("<br />", "\n"),
-                    "wager_answer": info["answer"],
-                },
-            },
-        )
+    if game.round >= 3:
+        if game.score.num == len(game.score):
+            game.get(u"q_0_0")
+            info = game.current_question.get()
 
-    else:
+            updates = {
+                "wager_question": info["question"].replace("<br />", "\n"),
+                "wager_answer": info["answer"],
+                "displayedInModal": "#wager_round",
+            }
+
+            reveal_wager_question(game=game, updates=updates)
+
         socketio.emit(
             "wager_submitted_s-h",
-            {"room": game.room, "updates": {"wager_player": data["name"]}},
+            {"room": game.room, "updates": {"name": data["name"]}},
         )
+
+    elif game.round < 3:
+        info = game.current_question.get()
+
+        updates = {
+            "wager_question": info["question"].replace("<br />", "\n"),
+            "wager_answer": info["answer"],
+        }
+
+        reveal_wager_question(game=game, updates=updates)
+
+
+def reveal_wager_question(game, updates) -> None:
+    socketio.emit(
+        "reveal_wager_question_s-bh", {"room": game.room, "updates": updates,},
+    )
 
 
 @socketio.on("wager_answered_h-s")

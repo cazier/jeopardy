@@ -102,7 +102,8 @@
                             </div>
                             <div class="modal-content" id="wager_round" style="display: none;">
                                 <div class="modal-text">
-                                    <div class="modal-custom">Daily Double!</div>
+                                    <div class="modal-custom">{% if game.round <= 2 %}Daily Double!{% else %}Final
+                                        Jeopardy!{% endif %}</div>
                                     <div id="wager_2" style="display: none;">
                                         <div class="modal-custom">
                                             <div>Question:</div>

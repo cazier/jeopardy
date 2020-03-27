@@ -44,7 +44,13 @@
 			for (var item in updates) {
 				$('#' + item).text(updates[item]);
 			};
+
+			if ('displayedInModal' in updates) {
+				displayedInModal = updates['displayedInModal'];
+				action = 'show';
+			}
 		}
+
 
 		if (action == 'show') {
 			$(displayedInModal).css("display", "block");
@@ -61,6 +67,7 @@
 
 			$(displayedInModal).css("display", "none");
 		}
+
 	};
 
 

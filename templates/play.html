@@ -45,7 +45,8 @@
                         <div class="modal-dialog modal-dialog-centered" role="document">
                             <div class="modal-content" id="wager-amount" style="display: none;">
                                 <div class="modal-text">
-                                    <div class="modal-custom">Daily Double!</div>
+                                    <div class="modal-custom">{% if game.round <= 2 %}Daily Double!{% else %}Final
+                                        Jeopardy!{% endif %}</div>
                                     <div class="modal-custom small">You currently have {{ currency }}<span
                                             id="scores">0</span>!</div>
                                     <div class="alert alert-danger collapse tiny" role="alert" id="wager_alert">
