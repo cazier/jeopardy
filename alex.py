@@ -132,6 +132,13 @@ class Game(object):
         if name in self.score:
             self.buzz_order.append(name)
 
+    def heading(self) -> str:
+        if self.round <= 2:
+            return "Daily Double!"
+        
+        else:
+            return "Final Jeopardy!"
+
 
 class Scoreboard(object):
     def __init__(self):

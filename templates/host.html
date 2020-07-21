@@ -78,8 +78,7 @@
                             </div>
                             <div class="modal-content" id="wager_round" style="display: none;">
                                 <div class="modal-text">
-                                    <div class="modal-custom">{% if game.round <= 2 %}Daily Double!{% else %}Final
-                                        Jeopardy!{% endif %}</div>
+                                    <div class="modal-custom">{{ game.heading() }}</div>
                                     <div id="wager_1" {% if game.round > 2 %}style="display: none;" {% endif %}>
                                         <div class="modal-custom small">Who chose the category?</div>
                                         <div class="btn-toolbar" role="toolbar" style="padding: 16px;">
@@ -149,7 +148,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="modal-content" id="final_reveal" style="display: none;">
+                        <!-- <div class="modal-content" id="final_reveal" style="display: none;">
                             <div class="modal-header">
                                 <h3 class="modal-title" id="wager-category-modal-holder"><span id="category"></span>
                                 </h3>
@@ -193,7 +192,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                     {% else %}
                     <!-- Section loaded for the wagering rounds. (Final and Tiebreaker) -->
@@ -306,6 +305,8 @@
                         'room': '{{ game.room }}',
                         'name': null
                     });
+
+                    $('#get_wager').addClass('disabled');
                 }
             }
         });
