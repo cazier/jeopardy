@@ -218,7 +218,7 @@ def route_test():
 
     storage.pull(room=room).make_board()
 
-    return render_template(template_name_or_list="testing.html")
+    return render_template(template_name_or_list="testing.html", ip = config.testing_address)
 
 
 @routing.errorhandler(500)
