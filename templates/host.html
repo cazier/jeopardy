@@ -76,9 +76,22 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="modal-content" id="round_transition" style="display: none;">
+                                <div id="modal-text">
+                                    <div class="modal-custom">Round Complete!</div>
+                                    <div class="modal-body">
+                                        Congratulations on finishing <span id="current_round"></span> Are you ready to
+                                        start <span id="next_round"></span>?
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button class="btn btn-success mr-auto" id="start_next_round">Start the next
+                                        round!</button>
+                                </div>
+                            </div>
                             <div class="modal-content" id="wager_round" style="display: none;">
                                 <div class="modal-text">
-                                    <div class="modal-custom">{{ game.heading() }}</div>
+                                    <div class="modal-custom centered">{{ game.heading() }}</div>
                                     <div id="wager_1" {% if game.round > 2 %}style="display: none;" {% endif %}>
                                         <div class="modal-custom small">Who chose the category?</div>
                                         <div class="btn-toolbar" role="toolbar" style="padding: 16px;">
@@ -106,19 +119,6 @@
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="modal-content" id="round_transition" style="display: none;">
-                                <div id="modal-text">
-                                    <div class="modal-custom">Round Complete!</div>
-                                    <div class="modal-body">
-                                        Congratulations on finishing <span id="current_round"></span> Are you ready to
-                                        start <span id="next_round"></span>?
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button class="btn btn-success mr-auto" id="start_next_round">Start the next
-                                        round!</button>
                                 </div>
                             </div>
                             <div class="modal-content" id="final_round" style="display: none;">
