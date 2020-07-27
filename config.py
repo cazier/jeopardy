@@ -11,6 +11,6 @@ app_secret = u"secret!"
 
 debug = True
 questions = 1
-round_ = 2
+round_ = 3
 
-testing_address = "192.168.1.173:5000"
+testing_address = "127.0.0.1:5000"

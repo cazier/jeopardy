@@ -29,6 +29,10 @@ class Game(object):
             self.add_player("Brad")
             self.add_player("Carl")
 
+            self.score.players['Alex']['score'] = 15000
+            self.score.players['Brad']['score'] = 500
+            self.score.players['Carl']['score'] = -750
+
     def add_player(self, name: str):
         """Add a player to the game with a starting score of zero (0).
 
