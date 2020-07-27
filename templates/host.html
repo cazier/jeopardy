@@ -92,14 +92,15 @@
                             <div class="modal-content" id="wager_round" style="display: none;">
                                 <div class="modal-text">
                                     <div class="modal-custom centered">{{ game.heading() }}</div>
-                                    <div id="wager_1" {% if game.round > 2 %}style="display: none;" {% endif %}>
+                                    <!-- <div id="wager_1" {% if game.round > 2 %}style="display: none;" {% endif %}> -->
+                                    <div id="show_-1">
                                         <div class="modal-custom small">Who chose the category?</div>
                                         <div class="btn-toolbar" role="toolbar" style="padding: 16px;">
                                             <div class="btn-group" role="group" id="players">
                                             </div>
                                         </div>
                                     </div>
-                                    <div id="wager_2" style="display: none;">
+                                    <div id="show_0" style="display: none;">
                                         <div class="modal-custom">
                                             <div>Question:</div>
                                             <div id="wager_question" class="smaller"></div>
@@ -210,29 +211,30 @@
                                 CATEGORY:
                             </h4>
                             <h5 style="padding-left: 25px">{{ game.board.categories[0].category }}</h5>
-                            <div id='final_question_answer_reveal' class="collapse">
-                                <hr>
+                            <hr>
+                            <div class="btn-toolbar" role="toolbar" id="hide_0">
+                                <div class="btn-group mr-2" role="group">
+                                    <button class="btn btn-success" id="get_wager">Prompt for Wagers</button>
+                                </div>
+                            </div>
+                            <div id="show_0" style="display: none;">
                                 <h4>
                                     QUESTION:
                                 </h4>
                                 <h5 style="padding-left: 25px">{{ game.board.categories[0].questions[0].question }}</h5>
                                 <hr>
+                                <div class="btn-toolbar" role="toolbar" id="hide_1">
+                                    <div class="btn-group mr-2" role="group">
+                                        <button class="btn btn-success" id="get_answers">Prompt for Answers</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="show_1" style="display: none;">
                                 <h4>
                                     ANSWER:
-                                    </h3>
-                                    <h5 style="padding-left: 25px">{{ game.board.categories[0].questions[0].answer }}
-                                    </h5>
                                 </h4>
-                            </div>
-                            <hr>
-                            <div class="btn-toolbar" role="toolbar">
-                                <div class="btn-group mr-2" role="group">
-                                    <button class="btn btn-success" id="get_wager">Prompt for Wagers</button>
-                                </div>
-                                <div class="btn-group mr-2" role="group">
-                                    <button class="btn btn-success disabled" id="reveal_question">Reveal
-                                        Question</button>
-                                </div>
+                                <h5 style="padding-left: 25px">{{ game.board.categories[0].questions[0].answer }}</h5>
+                                <hr>
                             </div>
                         </div>
                     </div>
@@ -306,7 +308,16 @@
                         'name': null
                     });
 
-                    $('#get_wager').addClass('disabled');
+                    $('#hide_0').hide();
+                }
+
+                else if (this.id == 'get_answers') {
+                    socket.emit('get_answers_h-s', {
+                        'room': '{{ game.room }}',
+                        'name': null
+                    });
+
+                    $('#hide_1').hide();
                 }
             }
         });
@@ -350,7 +361,7 @@
             };
 
             $('#players').on('click', '.btn', function () {
-                $('#wager_1').toggle();
+                $('#show_-1').toggle();
 
                 socket.emit('get_wager_h-s', {
                     'room': '{{ game.room }}',
@@ -365,13 +376,19 @@
         socket.on('reveal_wager_question_s-bh', function (message) {
             manageModal({ action: 'none', updates: message['updates'] });
 
-            $('#wager_2').toggle();
+            $('#show_0').toggle();
+        });
 
+        socket.on('reset_wager_names_s-h', function (message) {
+            names = message['players'];
+            for (name in names) {
+                console.log(names[name]);
+                $('#' + names[name] + '_wagered').toggleClass('btn-danger btn-success');
+            }
         });
 
         socket.on('wager_submitted_s-h', function (message) {
-            $('#' + message['updates']['name'] + '_wagered').removeClass('btn-danger');
-            $('#' + message['updates']['name'] + '_wagered').addClass('btn-success');
+            $('#' + message['updates']['name'] + '_wagered').toggleClass('btn-danger btn-success');
         });
 
     </script>

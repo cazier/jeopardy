@@ -29,9 +29,9 @@ class Game(object):
             self.add_player("Brad")
             self.add_player("Carl")
 
-            self.score.players['Alex']['score'] = 15000
-            self.score.players['Brad']['score'] = 500
-            self.score.players['Carl']['score'] = -750
+            self.score.players["Alex"]["score"] = 15000
+            self.score.players["Brad"]["score"] = 500
+            self.score.players["Carl"]["score"] = -750
 
     def add_player(self, name: str):
         """Add a player to the game with a starting score of zero (0).
@@ -139,7 +139,7 @@ class Game(object):
     def heading(self) -> str:
         if self.round <= 2:
             return "Daily Double!"
-        
+
         else:
             return "Final Jeopardy!"
 
@@ -154,7 +154,7 @@ class Scoreboard(object):
 
     def __lshift__(self, other: str) -> bool:
         if other not in self:
-            self.players[other] = {"score": 0, "wager": 0}
+            self.players[other] = {"score": 0, "wager": {"amount": 0, "answer": ""}}
 
             return True
 
@@ -167,8 +167,11 @@ class Scoreboard(object):
     def __getitem__(self, player: str) -> int:
         return self.players[player]["score"]
 
-    def __setitem__(self, player: str, wager: int) -> None:
-        self.players[player]["wager"] = wager
+    def __setitem__(self, player: str, wager: tuple) -> None:
+        k, v = wager
+
+        self.players[player]["wager"][k] = v
+
         self.num += 1
 
     def emit(self) -> dict:
@@ -193,10 +196,10 @@ class Scoreboard(object):
 
         elif round_ == "wager":
             for player in self.players:
-                value = self.players[player]["wager"] * (-1 + (2 * correct))
+                value = self.players[player]["wager"]["amount"] * (-1 + (2 * correct))
 
                 self.players[player]["score"] += value
-                self.players[player]["wager"] = 0
+                self.players[player]["wager"]["amount"] = 0
 
 
 class Board(object):
