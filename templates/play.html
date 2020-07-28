@@ -79,6 +79,7 @@
     </div>
     <script type="text/javascript">
         var displayedInModal = null;
+        var finalRound = false;
 
         socket.on('enable_buzzers_s-p', function (message) {
             if (!message['players'].includes("{{ session['name'] }}")) {
@@ -98,6 +99,7 @@
         });
 
         socket.on('wager_amount_prompt_s-p', function (message) {
+            if (message['players'].length != 1) { finalRound = true; };
             $('#wager_value').val(0);
 
             if (message['players'].includes('{{ session["name"] }}')) {
@@ -143,9 +145,11 @@
                         manageModal({ action: 'hide' })
                         $('#alert').hide();
 
-                        $('#alert').text('Please enter an answer! Guess if you have to!')
-                        $('#wager').hide();
-                        $('#answer').show();
+                        if (finalRound) {
+                            $('#alert').text('Please enter an answer! Guess if you have to!')
+                            $('#wager').hide();
+                            $('#answer').show();
+                        }
                     }
 
                     else {

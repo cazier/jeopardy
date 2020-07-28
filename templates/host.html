@@ -382,13 +382,18 @@
         socket.on('reset_wager_names_s-h', function (message) {
             names = message['players'];
             for (name in names) {
-                console.log(names[name]);
                 $('#' + names[name] + '_wagered').toggleClass('btn-danger btn-success');
             }
         });
 
         socket.on('wager_submitted_s-h', function (message) {
             $('#' + message['updates']['name'] + '_wagered').toggleClass('btn-danger btn-success');
+        });
+
+        socket.on('reveal_wager_answer_s-bh', function (message) {
+            manageModal({ action: 'none', updates: message['updates'] });
+
+            $('#show_1').toggle();
         });
 
     </script>

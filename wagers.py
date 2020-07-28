@@ -14,6 +14,7 @@ def start_wager(game):
 @socketio.on("get_wager_h-s")
 def wager_receipt(data):
     game = storage.pull(room=data["room"])
+    game.score.num = 0
 
     if game.round <= 2:
         players = [data["name"]]
@@ -30,6 +31,13 @@ def wager_receipt(data):
 def wager_submittal(data):
     game = storage.pull(room=data["room"])
 
+    print("="*7, "\n", game.score.num, len(game.score))
+
+    socketio.emit(
+        "wager_submitted_s-h",
+        {"room": game.room, "updates": {"name": data["name"]}},
+    )
+
     if "wager" in data.keys():
         game.score[data["name"]] = ("amount", int(data["wager"]))
 
@@ -37,8 +45,6 @@ def wager_submittal(data):
 
         if game.round >= 3:
             if game.score.num == len(game.score):
-                game.score.num = 0
-
                 game.get(u"q_0_0")
                 info = game.current_question.get()
 
@@ -52,10 +58,10 @@ def wager_submittal(data):
 
                 reveal_wager_question(game=game, updates=updates)
 
-            socketio.emit(
-                "wager_submitted_s-h",
-                {"room": game.room, "updates": {"name": data["name"]}},
-            )
+            # socketio.emit(
+            #     "wager_submitted_s-h",
+            #     {"room": game.room, "updates": {"name": data["name"]}},
+            # )
 
         elif game.round < 3:
             info = game.current_question.get()
@@ -74,6 +80,16 @@ def wager_submittal(data):
 
         if game.score.num == len(game.score):
             reset_wager_names(game=game)
+
+            socketio.emit(
+                "reveal_wager_answer_s-bh",
+                {
+                    "room": game.room,
+                    "updates": updates,
+                },
+            )
+
+
 
 
 
@@ -112,6 +128,7 @@ def wager_answered(data):
 @socketio.on("get_answers_h-s")
 def answer_receipt(data):
     game = storage.pull(room=data["room"])
+    game.score.num = 0
 
     players = game.score.keys()
 
