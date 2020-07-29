@@ -80,7 +80,7 @@ def wager_submittal(data):
 
         if game.score.num == len(game.score):
             socketio.emit(
-                "reveal_wager_answer_s-bh", {"room": game.room, "updates": updates,},
+                "enable_show_answers-s>h", {"room": game.room, "updates": updates,},
             )
 
 
@@ -118,3 +118,9 @@ def answer_receipt(data):
     socketio.emit(
         "wager_answer_prompt-s>p", {"room": data["room"], "players": players},
     )
+
+@socketio.on("show_answers-h>s")
+def show_player_answers(data):
+    game = storage.pull(room=data["room"])
+    order = game.score.sort()
+    print(order)

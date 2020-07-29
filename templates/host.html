@@ -158,6 +158,12 @@
                                 </div>
                             </div>
                             <div id="show_1" style="display: none;">
+                                <div class="btn-toolbar" role="toolbar" id="hide_2">
+                                    <div class="btn-group mr-2" role="group">
+                                        <button class="btn btn-success" id="show_answers">Show Player's Answers!</button>
+                                    </div>
+                                </div>
+                            <div id="show_9" style="display: none;">
                                 <h4>
                                     ANSWER:
                                 </h4>
@@ -246,6 +252,14 @@
                     });
 
                     $('#hide_1').hide();
+                }
+
+                else if (this.id == 'show_answers') {
+                    socket.emit('show_answers-h>s', {
+                        'room': '{{ game.room }}',
+                    });
+
+                    // $('#hide_1').hide();
                 }
             }
         });
