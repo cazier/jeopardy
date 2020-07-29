@@ -51,7 +51,10 @@ def wager_submittal(data):
                     "displayedInModal": "#wager_round",
                 }
 
-                reset_wager_names(game=game)
+                socketio.emit(
+                    "reset_wager_names-s>h",
+                    {"room": game.room, "players": list(game.score.players.keys())},
+                )
 
                 reveal_wager_question(game=game, updates=updates)
 
@@ -76,8 +79,6 @@ def wager_submittal(data):
         updates: dict = dict()
 
         if game.score.num == len(game.score):
-            reset_wager_names(game=game)
-
             socketio.emit(
                 "reveal_wager_answer_s-bh", {"room": game.room, "updates": updates,},
             )
@@ -89,14 +90,7 @@ def reveal_wager_question(game, updates: dict) -> None:
     )
 
 
-def reset_wager_names(game) -> None:
-    socketio.emit(
-        "reset_wager_names_s-h",
-        {"room": game.room, "players": list(game.score.players.keys())},
-    )
-
-
-@socketio.on("wager_answered_h-s")
+@socketio.on("wager_answered-h>s")
 def wager_answered(data):
     game = storage.pull(room=data["room"])
 
