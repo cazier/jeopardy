@@ -81,24 +81,24 @@
         var displayedInModal = null;
         var finalRound = false;
 
-        socket.on('enable_buzzers_s-p', function (message) {
+        socket.on('enable_buzzers-s>p', function (message) {
             if (!message['players'].includes("{{ session['name'] }}")) {
                 $('#buzzer').removeClass('disabled btn-danger');
                 $('#buzzer').addClass('btn-success');
             }
         });
 
-        socket.on('reset_buzzers_s-p', function (message) {
+        socket.on('reset_buzzers-s>p', function (message) {
             $('#buzzer').removeClass('btn-success');
             $('#buzzer').addClass('disabled btn-danger');
         });
 
-        socket.on('update_scores_s-bph', function (message) {
+        socket.on('update_scores-s>bph', function (message) {
             $('#score').text(message['scores']['{{ session["name"] }}']);
             $('#scores').text(message['scores']['{{ session["name"] }}']);
         });
 
-        socket.on('wager_amount_prompt_s-p', function (message) {
+        socket.on('wager_amount_prompt-s>p', function (message) {
             if (message['players'].length != 1) { finalRound = true; };
             $('#wager_value').val(0);
 
@@ -111,8 +111,7 @@
             }
         });
 
-        socket.on('wager_answer_prompt_s-p', function (message) {
-            $('#answer_value').val("");
+        socket.on('wager_answer_prompt-s>p', function (message) {
 
             if (message['players'].includes('{{ session["name"] }}')) {
                 displayedInModal = '#wager-amount';
@@ -125,7 +124,7 @@
 
         $('button').click(function (event) {
             if (this.id == 'buzzer') {
-                socket.emit('buzz_in_p-s', {
+                socket.emit('buzz_in-p>s', {
                     'room': '{{ game.room }}',
                     'name': '{{ session["name"] }}'
                 });
@@ -137,7 +136,7 @@
                     score = parseInt($('#score').text());
 
                     if (((wager <= score) | ((wager > score) & (wager <= 1000))) & wager >= 0) {
-                        socket.emit('wager_submitted_p-s', {
+                        socket.emit('wager_submitted-p>s', {
                             'room': '{{ game.room }}',
                             'name': '{{ session["name"] }}',
                             'wager': wager,
@@ -160,7 +159,7 @@
                 else {
                     answer = $('#answer_value').val();
                     if (answer.trim().length > 0) {
-                        socket.emit('wager_submitted_p-s', {
+                        socket.emit('wager_submitted-p>s', {
                             'room': '{{ game.room }}',
                             'name': '{{ session["name"] }}',
                             'answer': answer,

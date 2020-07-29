@@ -180,7 +180,7 @@
                 if (this.className.includes('show-question')) {
                     $('#' + this.id).addClass('disabled');
 
-                    socket.emit('host_clicked_question_h-s', {
+                    socket.emit('host_clicked_question-h>s', {
                         'identifier': this.id,
                         'room': '{{ game.room }}'
                     });
@@ -193,7 +193,7 @@
                 }
 
                 else if (this.id == 'finished_reading') {
-                    socket.emit('finished_reading_h-s', {
+                    socket.emit('finished_reading-h>s', {
                         'room': '{{ game.room }}'
                     });
 
@@ -209,7 +209,7 @@
 
                     }
 
-                    socket.emit('question_answered_h-s', {
+                    socket.emit('question_answered-h>s', {
                         'room': '{{ game.room }}',
                         'correct': this.id == 'correct_answer'
                     })
@@ -218,20 +218,20 @@
                 else if (this.id.endsWith('correct_wager')) {
                     manageModal({ action: 'hide' });
 
-                    socket.emit('wager_answered_h-s', {
+                    socket.emit('wager_answered-h>s', {
                         'room': '{{ game.room }}',
                         'correct': this.id == 'correct_wager'
                     });
                 }
 
                 else if (this.id == 'start_next_round') {
-                    socket.emit('start_next_round_h-s', {
+                    socket.emit('start_next_round-h>s', {
                         'room': '{{ game.room }}'
                     });
                 }
 
                 else if (this.id == 'get_wager') {
-                    socket.emit('get_wager_h-s', {
+                    socket.emit('get_wager-h>s', {
                         'room': '{{ game.room }}',
                         'name': null
                     });
@@ -240,7 +240,7 @@
                 }
 
                 else if (this.id == 'get_answers') {
-                    socket.emit('get_answers_h-s', {
+                    socket.emit('get_answers-h>s', {
                         'room': '{{ game.room }}',
                         'name': null
                     });
@@ -251,36 +251,36 @@
         });
 
 
-        socket.on('reveal_standard_question_s-bh', function (message) {
+        socket.on('reveal_standard_question-s>bh', function (message) {
             displayedInModal = '#standard_question';
 
             manageModal({ action: 'show', updates: message['updates'] });
         });
 
-        socket.on('player_buzzed_s-h', function (message) {
+        socket.on('player_buzzed-s>h', function (message) {
             $('#player').text(message['name']);
 
             $('#correct_answer').removeClass('disabled');
             $('#incorrect_answer').removeClass('disabled');
         });
 
-        socket.on('clear_modal_s-bh', function (message) {
+        socket.on('clear_modal-s>bh', function (message) {
             $('#player').text('');
 
             manageModal({ action: 'hide' });
         });
 
-        socket.on('round_complete_s-bh', function (message) {
+        socket.on('round_complete-s>bh', function (message) {
             displayedInModal = '#round_transition';
 
             manageModal({ action: 'show', updates: message['updates'] });
         });
 
-        socket.on('next_round_started_s-bh', function (message) {
+        socket.on('next_round_started-s>bh', function (message) {
             $("<form method='POST' action='" + document.URL + "'><input type='hidden' name='room' value='{{ game.room }}'/></form>").appendTo("body").submit();
         });
 
-        socket.on('start_wager_round_s-bh', function (message) {
+        socket.on('start_wager_round-s>bh', function (message) {
             displayedInModal = '#wager_round';
 
             names = message['players'];
@@ -291,7 +291,7 @@
             $('#players').on('click', '.btn', function () {
                 $('#show_-1').toggle();
 
-                socket.emit('get_wager_h-s', {
+                socket.emit('get_wager-h>s', {
                     'room': '{{ game.room }}',
                     'name': this.id,
                 });
@@ -301,26 +301,24 @@
             manageModal({ action: 'show' });
         });
 
-        socket.on('reveal_wager_question_s-bh', function (message) {
+        socket.on('reveal_wager_question-s>bh', function (message) {
             manageModal({ action: 'none', updates: message['updates'] });
 
             $('#show_0').toggle();
         });
 
-        socket.on('reset_wager_names_s-h', function (message) {
+        socket.on('reset_wager_names-s>h', function (message) {
             names = message['players'];
             for (name in names) {
                 $('#' + names[name] + '_wagered').toggleClass('btn-danger btn-success');
             }
         });
 
-        socket.on('wager_submitted_s-h', function (message) {
+        socket.on('wager_submitted-s>h', function (message) {
             $('#' + message['updates']['name'] + '_wagered').toggleClass('btn-danger btn-success');
         });
 
-        socket.on('reveal_wager_answer_s-bh', function (message) {
-            manageModal({ action: 'none', updates: message['updates'] });
-
+        socket.on('enable_show_answers-s>h', function (message) {
             $('#show_1').toggle();
         });
 

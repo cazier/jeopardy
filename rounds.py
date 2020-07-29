@@ -9,7 +9,7 @@ from sockets import socketio
 rounds = Blueprint(name="rounds", import_name=__name__)
 
 
-@socketio.on("host_clicked_question_h-s")
+@socketio.on("host_clicked_question-h>s")
 def host_clicked_question(data):
     """The host has selected a question from their device.
 
@@ -24,7 +24,7 @@ def host_clicked_question(data):
     # If the question is not a Daily Double or Final Round (which would require a wager!)
     if not info["wager"]:
         socketio.emit(
-            "reveal_standard_question_s-bh",
+            "reveal_standard_question-s>bh",
             {
                 "room": data["room"],
                 "updates": {
@@ -41,7 +41,7 @@ def host_clicked_question(data):
         wagers.start_wager(game=game)
 
 
-@socketio.on("finished_reading_h-s")
+@socketio.on("finished_reading-h>s")
 def enable_buzzers(data, incorrect_players: list = list()):
     """After receiving the `socket.on` that the host has finished reading the question, `socket.emit` the
     signal to enable the buzzers for each player.
@@ -50,11 +50,11 @@ def enable_buzzers(data, incorrect_players: list = list()):
     incorrectly to try to do so again.
     """
     socketio.emit(
-        "enable_buzzers_s-p", {"room": data["room"], "players": incorrect_players}
+        "enable_buzzers-s>p", {"room": data["room"], "players": incorrect_players}
     )
 
 
-@socketio.on("buzz_in_p-s")
+@socketio.on("buzz_in-p>s")
 def player_buzzed_in(data):
     """After receiving the `socket.on` that a player is buzzing in, `socket.emit` the player's name to the
     host.
@@ -62,14 +62,14 @@ def player_buzzed_in(data):
     game = storage.pull(data["room"])
     game.buzz(data["name"])
 
-    socketio.emit("reset_buzzers_s-p", {"room": data["room"]})
+    socketio.emit("reset_buzzers-s>p", {"room": data["room"]})
 
     socketio.emit(
-        "player_buzzed_s-h", {"room": data["room"], "name": game.buzz_order[-1],},
+        "player_buzzed-s>h", {"room": data["room"], "name": game.buzz_order[-1],},
     )
 
 
-@socketio.on("question_answered_h-s")
+@socketio.on("question_answered-h>s")
 def question_answered(data):
     """After receiving the `socket.on` that the player guessed an answer, update the game record,
     and `socket.emit` the updated scores to that player and the game board.
@@ -82,7 +82,7 @@ def question_answered(data):
     game.score.update(game=game, correct=int(data["correct"]))
 
     socketio.emit(
-        "update_scores_s-bph", {"room": data["room"], "scores": game.score.emit()}
+        "update_scores-s>bph", {"room": data["room"], "scores": game.score.emit()}
     )
 
     if data["correct"] or len(game.score) == len(game.buzz_order):
@@ -92,7 +92,7 @@ def question_answered(data):
         enable_buzzers(data, incorrect_players=game.buzz_order)
 
 
-@socketio.on("start_next_round_h-s")
+@socketio.on("start_next_round-h>s")
 def start_next_round(data):
     """After receiving the `socket.on` that the host has clicked to start the next round, run
     the game logic that does so, and then `socket.emit` to the board and host to move on.
@@ -101,7 +101,7 @@ def start_next_round(data):
 
     game.start_next_round()
 
-    socketio.emit("next_round_started_s-bh")
+    socketio.emit("next_round_started-s>bh")
 
 
 def end_question(data):
@@ -113,7 +113,7 @@ def end_question(data):
     game.buzz_order = list()
     game.current_question = None
 
-    socketio.emit("clear_modal_s-bh", {"room": data["room"]})
+    socketio.emit("clear_modal-s>bh", {"room": data["room"]})
 
     if config.debug:
         print(game.remaining_questions)
@@ -121,7 +121,7 @@ def end_question(data):
     if game.remaining_questions <= 0 and game.round <= 3:
         socketio.sleep(0.5)
         socketio.emit(
-            "round_complete_s-bh",
+            "round_complete-s>bh",
             {
                 "room": data["room"],
                 "updates": {

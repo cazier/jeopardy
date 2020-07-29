@@ -121,12 +121,12 @@
             <script type="text/javascript">
                 var displayedInModal = null;
 
-                socket.on('add_player_to_board_s-b', function (message) {
+                socket.on('add_player_to_board-s>b', function (message) {
                     $('#players').append('<th style="text-align: center;">' + message['player'] + '</th>');
                     $('#scores').append('<td style="text-align: center;"><span>{{ currency }}</span><span id="' + message['player'] + '_score">0</span></td>');
                 })
 
-                socket.on('reveal_standard_question_s-bh', function (message) {
+                socket.on('reveal_standard_question-s>bh', function (message) {
                     $(message['identifier']).addClass('disabled');
 
                     displayedInModal = '#standard_question';
@@ -134,26 +134,26 @@
                     manageModal({ action: 'show', updates: message['updates'] });
                 });
 
-                socket.on('start_wager_round_s-bh', function (message) {
+                socket.on('start_wager_round-s>bh', function (message) {
                     displayedInModal = '#wager_round';
 
                     manageModal({ action: 'show' });
                 });
 
-                socket.on('reveal_wager_question_s-bh', function (message) {
+                socket.on('reveal_wager_question-s>bh', function (message) {
                     manageModal({ action: 'none', updates: message['updates'] });
 
                     $('#wager_2').toggle();
 
                 });
 
-                socket.on('clear_modal_s-bh', function (message) {
+                socket.on('clear_modal-s>bh', function (message) {
                     $('#player').text('');
 
                     manageModal({ action: 'hide' });
                 });
 
-                socket.on('update_scores_s-bph', function (message) {
+                socket.on('update_scores-s>bph', function (message) {
                     for (player in message['scores']) {
                         $('#' + player + '_score').text(message['scores'][player]);
                     };
@@ -163,13 +163,13 @@
                     };
                 });
 
-                socket.on('round_complete_s-bh', function (message) {
+                socket.on('round_complete-s>bh', function (message) {
                     displayedInModal = '#round_transition';
 
                     manageModal({ action: 'show', updates: message['updates'] });
                 });
 
-                socket.on('next_round_started_s-bh', function (message) {
+                socket.on('next_round_started-s>bh', function (message) {
                     $("<form method='POST' action='" + document.URL + "'><input type='hidden' name='room' value='{{ game.room }}'/></form>").appendTo("body").submit();
                 });
 
