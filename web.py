@@ -183,4 +183,3 @@ def socket_join(data):
 
 if __name__ == u"__main__":
     socketio.run(app, host=u"0.0.0.0")
-

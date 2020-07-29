@@ -97,16 +97,13 @@ def wager_answered(data):
     game.score.update(game=game, correct=int(data["correct"]), round_=u"wager")
 
     socketio.emit(
-        "update_scores-s>bph",
-        {
-            "room": data["room"],
-            "scores": game.score.emit(),
-        },
+        "update_scores-s>bph", {"room": data["room"], "scores": game.score.emit(),},
     )
 
     socketio.emit("clear_modal", {"room": data["room"]})
 
     rounds.end_question(data)
+
 
 @socketio.on("get_answers-h>s")
 def answer_receipt(data):
@@ -118,6 +115,7 @@ def answer_receipt(data):
     socketio.emit(
         "wager_answer_prompt-s>p", {"room": data["room"], "players": players},
     )
+
 
 @socketio.on("show_answers-h>s")
 def show_player_answers(data):
