@@ -153,12 +153,12 @@
                     manageModal({ action: 'hide' });
                 });
 
-                socket.on('update_scores_s-ph', function (message) {
+                socket.on('update_scores_s-bph', function (message) {
                     for (player in message['scores']) {
                         $('#' + player + '_score').text(message['scores'][player]);
                     };
 
-                    if (message.final) {
+                    if (message['final']) {
                         manageModal('wager_category_modal', 'hide');
                     };
                 });

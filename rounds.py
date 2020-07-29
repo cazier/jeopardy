@@ -82,7 +82,7 @@ def question_answered(data):
     game.score.update(game=game, correct=int(data["correct"]))
 
     socketio.emit(
-        "update_scores_s-ph", {"room": data["room"], "scores": game.score.emit()}
+        "update_scores_s-bph", {"room": data["room"], "scores": game.score.emit()}
     )
 
     if data["correct"] or len(game.score) == len(game.buzz_order):

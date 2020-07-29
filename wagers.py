@@ -31,11 +31,8 @@ def wager_receipt(data):
 def wager_submittal(data):
     game = storage.pull(room=data["room"])
 
-    print("="*7, "\n", game.score.num, len(game.score))
-
     socketio.emit(
-        "wager_submitted_s-h",
-        {"room": game.room, "updates": {"name": data["name"]}},
+        "wager_submitted_s-h", {"room": game.room, "updates": {"name": data["name"]}},
     )
 
     if "wager" in data.keys():
@@ -82,24 +79,13 @@ def wager_submittal(data):
             reset_wager_names(game=game)
 
             socketio.emit(
-                "reveal_wager_answer_s-bh",
-                {
-                    "room": game.room,
-                    "updates": updates,
-                },
+                "reveal_wager_answer_s-bh", {"room": game.room, "updates": updates,},
             )
-
-
-
 
 
 def reveal_wager_question(game, updates: dict) -> None:
     socketio.emit(
-        "reveal_wager_question_s-bh",
-        {
-            "room": game.room,
-            "updates": updates,
-        },
+        "reveal_wager_question_s-bh", {"room": game.room, "updates": updates,},
     )
 
 
@@ -117,7 +103,12 @@ def wager_answered(data):
     game.score.update(game=game, correct=int(data["correct"]), round_=u"wager")
 
     socketio.emit(
-        "update_scores_s-ph", {"room": data["room"], "scores": game.score.emit()}
+        "update_scores_s-bph",
+        {
+            "room": data["room"],
+            "scores": game.score.emit(),
+            "sorted_scores": game.score.emit(),
+        },
     )
 
     socketio.emit("clear_modal", {"room": data["room"]})

@@ -93,7 +93,7 @@
             $('#buzzer').addClass('disabled btn-danger');
         });
 
-        socket.on('update_scores_s-ph', function (message) {
+        socket.on('update_scores_s-bph', function (message) {
             $('#score').text(message['scores']['{{ session["name"] }}']);
             $('#scores').text(message['scores']['{{ session["name"] }}']);
         });
