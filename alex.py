@@ -180,6 +180,9 @@ class Scoreboard(object):
     def keys(self) -> list:
         return list(self.players.keys())
 
+    def sort(self) -> list:
+        return [i[0] for i in sorted(self.players.items(), key=lambda k: k[1]['score'])]
+
     def reset(self, type_: str) -> None:
         if type_ == "players":
             self.players = dict()
