@@ -9,3 +9,11 @@
 
 # Player
 - Enable buzzer (if name not in players who've guessed)
+
+
+# Final Jeopardy Reveal Procession
+- Player
+- Current Score
+- Answer
+- Wager
+- Updated Score
