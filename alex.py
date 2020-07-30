@@ -29,9 +29,9 @@ class Game(object):
             self.add_player("Brad")
             self.add_player("Carl")
 
-            self.score.players["Alex"]["score"] = 15000
+            self.score.players["Alex"]["score"] = 1500
             self.score.players["Brad"]["score"] = 500
-            self.score.players["Carl"]["score"] = -750
+            self.score.players["Carl"]["score"] = 750
 
     def add_player(self, name: str):
         """Add a player to the game with a starting score of zero (0).
@@ -182,6 +182,9 @@ class Scoreboard(object):
 
     def sort(self) -> list:
         return [i[0] for i in sorted(self.players.items(), key=lambda k: k[1]["score"])]
+
+    def wager(self, player: str) -> dict:
+        return {**self.players[player]["wager"], 'player': player, 'score': self[player]}
 
     def reset(self, type_: str) -> None:
         if type_ == "players":

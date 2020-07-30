@@ -160,23 +160,58 @@
                             <div id="show_1" style="display: none;">
                                 <div class="btn-toolbar" role="toolbar" id="hide_2">
                                     <div class="btn-group mr-2" role="group">
-                                        <button class="btn btn-success" id="show_answers">Show Player's Answers!</button>
+                                        <button class="btn btn-success" id="show_answers">Show Player's
+                                            Answers!</button>
                                     </div>
                                 </div>
-                            <div id="show_9" style="display: none;">
-                                <h4>
-                                    ANSWER:
-                                </h4>
-                                <h5 style="padding-left: 25px">{{ game.board.categories[0].questions[0].answer }}</h5>
-                                <hr>
+                                <div id="show_9" style="display: none;">
+                                    <h4>
+                                        ANSWER:
+                                    </h4>
+                                    <h5 style="padding-left: 25px">{{ game.board.categories[0].questions[0].answer }}
+                                    </h5>
+                                    <hr>
+                                </div>
                             </div>
                         </div>
+                        <div class="modal fade" id="master-modal" tabindex="-1" role="dialog"
+                            aria-labelledby="master-modal-holder" aria-hidden="true" data-keyboard="false"
+                            data-backdrop="static">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content" id="final_reveal" style="display: none;">
+                                    <div id="modal-text">
+                                        <div class="modal-custom">Player:</div>
+                                        <div class="modal-body" id="player"></div>
+                                        <div class="modal-custom">Score:</div>
+                                        <div class="modal-body" id="score"></div>
+                                        <hr>
+                                        <div class="modal-custom">Answer:</div>
+                                        <div class="modal-body" id="answer"></div>
+                                        <div class="modal-custom">Wager Amount:</div>
+                                        <div class="modal-body" id="amount"></div>
+                                    </div>
+                                    <!-- <div class="modal-footer" id="question_footer">
+                                        <div class="btn-toolbar" role="toolbar">
+                                            <div class="btn-group" role="group">
+                                                <button class="btn btn-light disabled mr-auto"
+                                                    id="player">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</button>
+                                                <button class="btn btn-success disabled mr-auto"
+                                                    id="correct_answer">Correct!</button>
+                                                <button class="btn btn-danger disabled mr-auto"
+                                                    id="incorrect_answer">Incorrect</button>
+                                                <button class="btn btn-dark mr-auto" id="finished_reading">Finished
+                                                    Reading!</button>
+                                            </div>
+                                        </div>
+                                    </div> -->
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
                     </div>
-                    {% endif %}
                 </div>
             </div>
         </div>
-    </div>
     </div>
     <script type="text/javascript">
         var displayedInModal = null;
@@ -258,8 +293,6 @@
                     socket.emit('show_answers-h>s', {
                         'room': '{{ game.room }}',
                     });
-
-                    // $('#hide_1').hide();
                 }
             }
         });
@@ -335,6 +368,15 @@
         socket.on('enable_show_answers-s>h', function (message) {
             $('#show_1').toggle();
         });
+
+        socket.on('display_final_answer-s>bph', function (message) {
+            displayedInModal = '#final_reveal';
+
+            manageModal({ action: 'show', updates: message['updates'] });
+
+            console.log(message['updates']);
+            console.log(message['remaining']);
+        })
 
     </script>
 </body>
