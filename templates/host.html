@@ -347,9 +347,10 @@
 
             manageModal({ action: 'show' });
         });
-
         socket.on('reveal_wager_question-s>bh', function (message) {
+            {% if game.round <= 2 %}
             manageModal({ action: 'none', updates: message['updates'] });
+            {% endif %}
 
             $('#show_0').toggle();
         });
