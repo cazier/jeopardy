@@ -184,7 +184,11 @@ class Scoreboard(object):
         return [i[0] for i in sorted(self.players.items(), key=lambda k: k[1]["score"])]
 
     def wager(self, player: str) -> dict:
-        return {**self.players[player]["wager"], 'player': player, 'score': self[player]}
+        return {
+            **self.players[player]["wager"],
+            "player": player,
+            "score": self[player],
+        }
 
     def reset(self, type_: str) -> None:
         if type_ == "players":
