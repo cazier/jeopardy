@@ -14,6 +14,9 @@
 # Final Jeopardy Reveal Procession
 - Player
 - Current Score
-- Answer
+- Show Their Answer
+- If correct, say correct. If wrong, say wrong, but do not reveal the correct answer.
 - Wager
 - Updated Score
+- Repeat
+
