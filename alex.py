@@ -191,6 +191,8 @@ class Scoreboard(object):
         }
 
     def reset(self, type_: str) -> None:
+        # TODO: This won't work, for score, because the wager dictionary has been refactored.
+        #       Need to fix this, and possibly (ideally), clean up this super deep dict traversal
         if type_ == "players":
             self.players = dict()
 
