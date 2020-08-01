@@ -278,14 +278,12 @@
                 }
 
                 else if (this.id.endsWith('correct_fj')) {
-                    var amount = parseInt($('#amount').text(), 10);
-                    var score = parseInt($('#score').text(), 10);
-
-                    var multiplier = (-1 + (2 * (this.id == 'correct_fj')));
-
-                    $('#final_score').text((score + (multiplier * amount)).toString(10));
-
                     $('#wagering').toggle();
+
+                    socket.emit('wager_answered-h>s', {
+                        'room': '{{ game.room }}',
+                        'correct': this.id == 'correct_fj'
+                    });
                 }
 
                 else if (this.id == 'start_next_round') {
@@ -405,7 +403,13 @@
             displayedInModal = '#final_reveal';
 
             manageModal({ action: 'show', updates: message['updates'] });
-        })
+        });
+
+        socket.on('update_scores-s>bph', function (message) {
+            var player = $("#player").text();
+
+            $('#final_score').text(message['scores'][player]);
+        });
 
     </script>
 </body>

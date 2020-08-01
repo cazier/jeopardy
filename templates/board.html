@@ -157,10 +157,6 @@
                     for (player in message['scores']) {
                         $('#' + player + '_score').text(message['scores'][player]);
                     };
-
-                    if (message['final']) {
-                        manageModal('wager_category_modal', 'hide');
-                    };
                 });
 
                 socket.on('round_complete-s>bh', function (message) {

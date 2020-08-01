@@ -27,11 +27,11 @@ class Game(object):
         if config.debug:
             self.add_player("Alex")
             self.add_player("Brad")
-            self.add_player("Carl")
+            # self.add_player("Carl")
 
             self.score.players["Alex"]["score"] = 1500
             self.score.players["Brad"]["score"] = 500
-            self.score.players["Carl"]["score"] = 750
+            # self.score.players["Carl"]["score"] = 750
 
     def add_player(self, name: str):
         """Add a player to the game with a starting score of zero (0).
@@ -148,6 +148,7 @@ class Scoreboard(object):
     def __init__(self):
         self.players: dict = dict()
         self.num = 0
+        self.wagerer = None
 
     def __contains__(self, item: str) -> bool:
         return item in self.players.keys()
@@ -199,19 +200,19 @@ class Scoreboard(object):
         elif type_ == "score":
             self.players = {i: {"score": 0, "wager": 0} for i in self.players}
 
-    def update(self, game, correct: int, round_: str = "standard") -> None:
-        if round_ == "standard":
+    def update(self, game, correct: int) -> None:
+        if self.wagerer is None:
             player = game.buzz_order[-1]
             value = game.current_question.value * (-1 + (2 * correct))
 
-            self.players[player]["score"] += value
+        else:
+            player = self.wagerer
+            value = self.players[player]["wager"]["amount"] * (-1 + (2 * correct))
 
-        elif round_ == "wager":
-            for player in self.players:
-                value = self.players[player]["wager"]["amount"] * (-1 + (2 * correct))
+        self.players[player]["score"] += value
 
-                self.players[player]["score"] += value
-                self.players[player]["wager"]["amount"] = 0
+        self.players[player]["wager"]["amount"] = 0
+        self.wagerer = None
 
 
 class Board(object):
