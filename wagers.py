@@ -128,7 +128,7 @@ def show_player_answers(data):
     game = storage.pull(room=data["room"])
 
     if game.score.num == len(game.score):
-        end_game(game)
+        rounds.end_question(data)
 
     else:
         player = game.score.sort()[game.score.num]
@@ -140,7 +140,3 @@ def show_player_answers(data):
         )
 
         game.score.num += 1
-
-
-def end_game(data):
-    print(data.score)
