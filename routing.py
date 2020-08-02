@@ -199,6 +199,42 @@ def route_board():
     )
 
 
+@routing.route("/results", methods=["POST", "GET"])
+def route_results():
+    """Displays a final results page, ranking the players from first to last. There are also a number of 
+    buttons to allow the host to choose to restart the game with the same, or new, players.
+
+    Allows only POST requests.
+    """
+    if request.method == "POST":
+        room = request.form.get("room").upper()
+        player = request.form.get("name", None)
+        type_ = request.form.get("type", "player")
+
+        game = storage.pull(room=room)
+        results = [[name, game.score[name]] for name in game.score.sort(reverse=True)]
+
+        return render_template(
+            template_name_or_list="results.html", results=results, you=player
+        )
+
+    else:
+        session = "A"
+        game = "B"
+        results = [
+            ["Alex", 1000],
+            ["Brad", 500],
+            ["Carl", 250],
+            ["Dani", 100],
+            ["Erik", 50],
+        ]
+        return render_template(
+            template_name_or_list="results.html", results=results, you="Alex"
+        )
+
+        # return redirect(url_for("routing.route_join"))
+
+
 @routing.route("/test", methods=["GET"])
 def route_test():
     """Displays a (rather convoluted) testing page with a number of iframes to show each user

@@ -118,8 +118,9 @@ def end_question(data):
     if config.debug:
         print(game.remaining_questions)
 
-    if game.remaining_questions <= 0 and game.round <= 3:
-        socketio.sleep(0.5)
+    socketio.sleep(0.2)
+
+    if (game.remaining_questions <= 0) and (game.round < 3):
         socketio.emit(
             "round_complete-s>bh",
             {
@@ -130,3 +131,6 @@ def end_question(data):
                 },
             },
         )
+
+    elif game.round == 3:
+        socketio.emit("results-page-s>bph")
