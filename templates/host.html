@@ -72,6 +72,8 @@
                                                 id="incorrect_answer">Incorrect</button>
                                             <button class="btn btn-dark mr-auto" id="finished_reading">Finished
                                                 Reading!</button>
+                                            <button class="btn btn-info mr-auto" id="dismiss_question"
+                                                style="display: none;">Dismiss Question...</button>
                                         </div>
                                     </div>
                                 </div>
@@ -238,7 +240,8 @@
                         'room': '{{ game.room }}'
                     });
 
-                    $('#finished_reading').removeClass('disabled');
+                    $('#finished_reading').show();
+                    $('#dismiss_question').hide();
 
                     $('#correct_answer').addClass('disabled');
                     $('#incorrect_answer').addClass('disabled');
@@ -250,7 +253,14 @@
                         'room': '{{ game.room }}'
                     });
 
-                    $('#finished_reading').addClass('disabled');
+                    $('#finished_reading').hide();
+                    $('#dismiss_question').show();
+                }
+
+                else if (this.id == 'dismiss_question') {
+                    socket.emit('dismiss_question-h>s', {
+                        'room': '{{ game.room }}'
+                    });
                 }
 
                 else if (this.id.endsWith('correct_answer')) {
@@ -261,6 +271,8 @@
                         $('#incorrect_answer').addClass('disabled');
 
                     }
+
+                    $('#dismiss_question').removeClass('disabled');
 
                     socket.emit('question_answered-h>s', {
                         'room': '{{ game.room }}',
@@ -335,6 +347,8 @@
 
         socket.on('player_buzzed-s>h', function (message) {
             $('#player').text(message['name']);
+
+            $('#dismiss_question').addClass('disabled');
 
             $('#correct_answer').removeClass('disabled');
             $('#incorrect_answer').removeClass('disabled');

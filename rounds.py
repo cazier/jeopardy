@@ -54,6 +54,16 @@ def enable_buzzers(data, incorrect_players: list = list()):
     )
 
 
+@socketio.on("dismiss_question-h>s")
+def dismiss_question(data):
+    """After receiving the `socket.on` that the host has determined no one wants to byzz in, `socket.emit` the signal to dismiss the question and return to the game board.
+    """
+
+    socketio.emit("reset_buzzers-s>p", {"room": data["room"]})
+
+    end_question(data=data)
+
+
 @socketio.on("buzz_in-p>s")
 def player_buzzed_in(data):
     """After receiving the `socket.on` that a player is buzzing in, `socket.emit` the player's name to the
