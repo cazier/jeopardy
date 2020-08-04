@@ -128,7 +128,7 @@ def end_question(data):
     if config.debug:
         print(game.remaining_questions)
 
-    socketio.sleep(0.2)
+    socketio.sleep(0.5)
 
     if (game.remaining_questions <= 0) and (game.round < 3):
         socketio.emit(

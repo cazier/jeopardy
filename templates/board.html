@@ -86,54 +86,55 @@
                     <div class="modal fade" id="master-modal" tabindex="-1" role="dialog"
                         aria-labelledby="master-modal-holder" aria-hidden="true" data-keyboard="false"
                         data-backdrop="static">
-                        <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
                             <div class="modal-content" id="standard_question" style="display: none;">
-                                <div id="modal-text">
-                                    <div class="modal-custom">Question:</div>
-                                    <div class="modal-body" id="question"></div>
-                                </div>
+                                <div class="modal-custom">Question:</div>
+                                <div class="modal-body" id="question"></div>
                             </div>
                             <div class="modal-content" id="wager_round" style="display: none;">
-                                <div class="modal-text">
-                                    <div class="modal-custom centered">{{ game.heading() }}</div>
-                                    <div id="wager_2" style="display: none;">
-                                        <div class="modal-custom">
-                                            <div>Question:</div>
-                                            <div id="wager_question" class="smaller"></div>
+                                <div class="modal-header">
+                                    <h2 class="modal-title centered">{{ game.heading() }}</h2>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="card-group">
+                                        <div class="card" id="wager_2" style="display: none;">
+                                            <div class="card-body">
+                                                <div class="card-title d-flex justify-content-between">
+                                                    <h3><span>Question:</span></h3>
+                                                    <h3></h3>
+                                                </div>
+                                                <hr>
+                                                <div id="wager_question" class="card-text smaller"></div>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div id="wager_3" style="display: none;">
-                                        <hr>
-                                        <div class="modal-custom smaller">
-                                            <div><span id="namem">PLACEHOLDER_NAME</span> currently has <span
-                                                    style="font-weight: bold;">{{ currency }}<span
-                                                        id="score">999</span></span>, and answered:</div>
-                                            <br>
-                                            <div id="answer" style="font-weight: bold;">PLACEHOLDER_ANSWER</div>
-                                        </div>
-                                    </div>
-                                    <div id="wager_4" style="display: none;">
-                                        <hr>
-                                        <div class="modal-custom smaller">
-                                            <div>They wagered <span style="font-weight: bold;">{{ currency }}<span
-                                                        id="wagerm">999</span></span></div>
-                                            <hr>
-                                            Leaving them with a final score of:
-                                            <br>
-                                            <span style="font-weight: bold;">{{ currency }}<span
-                                                    id="final_scorem"></span></span>
+                                        <div class="card" id="wager_3" style="display: none;">
+                                            <div class="card-body">
+                                                <div class="card-title d-flex justify-content-between">
+                                                    <h3 id="player">Brad</h3>
+                                                    <h3>{{ currency }}<span id="score">500</span></h3>
+                                                </div>
+                                                <hr>
+                                                <div class="card-text">Their response:</div>
+                                                <div class="card-text" id="answer" style="font-weight: bold;">Answer
+                                                </div>
+                                                <hr>
+                                                <div class="card-text">They wagered <span
+                                                        style="font-weight: bold;">{{ currency }}<span
+                                                            id="wagerm"></span>500</span></div>
+                                                <hr>
+                                                <div class="card-text">Leaving them with a final score of:</div>
+                                                <div class="card-text" style="font-weight: bold;">{{ currency }}<span
+                                                        id="final_scorem">1000</span></div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-
                             <div class="modal-content" id="round_transition" style="display: none;">
-                                <div id="modal-text">
-                                    <div class="modal-custom">Round Complete!</div>
-                                    <div class="modal-body">
-                                        Congratulations on finishing <span id="current_round"></span> Are you ready to
-                                        start <span id="next_round"></span>?
-                                    </div>
+                                <div class="modal-custom">Round Complete!</div>
+                                <div class="modal-body">
+                                    Congratulations on finishing <span id="current_round"></span> Are you ready to
+                                    start <span id="next_round"></span>?
                                 </div>
                             </div>
                         </div>
