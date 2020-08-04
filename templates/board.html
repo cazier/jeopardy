@@ -107,24 +107,26 @@
                                                 <div id="wager_question" class="card-text smaller"></div>
                                             </div>
                                         </div>
-                                        <div class="card" id="wager_3" style="display: none;">
+                                        <div class="card" id="final_reveal" style="display: none;">
                                             <div class="card-body">
                                                 <div class="card-title d-flex justify-content-between">
-                                                    <h3 id="player">Brad</h3>
-                                                    <h3>{{ currency }}<span id="score">500</span></h3>
+                                                    <h3 id="player"></h3>
+                                                    <h3>{{ currency }}<span id="score"></span></h3>
                                                 </div>
                                                 <hr>
                                                 <div class="card-text">Their response:</div>
-                                                <div class="card-text" id="answer" style="font-weight: bold;">Answer
+                                                <div class="card-text" id="answer" style="font-weight: bold;">
                                                 </div>
-                                                <hr>
-                                                <div class="card-text">They wagered <span
-                                                        style="font-weight: bold;">{{ currency }}<span
-                                                            id="wagerm"></span>500</span></div>
-                                                <hr>
-                                                <div class="card-text">Leaving them with a final score of:</div>
-                                                <div class="card-text" style="font-weight: bold;">{{ currency }}<span
-                                                        id="final_scorem">1000</span></div>
+                                                <div style="display: none;" id="wagering">
+                                                    <hr>
+                                                    <div class="card-text">They wagered <span
+                                                            style="font-weight: bold;">{{ currency }}<span
+                                                                id="amount"></span></span></div>
+                                                    <hr>
+                                                    <div class="card-text">Leaving them with a final score of:</div>
+                                                    <div class="card-text" style="font-weight: bold;">{{ currency }}<span
+                                                            id="final_score"></span></div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -175,10 +177,18 @@
 
                     manageModal({ action: 'hide' });
                 });
-
+                
                 socket.on('update_scores-s>bph', function (message) {
                     for (player in message['scores']) {
                         $('#' + player + '_score').text(message['scores'][player]);
+
+                        console.log(player);
+
+                        if (player = $("#player").text()) {
+                            $('#final_score').text(message['scores'][player]);
+
+                            $('#wagering').toggle();
+                        };
                     };
                 });
 
@@ -212,6 +222,13 @@
 
                 socket.on('results-page-s>bph', function (message) {
                     $("<form method='POST' action='" + window.location.origin + "/results'><input type='hidden' name='room' value='{{ game.room }}'/><input type='hidden' name='type' value='" + type + "'/></form>").appendTo("body").submit();
+                });
+
+                socket.on('display_final_answer-s>bph', function (message) {
+                    $('#wagering').hide();
+                    displayedInModal = '#final_reveal';
+                    
+                    manageModal({ action: 'show', updates: message['updates'] });
                 });
 
 

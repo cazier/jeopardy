@@ -322,14 +322,10 @@
                     $('#hide_1').hide();
                 }
 
-                else if (this.id == 'show_answers') {
-                    socket.emit('show_answers-h>s', {
-                        'room': '{{ game.room }}',
-                    });
-                }
-
-                else if (this.id == 'next') {
-                    $('#wagering').toggle();
+                else if ((this.id == 'show_answers') | (this.id == 'next')) {
+                    if (this.id == 'next') {
+                        $('#wagering').toggle();
+                    };
 
                     socket.emit('show_answers-h>s', {
                         'room': '{{ game.room }}',
