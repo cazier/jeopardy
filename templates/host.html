@@ -292,8 +292,6 @@
                 }
 
                 else if (this.id.endsWith('correct_fj')) {
-                    $('#wagering').toggle();
-
                     socket.emit('wager_answered-h>s', {
                         'room': '{{ game.room }}',
                         'correct': this.id == 'correct_fj'
@@ -425,6 +423,8 @@
             var player = $("#player").text();
 
             $('#final_score').text(message['scores'][player]);
+
+            $('#wagering').toggle();
         });
 
         socket.on('results-page-s>bph', function (message) {
