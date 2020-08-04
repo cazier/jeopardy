@@ -83,14 +83,13 @@
 
         socket.on('enable_buzzers-s>p', function (message) {
             if (!message['players'].includes("{{ session['name'] }}")) {
-                $('#buzzer').removeClass('disabled btn-danger');
-                $('#buzzer').addClass('btn-success');
+                $('#buzzer').toggleClass('disabled btn-danger btn-success');
+
             }
         });
 
         socket.on('reset_buzzers-s>p', function (message) {
-            $('#buzzer').removeClass('btn-success');
-            $('#buzzer').addClass('disabled btn-danger');
+            $('#buzzer').toggleClass('disabled btn-danger btn-success');
         });
 
         socket.on('update_scores-s>bph', function (message) {
