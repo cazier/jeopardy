@@ -56,9 +56,9 @@
                         <div class="modal-dialog modal-dialog-centered" role="document">
                             <div class="modal-content" id="standard_question" style="display: none;">
                                 <div id="modal-text">
-                                    <div class="modal-custom">Question:</div>
-                                    <div class="modal-body" id="question"></div>
                                     <div class="modal-custom">Answer:</div>
+                                    <div class="modal-body" id="question"></div>
+                                    <div class="modal-custom">Question:</div>
                                     <div class="modal-body" id="answer"></div>
                                 </div>
                                 <div class="modal-footer" id="question_footer">
@@ -73,7 +73,7 @@
                                             <button class="btn btn-dark mr-auto" id="finished_reading">Finished
                                                 Reading!</button>
                                             <button class="btn btn-info mr-auto" id="dismiss_question"
-                                                style="display: none;">Dismiss Question...</button>
+                                                style="display: none;">Dismiss</button>
                                         </div>
                                     </div>
                                 </div>
@@ -103,11 +103,11 @@
                                     </div>
                                     <div id="show_0" style="display: none;">
                                         <div class="modal-custom">
-                                            <div>Question:</div>
+                                            <div>Answer:</div>
                                             <div id="wager_question" class="smaller"></div>
                                         </div>
                                         <div class="modal-custom">
-                                            <div>Answer:</div>
+                                            <div>Question:</div>
                                             <div id="wager_answer" class="smaller"></div>
                                         </div>
                                         <div class="modal-footer">
@@ -149,13 +149,13 @@
                             </div>
                             <div id="show_0" style="display: none;">
                                 <h4>
-                                    QUESTION:
+                                    ANSWER:
                                 </h4>
                                 <h5 style="padding-left: 25px">{{ game.board.categories[0].questions[0].question }}</h5>
                                 <hr>
                                 <div class="btn-toolbar" role="toolbar" id="hide_1">
                                     <div class="btn-group mr-2" role="group">
-                                        <button class="btn btn-success" id="get_answers">Prompt for Answers</button>
+                                        <button class="btn btn-success" id="get_answers">Prompt for Questions</button>
                                     </div>
                                 </div>
                             </div>
@@ -163,7 +163,7 @@
                                 <div class="btn-toolbar" role="toolbar" id="hide_2">
                                     <div class="btn-group mr-2" role="group">
                                         <button class="btn btn-success" id="show_answers">Show Player's
-                                            Answers!</button>
+                                            Questions!</button>
                                     </div>
                                 </div>
                             </div>

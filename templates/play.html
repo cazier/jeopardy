@@ -61,7 +61,7 @@
                                         <small class="form-text text-muted"></small>
                                     </div>
                                     <div class="form-group modal-custom smaller" id="answer" style="display: none;">
-                                        <label for="wager">Please enter an answer!</label>
+                                        <label for="wager">Please enter a question!</label>
                                         <input name="wager" type="text" class="form-control" placeholder="" required
                                             id="answer_value" minlength="1" maxlength="100">
                                         <small class="form-text text-muted"></small>
@@ -144,7 +144,7 @@
                         $('#alert').hide();
 
                         if (finalRound) {
-                            $('#alert').text('Please enter an answer! Guess if you have to!')
+                            $('#alert').text('Please enter a question! Guess if you have to!')
                             $('#wager').hide();
                             $('#answer').show();
                         }
