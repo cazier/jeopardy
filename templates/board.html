@@ -41,11 +41,11 @@
                         </tr>
                         {% for category in game.html_board() %}
                         <tr>
-                            {% for question in category %}
+                            {% for answer in category %}
                             <td>
-                                <button class="btn btn-block btn-primary {% if question.shown %}disabled{% endif %}"
-                                    id="q_{{ question.id() }}">
-                                    {{ currency }}{{ question.value }}
+                                <button class="btn btn-block btn-primary {% if answer.shown %}disabled{% endif %}"
+                                    id="q_{{ answer.id() }}">
+                                    {{ currency }}{{ answer.value }}
                                 </button>
                             </td>
                             {% endfor %}
@@ -87,10 +87,10 @@
                         aria-labelledby="master-modal-holder" aria-hidden="true" data-keyboard="false"
                         data-backdrop="static">
                         <div class="modal-dialog modal-dialog-centered" role="document">
-                            <div class="modal-content" id="standard_question" style="display: none;">
+                            <div class="modal-content" id="standard_answer" style="display: none;">
                                 <div id="modal-text">
                                     <div class="modal-custom">Answer:</div>
-                                    <div class="modal-body" id="question"></div>
+                                    <div class="modal-body" id="answer"></div>
                                 </div>
                             </div>
                             <div class="modal-content" id="wager_round" style="display: none;">
@@ -99,7 +99,7 @@
                                     <div id="wager_2" style="display: none;">
                                         <div class="modal-custom">
                                             <div>Answer:</div>
-                                            <div id="wager_question" class="smaller"></div>
+                                            <div id="wager_answer" class="smaller"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -126,10 +126,10 @@
                     $('#scores').append('<td style="text-align: center;"><span>{{ currency }}</span><span id="' + message['player'] + '_score">0</span></td>');
                 })
 
-                socket.on('reveal_standard_question-s>bh', function (message) {
+                socket.on('reveal_standard_answer-s>bh', function (message) {
                     $(message['identifier']).addClass('disabled');
 
-                    displayedInModal = '#standard_question';
+                    displayedInModal = '#standard_answer';
 
                     manageModal({ action: 'show', updates: message['updates'] });
                 });
@@ -167,24 +167,6 @@
 
                 socket.on('next_round_started-s>bh', function (message) {
                     $("<form method='POST' action='" + document.URL + "'><input type='hidden' name='room' value='{{ game.room }}'/></form>").appendTo("body").submit();
-                });
-
-                socket.on('final_wager_received', function (message) {
-                    $('#wager_answer_holder').collapse('hide');
-
-                    $('#wager_round_name').text(message['name']);
-                    $('#wager_round_amount').text(message['wager']);
-                    $('#wager_round_answer').text(message['answer']);
-
-                    manageModal('wager_category_modal', 'show');
-                });
-
-                socket.on('reveal_wager_answer', function (message) {
-                    $('#wager_answer_holder').collapse('show');
-                });
-
-                socket.on('final_question_revealed', function (message) {
-                    $('#question_details').collapse();
                 });
 
                 socket.on('results-page-s>bph', function (message) {
