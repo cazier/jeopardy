@@ -22,16 +22,16 @@ class Game(object):
 
         self.buzz_order: list = list()
 
-        self.current_question = None
+        self.current_answer = None
 
         if config.debug:
             self.add_player("Alex")
             self.add_player("Brad")
-            # self.add_player("Carl")
+            self.add_player("Carl")
 
             self.score.players["Alex"]["score"] = 1500
             self.score.players["Brad"]["score"] = 500
-            # self.score.players["Carl"]["score"] = 750
+            self.score.players["Carl"]["score"] = 750
 
     def add_player(self, name: str):
         """Add a player to the game with a starting score of zero (0).
@@ -118,7 +118,7 @@ class Game(object):
 
         if entry == "q":
             response = self.board.categories[int(category)].questions[int(question)]
-            self.current_question = response.get_question()
+            self.current_answer = response.get_question()
             return response.get()
 
         else:
@@ -206,7 +206,7 @@ class Scoreboard(object):
     def update(self, game, correct: int) -> None:
         if self.wagerer is None:
             player = game.buzz_order[-1]
-            value = game.current_question.value * (-1 + (2 * correct))
+            value = game.current_answer.value * (-1 + (2 * correct))
 
         else:
             player = self.wagerer

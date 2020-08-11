@@ -45,11 +45,11 @@ def wager_submittal(data):
                 game.score.num = 0
 
                 game.get(u"q_0_0")
-                info = game.current_question.get()
+                info = game.current_answer.get()
 
                 updates = {
-                    "wager_question": info["question"].replace("<br />", "\n"),
-                    "wager_answer": info["answer"],
+                    "wager_answer": info["question"].replace("<br />", "\n"),
+                    "wager_question": info["answer"],
                     "displayedInModal": "#wager_round",
                 }
 
@@ -58,7 +58,7 @@ def wager_submittal(data):
                     {"room": game.room, "players": list(game.score.players.keys())},
                 )
 
-                reveal_wager_question(game=game, updates=updates)
+                reveal_wager_answer(game=game, updates=updates)
 
             # socketio.emit(
             #     "wager_submitted-s>h",
@@ -68,17 +68,17 @@ def wager_submittal(data):
         elif game.round < 3:
             game.score.num = 0
 
-            info = game.current_question.get()
+            info = game.current_answer.get()
 
             updates = {
-                "wager_question": info["question"].replace("<br />", "\n"),
-                "wager_answer": info["answer"],
+                "wager_answer": info["question"].replace("<br />", "\n"),
+                "wager_question": info["answer"],
             }
 
-            reveal_wager_question(game=game, updates=updates)
+            reveal_wager_answer(game=game, updates=updates)
 
-    elif "answer" in data.keys():
-        game.score[data["name"]] = ("answer", data["answer"])
+    elif "question" in data.keys():
+        game.score[data["name"]] = ("question", data["question"])
 
         updates: dict = dict()
 
@@ -86,17 +86,17 @@ def wager_submittal(data):
             game.score.num = 0
 
             socketio.emit(
-                "enable_show_answers-s>h", {"room": game.room, "updates": updates,},
+                "enable_show_questions-s>h", {"room": game.room, "updates": updates,},
             )
 
 
-def reveal_wager_question(game, updates: dict) -> None:
+def reveal_wager_answer(game, updates: dict) -> None:
     socketio.emit(
-        "reveal_wager_question-s>bh", {"room": game.room, "updates": updates,},
+        "reveal_wager_answer-s>bh", {"room": game.room, "updates": updates,},
     )
 
 
-@socketio.on("wager_answered-h>s")
+@socketio.on("wager_responded-h>s")
 def wager_answered(data):
     game = storage.pull(room=data["room"])
 
@@ -112,18 +112,18 @@ def wager_answered(data):
         rounds.end_question(data)
 
 
-@socketio.on("get_answers-h>s")
+@socketio.on("get_questions-h>s")
 def answer_receipt(data):
     game = storage.pull(room=data["room"])
 
     players = game.score.keys()
 
     socketio.emit(
-        "wager_answer_prompt-s>p", {"room": data["room"], "players": players},
+        "wager_question_prompt-s>p", {"room": data["room"], "players": players},
     )
 
 
-@socketio.on("show_answers-h>s")
+@socketio.on("show_questions-h>s")
 def show_player_answers(data):
     game = storage.pull(room=data["room"])
 
@@ -135,7 +135,7 @@ def show_player_answers(data):
         game.score.wagerer = player
 
         socketio.emit(
-            "display_final_answer-s>bph",
+            "display_final_response-s>bph",
             {"room": data["room"], "updates": game.score.wager(player)},
         )
 

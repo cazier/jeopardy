@@ -9,8 +9,8 @@ from sockets import socketio
 rounds = Blueprint(name="rounds", import_name=__name__)
 
 
-@socketio.on("host_clicked_question-h>s")
-def host_clicked_question(data):
+@socketio.on("host_clicked_answer-h>s")
+def host_clicked_answer(data):
     """The host has selected a question from their device.
 
     Required Arguments: 
@@ -24,12 +24,12 @@ def host_clicked_question(data):
     # If the question is not a Daily Double or Final Round (which would require a wager!)
     if not info["wager"]:
         socketio.emit(
-            "reveal_standard_question-s>bh",
+            "reveal_standard_answer-s>bh",
             {
                 "room": data["room"],
                 "updates": {
-                    "question": info["question"].replace("<br />", "\n"),
-                    "answer": info["answer"],
+                    "answer": info["question"].replace("<br />", "\n"),
+                    "question": info["answer"],
                 },
                 "identifier": f'#{data[u"identifier"]}',
             },
@@ -54,8 +54,8 @@ def enable_buzzers(data, incorrect_players: list = list()):
     )
 
 
-@socketio.on("dismiss_question-h>s")
-def dismiss_question(data):
+@socketio.on("dismiss-h>s")
+def dismiss(data):
     """After receiving the `socket.on` that the host has determined no one wants to byzz in, `socket.emit` the signal to dismiss the question and return to the game board.
     """
 
@@ -79,7 +79,7 @@ def player_buzzed_in(data):
     )
 
 
-@socketio.on("question_answered-h>s")
+@socketio.on("response_given-h>s")
 def question_answered(data):
     """After receiving the `socket.on` that the player guessed an answer, update the game record,
     and `socket.emit` the updated scores to that player and the game board.
@@ -121,7 +121,7 @@ def end_question(data):
     game = storage.pull(data["room"])
 
     game.buzz_order = list()
-    game.current_question = None
+    game.current_answer = None
 
     socketio.emit("clear_modal-s>bh", {"room": data["room"]})
 
