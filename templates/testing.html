@@ -9,23 +9,36 @@
     <title>{{ game_name }} - Python/WebSocket Trivia!</title>
 
     {% include "scripts.html" %}
+    <script>
+        function setIFrames() {
+            urls = [
+                window.location.origin + '/host?room=ABCD',
+                window.location.origin + '/play?room=ABCD&name=Alex',
+                window.location.origin + '/play?room=ABCD&name=Brad',
+                window.location.origin + '/play?room=ABCD&name=Carl',
+                window.location.origin + '/board?room=ABCD',
+            ]
+
+            for (const x of Array(5).keys()) {
+                console.log(x);
+                document.getElementById(x).src = urls[x];
+            }
+        }
+        window.onload = setIFrames;
+    </script>
 
 </head>
 
 <body>
-    <iframe style="width: calc(25vw - 4px); height: calc( 50vh - 10px); overflow: hidden; border:1px solid #000;"
-        src="http://{{ ip }}/host?room=ABCD" width="25" height="25" scrolling="yes">Iframes not supported</iframe>
-    <iframe style="width: calc(25vw - 4px); height: calc( 50vh - 10px); overflow: hidden; border:1px solid #000;"
-        src="http://{{ ip }}/play?room=ABCD&name=Alex" width="25" height="25" scrolling="yes">Iframes not
-        supported</iframe>
-    <iframe style="width: calc(25vw - 4px); height: calc( 50vh - 10px); overflow: hidden; border:1px solid #000;"
-        src="http://{{ ip }}/play?room=ABCD&name=Brad" width="25" height="25" scrolling="yes">Iframes not
-        supported</iframe>
-    <iframe style="width: calc(25vw - 4px); height: calc( 50vh - 10px); overflow: hidden; border:1px solid #000;"
-        src="http://{{ ip }}/play?room=ABCD&name=Carl" width="25" height="25" scrolling="yes">Iframes not
-        supported</iframe>
-    <iframe style="width: 100%; height: calc( 50vh - 10px); overflow: hidden; border:1px solid #000;"
-        src="http://{{ ip }}/board?room=ABCD" width="25" height="25" scrolling="yes">Iframes not
-        supported</iframe>
+    <iframe id="0" style="width: calc(24vw - 4px); height: calc( 50vh - 10px); overflow: hidden; border:1px solid #000;"
+        src="" scrolling="yes">Iframes not supported</iframe>
+    <iframe id="1" style="width: calc(24vw - 4px); height: calc( 50vh - 10px); overflow: hidden; border:1px solid #000;"
+        src="" scrolling="yes">Iframes not supported</iframe>
+    <iframe id="2" style="width: calc(24vw - 4px); height: calc( 50vh - 10px); overflow: hidden; border:1px solid #000;"
+        src="" scrolling="yes">Iframes not supported</iframe>
+    <iframe id="3" style="width: calc(24vw - 4px); height: calc( 50vh - 10px); overflow: hidden; border:1px solid #000;"
+        src="" scrolling="yes">Iframes not supported</iframe>
+    <iframe id="4" style="width: 100%; height: calc( 50vh - 10px); overflow: hidden; border:1px solid #000;" src=""
+        scrolling="yes">Iframes not supported</iframe>
 
 </body>
