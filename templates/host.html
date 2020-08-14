@@ -162,8 +162,8 @@
                             <div id="show_1" style="display: none;">
                                 <div class="btn-toolbar" role="toolbar" id="hide_2">
                                     <div class="btn-group mr-2" role="group">
-                                        <button class="btn btn-success" id="show_questions">Show Player's
-                                            Questions!</button>
+                                        <button class="btn btn-success" id="show_responses">Show Player's
+                                            Responses!</button>
                                     </div>
                                 </div>
                             </div>
@@ -185,7 +185,7 @@
                                                 </div>
                                                 <hr>
                                                 <div>Their response:<br><span style="font-weight: bold;"
-                                                        id="answer"></span></div>
+                                                        id="question"></span></div>
                                                 <hr>
                                                 <div>The <em>correct</em> response is:<br>
                                                     <button class="btn btn-primary"
@@ -292,8 +292,6 @@
                 }
 
                 else if (this.id.endsWith('correct_fj')) {
-                    $('#wagering').toggle();
-
                     socket.emit('wager_responded-h>s', {
                         'room': '{{ game.room }}',
                         'correct': this.id == 'correct_fj'
@@ -324,19 +322,21 @@
                     $('#hide_1').hide();
                 }
 
-                else if (this.id == 'show_questions') {
-                    socket.emit('show_questions-h>s', {
+                else if (this.id == 'show_responses') {
+                    socket.emit('show_responses-h>s', {
                         'room': '{{ game.room }}',
                     });
                 }
 
-                else if (this.id == 'next') {
-                    $('#wagering').toggle();
+                else if ((this.id == 'show_responses') | (this.id == 'next')) {
+                    if (this.id == 'next') {
+                        $('#wagering').toggle();
+                    };
 
-                    socket.emit('show_questions-h>s', {
+                    socket.emit('show_responses-h>s', {
                         'room': '{{ game.room }}',
                     });
-                }
+                } 
             }
         });
 
@@ -411,7 +411,7 @@
             $('#' + message['updates']['name'] + '_wagered').toggleClass('btn-danger btn-success');
         });
 
-        socket.on('enable_show_questions-s>h', function (message) {
+        socket.on('enable_show_responses-s>h', function (message) {
             $('#show_1').toggle();
         });
 

@@ -86,7 +86,7 @@ def wager_submittal(data):
             game.score.num = 0
 
             socketio.emit(
-                "enable_show_questions-s>h", {"room": game.room, "updates": updates,},
+                "enable_show_responses-s>h", {"room": game.room, "updates": updates,},
             )
 
 
@@ -123,7 +123,7 @@ def answer_receipt(data):
     )
 
 
-@socketio.on("show_questions-h>s")
+@socketio.on("show_responses-h>s")
 def show_player_answers(data):
     game = storage.pull(room=data["room"])
 
