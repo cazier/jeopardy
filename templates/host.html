@@ -425,6 +425,8 @@
             var player = $("#player").text();
 
             $('#final_score').text(message['scores'][player]);
+
+            $('#wagering').toggle();
         });
 
         socket.on('results-page-s>bph', function (message) {

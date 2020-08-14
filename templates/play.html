@@ -89,7 +89,8 @@
         });
 
         socket.on('reset_buzzers-s>p', function (message) {
-            $('#buzzer').toggleClass('disabled btn-danger btn-success');
+            $('#buzzer').removeClass('btn-success');
+            $('#buzzer').addClass('disabled btn-danger');
         });
 
         socket.on('update_scores-s>bph', function (message) {
