@@ -111,7 +111,7 @@
             }
         });
 
-        socket.on('wager_question_prompt-s>p', function (message) {
+        socket.on('wager_response_prompt-s>p', function (message) {
 
             if (message['players'].includes('{{ session["name"] }}')) {
                 displayedInModal = '#wager-amount';

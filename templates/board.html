@@ -87,7 +87,7 @@
                         aria-labelledby="master-modal-holder" aria-hidden="true" data-keyboard="false"
                         data-backdrop="static">
                         <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-                            <div class="modal-content" id="standard_answer" style="display: none;">
+                            <div class="modal-content" id="standard_set" style="display: none;">
                                 <div class="modal-custom">Answer:</div>
                                 <div class="modal-body" id="answer"></div>
                             </div>
@@ -151,10 +151,10 @@
                     $('#scores').append('<td style="text-align: center;"><span>{{ currency }}</span><span id="' + message['player'] + '_score">0</span></td>');
                 })
 
-                socket.on('reveal_standard_answer-s>bh', function (message) {
+                socket.on('reveal_standard_set-s>bh', function (message) {
                     $(message['identifier']).addClass('disabled');
 
-                    displayedInModal = '#standard_answer';
+                    displayedInModal = '#standard_set';
 
                     manageModal({ action: 'show', updates: message['updates'] });
                 });

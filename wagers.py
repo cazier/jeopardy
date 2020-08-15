@@ -97,7 +97,7 @@ def reveal_wager_answer(game, updates: dict) -> None:
 
 
 @socketio.on("wager_responded-h>s")
-def wager_answered(data):
+def wager_responded(data):
     game = storage.pull(room=data["room"])
 
     game.score.update(game=game, correct=int(data["correct"]))
@@ -109,26 +109,26 @@ def wager_answered(data):
     if game.round <= 2:
         socketio.emit("clear_modal", {"room": data["room"]})
 
-        rounds.end_question(data)
+        rounds.end_set(data)
 
 
-@socketio.on("get_questions-h>s")
-def answer_receipt(data):
+@socketio.on("get_responses-h>s")
+def wager_response_prompt(data):
     game = storage.pull(room=data["room"])
 
     players = game.score.keys()
 
     socketio.emit(
-        "wager_question_prompt-s>p", {"room": data["room"], "players": players},
+        "wager_response_prompt-s>p", {"room": data["room"], "players": players},
     )
 
 
 @socketio.on("show_responses-h>s")
-def show_player_answers(data):
+def show_responses(data):
     game = storage.pull(room=data["room"])
 
     if game.score.num == len(game.score):
-        rounds.end_question(data)
+        rounds.end_set(data)
 
     else:
         player = game.score.sort()[game.score.num]

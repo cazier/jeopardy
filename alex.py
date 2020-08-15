@@ -107,7 +107,7 @@ class Game(object):
 
     def get(self, identifier: str):
         """Returns the `Content` object referred to by a specific identifier. Additionally ensures the remaining
-        answers counter is decremented, as required to play.
+        content counter is decremented, as required to play.
 
         Required Arguments:
 
