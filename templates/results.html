@@ -18,7 +18,11 @@
                 {% include "header.html" %}
                 <div class="jumbotron card card-block">
                     <h1>
+                        {% if you == results[0][0] %}
                         Congratulations, {{ you }}!
+                        {% else %}
+                        Congratulations!
+                        {% endif %}
                     </h1>
                     <hr>
                     <table class="table table-striped" style="margin-left:auto;margin-right:auto;">
