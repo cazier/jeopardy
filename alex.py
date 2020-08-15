@@ -40,7 +40,7 @@ class Game(object):
 
         name (str) -- The player's name
         """
-        self.score << name
+        self.score.add(name)
 
     def make_board(self):
         """Create a game board.
@@ -153,9 +153,9 @@ class Scoreboard(object):
     def __contains__(self, item: str) -> bool:
         return item in self.players.keys()
 
-    def __lshift__(self, other: str) -> bool:
+    def add(self, other: str) -> bool:
         if other not in self:
-            self.players[other] = {"score": 0, "wager": {"amount": 0, "answer": ""}}
+            self.players[other] = {"score": 0, "wager": {"amount": 0, "question": ""}}
 
             return True
 
