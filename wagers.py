@@ -58,7 +58,7 @@ def wager_submittal(data):
                     {"room": game.room, "players": list(game.score.players.keys())},
                 )
 
-                reveal_wager_answer(game=game, updates=updates)
+                reveal_wager(game=game, updates=updates)
 
             # socketio.emit(
             #     "wager_submitted-s>h",
@@ -75,7 +75,7 @@ def wager_submittal(data):
                 "wager_answer": info["answer"].replace("<br />", "\n"),
             }
 
-            reveal_wager_answer(game=game, updates=updates)
+            reveal_wager(game=game, updates=updates)
 
     elif "question" in data.keys():
         game.score[data["name"]] = ("question", data["question"])
@@ -90,9 +90,9 @@ def wager_submittal(data):
             )
 
 
-def reveal_wager_answer(game, updates: dict) -> None:
+def reveal_wager(game, updates: dict) -> None:
     socketio.emit(
-        "reveal_wager_answer-s>bh", {"room": game.room, "updates": updates,},
+        "reveal_wager-s>bh", {"room": game.room, "updates": updates,},
     )
 
 

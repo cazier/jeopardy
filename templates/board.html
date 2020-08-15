@@ -165,7 +165,7 @@
                     manageModal({ action: 'show' });
                 });
 
-                socket.on('reveal_wager_answer-s>bh', function (message) {
+                socket.on('reveal_wager-s>bh', function (message) {
                     manageModal({ action: 'none', updates: message['updates'] });
 
                     $('#wager_2').toggle();

@@ -392,7 +392,7 @@
 
             manageModal({ action: 'show' });
         });
-        socket.on('reveal_wager_answer-s>bh', function (message) {
+        socket.on('reveal_wager-s>bh', function (message) {
             {% if game.round <= 2 %}
             manageModal({ action: 'none', updates: message['updates'] });
             {% endif %}
