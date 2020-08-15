@@ -24,7 +24,7 @@ def format_row(data: dict) -> tuple:
     complete_category = data[u'complete_category']
     external_media = data[u'has_external_media']
 
-    return (num, category, segment, question, answer, value, year, complete_category, external_media)
+    return (num, category, segment, answer, question, value, year, complete_category, external_media)
 
 def create_table(database_name: str, question_set: str) -> None:
     with open(question_set, u'r') as data:
@@ -36,10 +36,10 @@ def create_table(database_name: str, question_set: str) -> None:
     conn = sqlite3.connect(database_name)
     c = conn.cursor()
 
-    c.execute('''CREATE TABLE questions
-              (show INT, category TEXT, segment INT, question TEXT, answer TEXT, value INT, year INT, complete_category BOOLEAN, external_media BOOLEAN)''')
+    c.execute('''CREATE TABLE show_data
+              (show INT, category TEXT, segment INT, answer TEXT, question TEXT, value INT, year INT, complete_category BOOLEAN, external_media BOOLEAN)''')
 
-    c.executemany(u'INSERT INTO questions VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', dataset)
+    c.executemany(u'INSERT INTO show_data VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', dataset)
 
     conn.commit()
     conn.close()
