@@ -240,7 +240,7 @@ class Board(object):
         # Pull a list of all the show numbers in the content database, and randomly select one show for each category
         # of gameplay. As such, in game, each category will be representing a different actually show number.
         selected_shows = random.sample(
-            sqlite_cleaned(t.execute("SELECT show FROM questions").fetchall()),
+            sqlite_cleaned(t.execute("SELECT show FROM show_data").fetchall()),
             self.size,
         )
 
@@ -249,7 +249,7 @@ class Board(object):
         # media (i.e., links/hrefs/images)
         for index, show in enumerate(selected_shows):
             categories = t.execute(
-                "SELECT category FROM questions WHERE \
+                "SELECT category FROM show_data WHERE \
                 segment=? AND show=? AND complete_category=? AND external_media=?",
                 (self.round, show, True, False),
             ).fetchall()
@@ -269,7 +269,7 @@ class Board(object):
 
                 # Finally, fetch all of the content associated with the specifically checked category and show
                 qs = t.execute(
-                    "SELECT * FROM questions WHERE segment=? AND show=? and category=?",
+                    "SELECT * FROM show_data WHERE segment=? AND show=? and category=?",
                     (self.round, show, category),
                 ).fetchall()
 
