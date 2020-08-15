@@ -29,26 +29,33 @@
                     <hr>
                     {% if game.round <= 2 %}
                     <!-- Section loaded for the first two rounds. (Regular and Double) -->
-                    <div id="categories">
-                        <div class="btn-group-vertical role=" group>
-                            {% for name in game.board.categories %}
-                            <div class="btn-group dropright" role="group">
-                                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown"
-                                    id="c_{{ name.index }}" aria-haspopup="true" aria-expanded="false">
-                                    {{ name.category }}
-                                </button>
-                                <div class="dropdown-menu" aria-labelledby="c_{{ name.index }}">
+                    <div class="accordion" id="categories">
+                        {% for name in game.board.categories %}
+                        <div class="card">
+                            <div class="card-header" id="category_{{ loop.index0 }}">
+                                <h3 class="mb-0">
+                                    <button class="btn btn-link btn-block text-left" type="button"
+                                        data-toggle="collapse" data-target="#content_{{ loop.index0 }}"
+                                        aria-expanded="false" aria-controls="content_{{ loop.index0 }}"
+                                        style="white-space: normal;">
+                                        {{ name }}
+                                    </button>
+                                </h3>
+                            </div>
+                            <div id="content_{{ loop.index0 }}" class="collapse text-center"
+                                aria-labelledby="category_{{ loop.index0 }}" data-parent="#categories">
+                                <div class="btn-group" role="group" aria-label="values"
+                                    style="padding-top: 6px; padding-bottom: 6px;">
                                     {% for answer in name.content %}
-                                    <button
-                                        class="dropdown-item show-answer {% if answer.shown %}disabled{% endif %}"
+                                    <button class="btn btn-primary show-answer {% if answer.shown %}disabled{% endif %}"
                                         type="button" id="q_{{ answer.id() }}">
                                         {{ currency }}{{ answer.value }}
                                     </button>
                                     {% endfor %}
                                 </div>
                             </div>
-                            {% endfor %}
                         </div>
+                        {% endfor %}
                     </div>
                     <div class="modal fade" id="master-modal" tabindex="-1" role="dialog"
                         aria-labelledby="master-modal-holder" aria-hidden="true" data-keyboard="false"
@@ -332,7 +339,7 @@
                     socket.emit('show_responses-h>s', {
                         'room': '{{ game.room }}',
                     });
-                } 
+                }
             }
         });
 
