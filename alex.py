@@ -22,7 +22,7 @@ class Game(object):
 
         self.buzz_order: list = list()
 
-        self.current_answer = None
+        self.current_set = None
 
         if config.debug:
             self.add_player("Alex")
@@ -118,7 +118,7 @@ class Game(object):
 
         if entry == "q":
             response = self.board.categories[int(category)].content[int(value)]
-            self.current_answer = response.get_content()
+            self.current_set = response.get_content()
             return response.get()
 
         else:
@@ -206,7 +206,7 @@ class Scoreboard(object):
     def update(self, game, correct: int) -> None:
         if self.wagerer is None:
             player = game.buzz_order[-1]
-            value = game.current_answer.value * (-1 + (2 * correct))
+            value = game.current_set.value * (-1 + (2 * correct))
 
         else:
             player = self.wagerer

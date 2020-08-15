@@ -45,7 +45,7 @@ def wager_submittal(data):
                 game.score.num = 0
 
                 game.get(u"q_0_0")
-                info = game.current_answer.get()
+                info = game.current_set.get()
 
                 updates = {
                     "wager_question": info["question"].replace("<br />", "\n"),
@@ -68,7 +68,7 @@ def wager_submittal(data):
         elif game.round < 3:
             game.score.num = 0
 
-            info = game.current_answer.get()
+            info = game.current_set.get()
 
             updates = {
                 "wager_question": info["question"].replace("<br />", "\n"),
