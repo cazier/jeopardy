@@ -41,11 +41,11 @@
                         </tr>
                         {% for category in game.html_board() %}
                         <tr>
-                            {% for question in category %}
+                            {% for answer in category %}
                             <td>
-                                <button class="btn btn-block btn-primary {% if question.shown %}disabled{% endif %}"
-                                    id="q_{{ question.id() }}">
-                                    {{ currency }}{{ question.value }}
+                                <button class="btn btn-block btn-primary {% if answer.shown %}disabled{% endif %}"
+                                    id="q_{{ answer.id() }}">
+                                    {{ currency }}{{ answer.value }}
                                 </button>
                             </td>
                             {% endfor %}
@@ -87,9 +87,9 @@
                         aria-labelledby="master-modal-holder" aria-hidden="true" data-keyboard="false"
                         data-backdrop="static">
                         <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-                            <div class="modal-content" id="standard_question" style="display: none;">
-                                <div class="modal-custom">Question:</div>
-                                <div class="modal-body" id="question"></div>
+                            <div class="modal-content" id="standard_set" style="display: none;">
+                                <div class="modal-custom">Answer:</div>
+                                <div class="modal-body" id="answer"></div>
                             </div>
                             <div class="modal-content" id="wager_round" style="display: none;">
                                 <div class="modal-header">
@@ -100,11 +100,11 @@
                                         <div class="card" id="wager_2" style="display: none;">
                                             <div class="card-body">
                                                 <div class="card-title d-flex justify-content-between">
-                                                    <h3><span>Question:</span></h3>
+                                                    <h3><span>Answer:</span></h3>
                                                     <h3></h3>
                                                 </div>
                                                 <hr>
-                                                <div id="wager_question" class="card-text smaller"></div>
+                                                <div id="wager_answer" class="card-text smaller"></div>
                                             </div>
                                         </div>
                                         <div class="card" id="final_reveal" style="display: none;">
@@ -115,7 +115,7 @@
                                                 </div>
                                                 <hr>
                                                 <div class="card-text">Their response:</div>
-                                                <div class="card-text" id="answer" style="font-weight: bold;">
+                                                <div class="card-text" id="question" style="font-weight: bold;">
                                                 </div>
                                                 <div style="display: none;" id="wagering">
                                                     <hr>
@@ -124,8 +124,8 @@
                                                                 id="amount"></span></span></div>
                                                     <hr>
                                                     <div class="card-text">Leaving them with a final score of:</div>
-                                                    <div class="card-text" style="font-weight: bold;">{{ currency }}<span
-                                                            id="final_score"></span></div>
+                                                    <div class="card-text" style="font-weight: bold;">
+                                                        {{ currency }}<span id="final_score"></span></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -151,10 +151,10 @@
                     $('#scores').append('<td style="text-align: center;"><span>{{ currency }}</span><span id="' + message['player'] + '_score">0</span></td>');
                 })
 
-                socket.on('reveal_standard_question-s>bh', function (message) {
+                socket.on('reveal_standard_set-s>bh', function (message) {
                     $(message['identifier']).addClass('disabled');
 
-                    displayedInModal = '#standard_question';
+                    displayedInModal = '#standard_set';
 
                     manageModal({ action: 'show', updates: message['updates'] });
                 });
@@ -165,7 +165,7 @@
                     manageModal({ action: 'show' });
                 });
 
-                socket.on('reveal_wager_question-s>bh', function (message) {
+                socket.on('reveal_wager_answer-s>bh', function (message) {
                     manageModal({ action: 'none', updates: message['updates'] });
 
                     $('#wager_2').toggle();
@@ -177,7 +177,7 @@
 
                     manageModal({ action: 'hide' });
                 });
-                
+
                 socket.on('update_scores-s>bph', function (message) {
                     for (player in message['scores']) {
                         $('#' + player + '_score').text(message['scores'][player]);
@@ -202,32 +202,14 @@
                     $("<form method='POST' action='" + document.URL + "'><input type='hidden' name='room' value='{{ game.room }}'/></form>").appendTo("body").submit();
                 });
 
-                socket.on('final_wager_received', function (message) {
-                    $('#wager_answer_holder').collapse('hide');
-
-                    $('#wager_round_name').text(message['name']);
-                    $('#wager_round_amount').text(message['wager']);
-                    $('#wager_round_answer').text(message['answer']);
-
-                    manageModal('wager_category_modal', 'show');
-                });
-
-                socket.on('reveal_wager_answer', function (message) {
-                    $('#wager_answer_holder').collapse('show');
-                });
-
-                socket.on('final_question_revealed', function (message) {
-                    $('#question_details').collapse();
-                });
-
                 socket.on('results-page-s>bph', function (message) {
                     $("<form method='POST' action='" + window.location.origin + "/results'><input type='hidden' name='room' value='{{ game.room }}'/><input type='hidden' name='type' value='" + type + "'/></form>").appendTo("body").submit();
                 });
 
-                socket.on('display_final_answer-s>bph', function (message) {
+                socket.on('display_final_response-s>bph', function (message) {
                     $('#wagering').hide();
                     displayedInModal = '#final_reveal';
-                    
+
                     manageModal({ action: 'show', updates: message['updates'] });
                 });
 

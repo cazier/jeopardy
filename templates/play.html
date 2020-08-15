@@ -60,10 +60,10 @@
                                             required id="wager_value" minlength="1" maxlength="6">
                                         <small class="form-text text-muted"></small>
                                     </div>
-                                    <div class="form-group modal-custom smaller" id="answer" style="display: none;">
-                                        <label for="wager">Please enter an answer!</label>
+                                    <div class="form-group modal-custom smaller" id="question" style="display: none;">
+                                        <label for="wager">Please enter a question!</label>
                                         <input name="wager" type="text" class="form-control" placeholder="" required
-                                            id="answer_value" minlength="1" maxlength="100">
+                                            id="question_value" minlength="1" maxlength="100">
                                         <small class="form-text text-muted"></small>
                                     </div>
                                 </div>
@@ -111,7 +111,7 @@
             }
         });
 
-        socket.on('wager_answer_prompt-s>p', function (message) {
+        socket.on('wager_response_prompt-s>p', function (message) {
 
             if (message['players'].includes('{{ session["name"] }}')) {
                 displayedInModal = '#wager-amount';
@@ -131,7 +131,7 @@
             }
 
             else if (this.id == 'wager_submit') {
-                if ($('#alert').text().trim().length != 45) {
+                if ($('#alert').text().trim().length != 46) {
                     wager = parseInt($('#wager_value').val());
                     score = parseInt($('#score').text());
 
@@ -145,9 +145,9 @@
                         $('#alert').hide();
 
                         if (finalRound) {
-                            $('#alert').text('Please enter an answer! Guess if you have to!')
+                            $('#alert').text('Please enter a question! Guess if you have to!')
                             $('#wager').hide();
-                            $('#answer').show();
+                            $('#question').show();
                         }
                     }
 
@@ -157,12 +157,12 @@
                 }
 
                 else {
-                    answer = $('#answer_value').val();
-                    if (answer.trim().length > 0) {
+                    question = $('#question_value').val();
+                    if (question.trim().length > 0) {
                         socket.emit('wager_submitted-p>s', {
                             'room': '{{ game.room }}',
                             'name': '{{ session["name"] }}',
-                            'answer': answer,
+                            'question': question,
                         });
                         manageModal({ action: 'hide' })
                         $('#alert').hide();

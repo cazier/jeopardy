@@ -38,11 +38,11 @@
                                     {{ name.category }}
                                 </button>
                                 <div class="dropdown-menu" aria-labelledby="c_{{ name.index }}">
-                                    {% for question in name.questions %}
+                                    {% for answer in name.content %}
                                     <button
-                                        class="dropdown-item show-question {% if question.shown %}disabled{% endif %}"
-                                        type="button" id="q_{{ question.id() }}">
-                                        {{ currency }}{{ question.value }}
+                                        class="dropdown-item show-answer {% if answer.shown %}disabled{% endif %}"
+                                        type="button" id="q_{{ answer.id() }}">
+                                        {{ currency }}{{ answer.value }}
                                     </button>
                                     {% endfor %}
                                 </div>
@@ -54,26 +54,26 @@
                         aria-labelledby="master-modal-holder" aria-hidden="true" data-keyboard="false"
                         data-backdrop="static">
                         <div class="modal-dialog modal-dialog-centered" role="document">
-                            <div class="modal-content" id="standard_question" style="display: none;">
+                            <div class="modal-content" id="standard_set" style="display: none;">
                                 <div id="modal-text">
-                                    <div class="modal-custom">Question:</div>
-                                    <div class="modal-body" id="question"></div>
                                     <div class="modal-custom">Answer:</div>
                                     <div class="modal-body" id="answer"></div>
+                                    <div class="modal-custom">Question:</div>
+                                    <div class="modal-body" id="question"></div>
                                 </div>
-                                <div class="modal-footer" id="question_footer">
+                                <div class="modal-footer">
                                     <div class="btn-toolbar" role="toolbar">
                                         <div class="btn-group" role="group">
                                             <button class="btn btn-light disabled mr-auto"
                                                 id="player">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</button>
                                             <button class="btn btn-success disabled mr-auto"
-                                                id="correct_answer">Correct!</button>
+                                                id="correct_response">Correct!</button>
                                             <button class="btn btn-danger disabled mr-auto"
-                                                id="incorrect_answer">Incorrect</button>
+                                                id="incorrect_response">Incorrect</button>
                                             <button class="btn btn-dark mr-auto" id="finished_reading">Finished
                                                 Reading!</button>
-                                            <button class="btn btn-info mr-auto" id="dismiss_question"
-                                                style="display: none;">Dismiss Question...</button>
+                                            <button class="btn btn-info mr-auto" id="dismiss"
+                                                style="display: none;">Dismiss</button>
                                         </div>
                                     </div>
                                 </div>
@@ -103,12 +103,12 @@
                                     </div>
                                     <div id="show_0" style="display: none;">
                                         <div class="modal-custom">
-                                            <div>Question:</div>
-                                            <div id="wager_question" class="smaller"></div>
-                                        </div>
-                                        <div class="modal-custom">
                                             <div>Answer:</div>
                                             <div id="wager_answer" class="smaller"></div>
+                                        </div>
+                                        <div class="modal-custom">
+                                            <div>Question:</div>
+                                            <div id="wager_question" class="smaller"></div>
                                         </div>
                                         <div class="modal-footer">
                                             <div class="btn-toolbar" role="toolbar">
@@ -149,21 +149,21 @@
                             </div>
                             <div id="show_0" style="display: none;">
                                 <h4>
-                                    QUESTION:
+                                    ANSWER:
                                 </h4>
-                                <h5 style="padding-left: 25px">{{ game.board.categories[0].questions[0].question }}</h5>
+                                <h5 style="padding-left: 25px">{{ game.board.categories[0].content[0].answer }}</h5>
                                 <hr>
                                 <div class="btn-toolbar" role="toolbar" id="hide_1">
                                     <div class="btn-group mr-2" role="group">
-                                        <button class="btn btn-success" id="get_answers">Prompt for Answers</button>
+                                        <button class="btn btn-success" id="get_questions">Prompt for Questions</button>
                                     </div>
                                 </div>
                             </div>
                             <div id="show_1" style="display: none;">
                                 <div class="btn-toolbar" role="toolbar" id="hide_2">
                                     <div class="btn-group mr-2" role="group">
-                                        <button class="btn btn-success" id="show_answers">Show Player's
-                                            Answers!</button>
+                                        <button class="btn btn-success" id="show_responses">Show Player's
+                                            Responses!</button>
                                     </div>
                                 </div>
                             </div>
@@ -185,11 +185,11 @@
                                                 </div>
                                                 <hr>
                                                 <div>Their response:<br><span style="font-weight: bold;"
-                                                        id="answer"></span></div>
+                                                        id="question"></span></div>
                                                 <hr>
-                                                <div>The <em>correct</em> answer is:<br>
+                                                <div>The <em>correct</em> response is:<br>
                                                     <button class="btn btn-primary"
-                                                        disabled>({{ game.board.categories[0].questions[0].answer }})</button>
+                                                        disabled>({{ game.board.categories[0].content[0].question }})</button>
                                                 </div>
                                                 <hr>
                                                 <div>Did they get it right?</div>
@@ -234,19 +234,19 @@
 
         $('button').click(function (event) {
             if (!this.className.includes('disabled')) {
-                if (this.className.includes('show-question')) {
+                if (this.className.includes('show-answer')) {
                     $('#' + this.id).addClass('disabled');
 
-                    socket.emit('host_clicked_question-h>s', {
+                    socket.emit('host_clicked_answer-h>s', {
                         'identifier': this.id,
                         'room': '{{ game.room }}'
                     });
 
                     $('#finished_reading').show();
-                    $('#dismiss_question').hide();
+                    $('#dismiss').hide();
 
-                    $('#correct_answer').addClass('disabled');
-                    $('#incorrect_answer').addClass('disabled');
+                    $('#correct_response').addClass('disabled');
+                    $('#incorrect_response').addClass('disabled');
 
                 }
 
@@ -256,43 +256,43 @@
                     });
 
                     $('#finished_reading').hide();
-                    $('#dismiss_question').show();
+                    $('#dismiss').show();
                 }
 
-                else if (this.id == 'dismiss_question') {
-                    socket.emit('dismiss_question-h>s', {
+                else if (this.id == 'dismiss') {
+                    socket.emit('dismiss-h>s', {
                         'room': '{{ game.room }}'
                     });
                 }
 
-                else if (this.id.endsWith('correct_answer')) {
-                    if (this.id == 'incorrect_answer') {
+                else if (this.id.endsWith('correct_response')) {
+                    if (this.id == 'incorrect_response') {
                         $('#player').text('');
 
-                        $('#correct_answer').addClass('disabled');
-                        $('#incorrect_answer').addClass('disabled');
+                        $('#correct_response').addClass('disabled');
+                        $('#incorrect_response').addClass('disabled');
 
                     }
 
-                    $('#dismiss_question').removeClass('disabled');
+                    $('#dismiss').removeClass('disabled');
 
-                    socket.emit('question_answered-h>s', {
+                    socket.emit('response_given-h>s', {
                         'room': '{{ game.room }}',
-                        'correct': this.id == 'correct_answer'
+                        'correct': this.id == 'correct_response'
                     })
                 }
 
                 else if (this.id.endsWith('correct_wager')) {
                     manageModal({ action: 'hide' });
 
-                    socket.emit('wager_answered-h>s', {
+                    socket.emit('wager_responded-h>s', {
                         'room': '{{ game.room }}',
                         'correct': this.id == 'correct_wager'
                     });
                 }
 
                 else if (this.id.endsWith('correct_fj')) {
-                    socket.emit('wager_answered-h>s', {
+                    socket.emit('wager_responded-h>s', {
                         'room': '{{ game.room }}',
                         'correct': this.id == 'correct_fj'
                     });
@@ -313,8 +313,8 @@
                     $('#hide_0').hide();
                 }
 
-                else if (this.id == 'get_answers') {
-                    socket.emit('get_answers-h>s', {
+                else if (this.id == 'get_questions') {
+                    socket.emit('get_responses-h>s', {
                         'room': '{{ game.room }}',
                         'name': null
                     });
@@ -322,21 +322,27 @@
                     $('#hide_1').hide();
                 }
 
-                else if ((this.id == 'show_answers') | (this.id == 'next')) {
+                else if (this.id == 'show_responses') {
+                    socket.emit('show_responses-h>s', {
+                        'room': '{{ game.room }}',
+                    });
+                }
+
+                else if ((this.id == 'show_responses') | (this.id == 'next')) {
                     if (this.id == 'next') {
                         $('#wagering').toggle();
                     };
 
-                    socket.emit('show_answers-h>s', {
+                    socket.emit('show_responses-h>s', {
                         'room': '{{ game.room }}',
                     });
-                }
+                } 
             }
         });
 
 
-        socket.on('reveal_standard_question-s>bh', function (message) {
-            displayedInModal = '#standard_question';
+        socket.on('reveal_standard_set-s>bh', function (message) {
+            displayedInModal = '#standard_set';
 
             manageModal({ action: 'show', updates: message['updates'] });
         });
@@ -344,10 +350,10 @@
         socket.on('player_buzzed-s>h', function (message) {
             $('#player').text(message['name']);
 
-            $('#dismiss_question').addClass('disabled');
+            $('#dismiss').addClass('disabled');
 
-            $('#correct_answer').removeClass('disabled');
-            $('#incorrect_answer').removeClass('disabled');
+            $('#correct_response').removeClass('disabled');
+            $('#incorrect_response').removeClass('disabled');
         });
 
         socket.on('clear_modal-s>bh', function (message) {
@@ -386,7 +392,7 @@
 
             manageModal({ action: 'show' });
         });
-        socket.on('reveal_wager_question-s>bh', function (message) {
+        socket.on('reveal_wager_answer-s>bh', function (message) {
             {% if game.round <= 2 %}
             manageModal({ action: 'none', updates: message['updates'] });
             {% endif %}
@@ -405,11 +411,11 @@
             $('#' + message['updates']['name'] + '_wagered').toggleClass('btn-danger btn-success');
         });
 
-        socket.on('enable_show_answers-s>h', function (message) {
+        socket.on('enable_show_responses-s>h', function (message) {
             $('#show_1').toggle();
         });
 
-        socket.on('display_final_answer-s>bph', function (message) {
+        socket.on('display_final_response-s>bph', function (message) {
             displayedInModal = '#final_reveal';
 
             manageModal({ action: 'show', updates: message['updates'] });
