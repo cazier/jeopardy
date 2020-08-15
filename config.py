@@ -10,4 +10,5 @@ database = os.path.join(os.path.abspath(os.getcwd()), u"data", u"database.db")
 app_secret = u"secret!"
 
 debug = True
-sets = 5
+sets = 2
+round_ = 1
