@@ -28,8 +28,8 @@ def host_clicked_answer(data):
             {
                 "room": data["room"],
                 "updates": {
-                    "answer": info["question"].replace("<br />", "\n"),
-                    "question": info["answer"],
+                    "question": info["question"].replace("<br />", "\n"),
+                    "answer": info["answer"].replace("<br />", "\n"),
                 },
                 "identifier": f'#{data[u"identifier"]}',
             },
@@ -126,11 +126,11 @@ def end_question(data):
     socketio.emit("clear_modal-s>bh", {"room": data["room"]})
 
     if config.debug:
-        print(game.remaining_questions)
+        print(game.remaining_content)
 
     socketio.sleep(0.5)
 
-    if (game.remaining_questions <= 0) and (game.round < 3):
+    if (game.remaining_content <= 0) and (game.round < 3):
         socketio.emit(
             "round_complete-s>bh",
             {

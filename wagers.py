@@ -48,8 +48,8 @@ def wager_submittal(data):
                 info = game.current_answer.get()
 
                 updates = {
-                    "wager_answer": info["question"].replace("<br />", "\n"),
-                    "wager_question": info["answer"],
+                    "wager_question": info["question"].replace("<br />", "\n"),
+                    "wager_answer": info["answer"].replace("<br />", "\n"),
                     "displayedInModal": "#wager_round",
                 }
 
@@ -71,8 +71,8 @@ def wager_submittal(data):
             info = game.current_answer.get()
 
             updates = {
-                "wager_answer": info["question"].replace("<br />", "\n"),
-                "wager_question": info["answer"],
+                "wager_question": info["question"].replace("<br />", "\n"),
+                "wager_answer": info["answer"].replace("<br />", "\n"),
             }
 
             reveal_wager_answer(game=game, updates=updates)

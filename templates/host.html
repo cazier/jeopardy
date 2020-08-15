@@ -38,7 +38,7 @@
                                     {{ name.category }}
                                 </button>
                                 <div class="dropdown-menu" aria-labelledby="c_{{ name.index }}">
-                                    {% for answer in name.questions %}
+                                    {% for answer in name.content %}
                                     <button
                                         class="dropdown-item show-answer {% if answer.shown %}disabled{% endif %}"
                                         type="button" id="q_{{ answer.id() }}">
