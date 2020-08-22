@@ -1,9 +1,9 @@
-from flask import jsonify, Response, request
+from flask import jsonify, request
 from flask_restful import Resource
 
 from dbapi import api, db
 from dbapi.models import Set, Category, Date, Show, Round, Value, External, Complete
-from dbapi.schemas import set_schema, sets_schema, show_schema, shows_schema  # , category_schema, categories_schema
+from dbapi.schemas import *
 
 import datetime, zlib
 
@@ -52,7 +52,9 @@ class SetListResource(Resource):
 
     def post(self) -> dict:
         payload = request.json
-
+        if set(payload.keys()) == set(
+            ("date", "show", "round", "complete", "category", "value", "external", "question", "answer")
+        ) and all((len(str(v)) > 0 for k, v in payload.items())):
         if (date := Date.query.filter_by(date=datetime.date.fromisoformat(payload["date"])).first()) is None:
             date = Date(date=datetime.date.fromisoformat(payload["date"]))
             db.session.add(date)
@@ -104,6 +106,9 @@ class SetListResource(Resource):
 
         else:
             return jsonify({"already": "exists"})
+
+        else:
+            return jsonify({"missing": "key or value"})
 
 
 api.add_resource(SetListResource, "/sets")
