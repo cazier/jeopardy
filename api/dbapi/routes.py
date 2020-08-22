@@ -8,6 +8,26 @@ from dbapi.schemas import set_schema, sets_schema, show_schema, shows_schema  # 
 import datetime, zlib
 
 
+class DetailsResource(Resource):
+    def get(self) -> dict:
+        categories = Category.query.count()
+        sets = Set.query.count()
+        shows = Show.query.count()
+        dates = Date.query.count()
+        is_complete = Set.query.filter(Set.complete.has(state=True)).count()
+        has_external = Set.query.filter(Set.external.has(state=True)).count()
+
+        return jsonify(
+            {
+                "categories": categories,
+                "sets": sets,
+                "shows": shows,
+                "dates": dates,
+                "is_complete": {True: is_complete, False: sets - is_complete},
+                "has_external": {True: has_external, False: sets - has_external},
+            }
+        )
+
 
 class SetResource(Resource):
     def get(self, set_id: int) -> dict:
@@ -88,6 +108,7 @@ class SetListResource(Resource):
 
 api.add_resource(SetListResource, "/sets")
 api.add_resource(SetResource, "/set/<int:set_id>")
+api.add_resource(DetailsResource, "/details")
 # # api_base = ""  # /api/v1/"
 # api.add_resource(ShowListResource, "/shows")
 # api.add_resource(ShowResource, "/show/<int:show_id>")
