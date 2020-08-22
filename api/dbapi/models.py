@@ -1,4 +1,4 @@
-from api import db
+from dbapi import db
 
 
 class Set(db.Model):
