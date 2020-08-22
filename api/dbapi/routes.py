@@ -8,6 +8,7 @@ from dbapi.schemas import set_schema, sets_schema, show_schema, shows_schema  # 
 import datetime, zlib
 
 
+
 class SetResource(Resource):
     def get(self, set_id: int) -> dict:
         set_ = Set.query.get_or_404(set_id)
