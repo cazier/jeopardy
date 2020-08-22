@@ -111,9 +111,31 @@ class SetListResource(Resource):
             return jsonify({"missing": "key or value"})
 
 
+class ShowResource(Resource):
+    def get(self, show_id: int) -> dict:
+        show = Show.query.get_or_404(show_id)
+
+        return jsonify(show_schema.dump(show))
+
+    def delete(self, show_id: int) -> dict:
+        show = Show.query.get(show_id)
+
+        db.session.delete(show)
+        db.session.commit()
+
+        return jsonify({"delete": "success"})
+
+
+class ShowListResource(Resource):
+    def get(self) -> dict:
+        shows = Show.query.all()
+
+        return jsonify(shows_schema.dump(shows))
+
+
 api.add_resource(SetListResource, "/sets")
 api.add_resource(SetResource, "/set/<int:set_id>")
 api.add_resource(DetailsResource, "/details")
 # # api_base = ""  # /api/v1/"
-# api.add_resource(ShowListResource, "/shows")
-# api.add_resource(ShowResource, "/show/<int:show_id>")
+api.add_resource(ShowListResource, "/shows")
+api.add_resource(ShowResource, "/show/<int:show_id>")

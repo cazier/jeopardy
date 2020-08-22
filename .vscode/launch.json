@@ -28,7 +28,7 @@
             "request": "launch",
             "module": "flask",
             "env": {
-                "FLASK_APP": "api/run.api.py",
+                "FLASK_APP": "api/dbapi/__init__.py",
                 "FLASK_ENV": "development",
                 "FLASK_DEBUG": "0"
             },
