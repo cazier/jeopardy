@@ -160,13 +160,20 @@ class Game(object):
 
 
 def get_external_media(round_: str, urls: list) -> None:
+    """Create a list of the external media found in the clue. The list will have identifiers for the show, round,
+    question, and an incrementing letter for each item in the clue. This file can then be run in a bash script
+    to download the media, which hopefully all exists...
+    """
     downloads = [f"curl -O downloads/{round_}{string.ascii_lowercase[i]} {j}\n" for i, j in enumerate(urls)]
     with open("downloads.txt", "a") as file:
         file.writelines(downloads)
 
 
-def pjs(function: str, index: int = 2):
-    return BeautifulSoup(parse(function)["body"][0]["expression"]["arguments"][index]["value"], "lxml")
+def pjs(function: str):
+    """ A simple wrapper function around the super useful pyjsparser library. This steps through all of the AST tree
+    of the library to only return the HTML element in the function.
+    """
+    return BeautifulSoup(parse(function)["body"][0]["expression"]["arguments"][2]["value"], "lxml")
 
 
 a = Game(url="http://www.j-archive.com/showgame.php?game_id=5757")
