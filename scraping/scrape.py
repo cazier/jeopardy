@@ -1,5 +1,5 @@
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, element
 from pyjsparser import parse
 
 import re
@@ -8,10 +8,11 @@ import datetime
 from pprint import pprint
 from collections import defaultdict
 
+import config
+
 LAST_SEASON = 36
 
 SHOW_DATE_MATCH = re.compile(r"^Show #(\d{0,6}) - (.*)$")
-ROUND_MATCH = re.compile(r"^clue_([DF]?J|TB)(?:_(\d)_(\d))?")
 
 
 class Links(object):
@@ -74,10 +75,11 @@ class Game(object):
         """
         for num, category in enumerate(self.data.find_all("td", class_="category_name")):
             self.board[num // 6][num % 6] = {
-                            "name": category.text,
-                            "complete": True,
-                            "clues": defaultdict(dict),
-                        }
+                "name": category.text,
+                "complete": True,
+                "clues": defaultdict(dict),
+            }
+
     def get_clues(self) -> None:
         """Start pulling out the question data!
         """
@@ -87,7 +89,7 @@ class Game(object):
             ("jeopardy_round", "round", "clue"),
             ("double_jeopardy_round", "round", "clue"),
             ("final_jeopardy_round", "final_round", "category"),
-                                )
+        )
 
         # So iterating over each of the items in the legend, corresponding to the rounds in Jeopardy!
         for self.round_, r_name in enumerate(ROUND_MAP):
@@ -137,15 +139,15 @@ class Game(object):
 
             # Check to see if the question has any external media (like pictures, sound clips, video etc.) by looking
             # for an <a> tag.
-                        if question.a is not None:
+            if question.a is not None:
 
                 # If it has one, set the external flag to true. Note this flag is set "per-clue".
-                            external = True
+                external = True
 
                 # Create a list containing all of the external media found on the question. Some clues have more than
                 # one  external media item listed. Then pass that list to the function that stores download info in a
                 # separate file.
-                            urls = [url.get("href") for url in question.find_all("a")]
+                urls = [url.get("href") for url in question.find_all("a")]
                 get_external_media(round_=f"{self.show}_{self.round_}_{self.column}_{self.value}", urls=urls)
 
         else:
