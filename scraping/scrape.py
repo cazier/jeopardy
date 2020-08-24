@@ -78,59 +78,85 @@ class Game(object):
                             "complete": True,
                             "clues": defaultdict(dict),
                         }
-                else:
-                    if r_num < 3:
-                        for column, clue in enumerate(text.find_all("td", class_="clue"), 1):
-                            if (content := clue.find("div", onmouseout=True)) is not None:
-                                question = pjs(content.get("onmouseout"))
-                                answer = pjs(clue.find("div", onmouseover=True).get("onmouseover")).find(
-                                    "em", class_="correct_response"
+    def get_clues(self) -> None:
+        """Start pulling out the question data!
+        """
+
+        # The variable `ROUND_MAP` has a "legend" for the HTML IDs or class names in which the data is stored
+        ROUND_MAP = (
+            ("jeopardy_round", "round", "clue"),
+            ("double_jeopardy_round", "round", "clue"),
+            ("final_jeopardy_round", "final_round", "category"),
                                 )
-                                external = False
 
-                                if question.a is not None:
-                                    external = True
-                                    urls = [url.get("href") for url in question.find_all("a")]
+        # So iterating over each of the items in the legend, corresponding to the rounds in Jeopardy!
+        for self.round_, r_name in enumerate(ROUND_MAP):
 
-                                    get_external_media(round_=f"{self.show}_{r_num}_{column}_{clue_value}", urls=urls)
+            # Use each table that has the game board for each round. Note that Final Jeopardy! and any Tiebreaker
+            # rounds (for instance in game #7709) are within the same "final_jeopardy" `div`. They're in separate
+            # tables within that div, but which both use the same class name "final_round"
+            for count, board in enumerate(self.data.find("div", id=r_name[0]).find_all("table", class_=r_name[1])):
 
-                            else:
-                                self.board[r_num][column]["complete"] = False
-                                question = BeautifulSoup("", "lxml")
-                                answer = BeautifulSoup("", "lxml")
+                # Continuing to loop over each ROW in the table, without the `recursive` flag set to `False`. This
+                # only searches the first sublevel, rather than matching every single child `tr` node.
+                # Note this loop corresponds to each ROW of the game board, meaning the `value` index set by the
+                # `enumerate` refers to the $ value in the game, and  also that each subsequent item found is
+                # in a different category of the game.
+                for self.value, text in enumerate(board.find_all("tr", recursive=False)):
 
-                            self.board[r_num][column]["clues"][clue_value]["question"] = question.text
-                            self.board[r_num][column]["clues"][clue_value]["answer"] = answer.text
-                            self.board[r_num][column]["clues"][clue_value]["external"] = external
+                    # Now looking through each row of table, loop through each COLUMN. This provides the CATEGORY
+                    # index of the clue. Still using the ROUND_MAP legend, though, because J-Archive has the JS
+                    # containing the clue information in different places depending on the round...
+                    # Note that, because this loop only looks at the specific class name, this ignores the first
+                    # actual row of the table, which has category names. We already pulled that info anyways!
+                    for self.column, self.clue in enumerate(text.find_all("td", class_=r_name[2])):
 
-                    elif r_num >= 3:
-                        question = pjs(board.find("div", onmouseout=True).get("onmouseout"))
-                        answer = pjs(board.find("div", onmouseover=True).get("onmouseover")).find(
-                            "em", class_="correct_response"
-                        )
-                        external = False
+                        # And now that we're at a specific clue, extract the clue data from the BS4 element
+                        set_ = self.get_clue_data()
 
+                        # Then save that to the Game object.
+                        self.board[self.round_][self.column if self.round_ < 2 else count]["clues"][self.value] = set_
+
+    def get_clue_data(self) -> dict:
+        """Extracts the clue information (primarily from some JS code on the web page) and sets both the `external` and
+        `complete flags as needed.
+        """
+
+        # Prep default flags
+        external, complete = (False, True)
+
+        # Check to see if the square has a question on the square. In particular on some of the older boards, or whenever
+        # the game runs "long" there may be some incomplete boards. If the clue data is available though:
+        if self.clue.find("div", onmouseout=True) is not None:
+
+            # Extract the question element from the JS function `onmouseout`
+            question = pjs(self.clue.find("div").get("onmouseout"))
+
+            # Extract the answer element from the JS function `onmouseover`
+            answer = pjs(self.clue.find("div").get("onmouseover")).find("em", class_="correct_response")
+
+            # Check to see if the question has any external media (like pictures, sound clips, video etc.) by looking
+            # for an <a> tag.
                         if question.a is not None:
+
+                # If it has one, set the external flag to true. Note this flag is set "per-clue".
                             external = True
+
+                # Create a list containing all of the external media found on the question. Some clues have more than
+                # one  external media item listed. Then pass that list to the function that stores download info in a
+                # separate file.
                             urls = [url.get("href") for url in question.find_all("a")]
+                get_external_media(round_=f"{self.show}_{self.round_}_{self.column}_{self.value}", urls=urls)
 
-                            get_external_media(round_=f"{self.show}_{r_num}_{column}_{clue_value}", urls=urls)
+        else:
+            # If the clue doesn't happen to have any content, just set it to blank BS4 elements, and mark the CATEGORY
+            # as being incomplete.
+            self.board[self.round_][self.column]["complete"] = False
+            question = BeautifulSoup("", "lxml")
+            answer = BeautifulSoup("", "lxml")
 
-                        self.board[r_num][1]["clues"][0]["question"] = question.text
-                        self.board[r_num][1]["clues"][0]["answer"] = answer.text
-                        self.board[r_num][1]["clues"][0]["external"] = external
-
-            # elif r_num == 3:
-            #     board = self.data.find("div", id=r_name).find("table", class_="round")
-
-            #     for clue_value, text in enumerate(board.find_all("tr", recursive=False)):
-            #         if clue_value == 0:
-            #             for column, category in enumerate(text.find_all("td", class_="category_name"), 1):
-            #                 self.board[r_num][column] = {
-            #                     "name": category.text,
-            #                     "complete": True,
-            #                     "clues": defaultdict(dict),
-            #                 }
+        # Return all that juicy clue information to be stored!
+        return {"question": question.text, "answer": answer.text, "external": external}
 
 
 def get_external_media(round_: str, urls: list) -> None:
