@@ -48,10 +48,14 @@ class Game(object):
 
         self.data = self.url.get()
         self.board: defaultdict = defaultdict(dict)
+        self.show = -1
 
         self.get_show_and_date()
         self.get_categories()
         self.get_clues()
+
+    def __repr__(self):
+        return f"<GAME URL:{self.url} SHOW: {self.show}>"
 
     def get_show_and_date(self):
         """Using the div with the ID matching "game_title, match to the above compiled regex string. It contains
