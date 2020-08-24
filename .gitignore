@@ -120,3 +120,5 @@ helpers/older_data/
 helpers/database/clues.json
 .DS_Store
 
+*.db
+downloads.txt
