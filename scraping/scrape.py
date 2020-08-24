@@ -49,6 +49,7 @@ class Game(object):
         self.board: defaultdict = defaultdict(dict)
 
         self.get_show_and_date()
+        self.get_categories()
         self.get_clues()
 
     def get_show_and_date(self):
@@ -63,19 +64,16 @@ class Game(object):
         self.show = int(s)
         self.date = datetime.datetime.strptime(d, "%A, %B %d, %Y").date().isoformat()
 
-    def get_clues(self):
-        for r_num, r_name in enumerate(("jeopardy_round", "double_jeopardy_round", "final_jeopardy_round"), 1):
-            if r_num < 3:
-                round_class = "round"
-            else:
-                round_class = "final_round"
+    def get_categories(self):
+        """Extract the categories from each round of the game. This assumes there are 6 categories in each game,
+        which appears to have been the case since the original Trebek run of the show.
 
-            board = self.data.find("div", id=r_name).find("table", class_=round_class)
-
-            for clue_value, text in enumerate(board.find_all("tr", recursive=False)):
-                if clue_value == 0:
-                    for column, category in enumerate(text.find_all("td", class_="category_name"), 1):
-                        self.board[r_num][column] = {
+        Using a combination of integer division (floor) and modulo, fill out the dictionary for each round with
+        the category name, the assumption that it is complete (which can be "corrected" later) and an empty
+        `defaultdict` for the clues.
+        """
+        for num, category in enumerate(self.data.find_all("td", class_="category_name")):
+            self.board[num // 6][num % 6] = {
                             "name": category.text,
                             "complete": True,
                             "clues": defaultdict(dict),
