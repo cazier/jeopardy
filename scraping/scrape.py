@@ -36,10 +36,24 @@ class Season(object):
         self.special: bool = not identifier.isnumeric()
         self.url = Links(type_="season", identifier=identifier)
 
+        self.storage = "clues.json"
+
         self.data = self.url.get().table
+
+        self.successful = list()
+        self.error = list()
 
     def get_games(self):
         self.games = [game.get("href") for game in self.data.find_all("a") if "game_id" in game.get("href")]
+
+    def store_data(self):
+        for url in self.games[:5]:
+            try:
+                item = Game(url=url)
+
+            except:
+                # self.save_and_quit()
+                pass
 
 
 class Game(object):
