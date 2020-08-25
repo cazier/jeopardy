@@ -49,6 +49,7 @@ class Game(object):
         self.data = self.url.get()
         self.board: defaultdict = defaultdict(dict)
         self.show = -1
+        self.json: list = list()
 
         self.get_show_and_date()
         self.get_categories()
@@ -56,6 +57,24 @@ class Game(object):
 
     def __repr__(self):
         return f"<GAME URL:{self.url} SHOW: {self.show}>"
+
+    def schema(self):
+        for round_, categories in self.board.items():
+            for _, category in categories.items():
+                for value, clue in category["clues"].items():
+                    self.json.append(
+                        {
+                            "show": self.show,
+                            "date": self.date,
+                            "category": category["name"],
+                            "complete": category["complete"],
+                            "answer": clue["answer"],
+                            "question": clue["question"],
+                            "external": clue["external"],
+                            "value": value,
+                            "round": round_,
+                        }
+                    )
 
     def get_show_and_date(self):
         """Using the div with the ID matching "game_title, match to the above compiled regex string. It contains
