@@ -1,3 +1,7 @@
+from scraping.scrape import Links, Season, Game
+import json
+
+
 def db_add(clue_data: dict, shortnames: bool = True):
     import zlib
     import datetime
@@ -66,4 +70,23 @@ def web_add(url: str, clue_data: dict, shortnames: bool = True):
     }
 
     requests.post(url=url, json=data)
+
+
+def get_seasons(start: int = 1, stop: int = 36, include_special: bool = False) -> list:
+    seasons = Links(url="http://www.j-archive.com/listseasons.php").get().find(id="content").find_all("a")
+    urls = (a.get("href").split("=")[1] for a in seasons)
+
+    num = [Season(id) for id in (url for url in urls if url.isnumeric()) if (start <= int(id) <= stop)]
+
+    return num + [Season(id) for id in urls if (not id.isnumeric()) & include_special]
+
+
+def store_games(seasons: list) -> None:
+    with open("status.json", "w") as json_file:
+        json.dump(
+            {"success": [], "error": [], "pending": [game_url for season in seasons for game_url in season.games]},
+            json_file,
+            indent="\t",
+        )
+
 
