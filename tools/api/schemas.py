@@ -1,7 +1,7 @@
 from flask_marshmallow import fields
 
-from dbapi import ma
-from dbapi.models import Set, Category, Date, Show, Round, Value, External, Complete
+from api import ma
+from api.models import Set, Category, Date, Show, Round, Value, External, Complete
 
 
 class DateSchema(ma.SQLAlchemySchema):

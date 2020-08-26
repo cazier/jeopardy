@@ -1,9 +1,9 @@
 from flask import jsonify, request
 from flask_restful import Resource
 
-from dbapi import api, db
-from dbapi.models import Set, Category, Date, Show, Round, Value, External, Complete
-from dbapi.schemas import *
+from api import api, db
+from api.models import Set, Category, Date, Show, Round, Value, External, Complete
+from api.schemas import *
 
 import datetime, zlib
 
