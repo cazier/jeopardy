@@ -39,6 +39,9 @@ class Season(object):
 
 class Game(object):
     def __init__(self, url: str) -> None:
+        if len(url) < 45:
+            url = f"http://www.j-archive.com/showgame.php?game_id={url.split('=')[1]}"
+            
         self.url = Links(url=url)
 
         self.data = self.url.get()
