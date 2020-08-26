@@ -156,23 +156,23 @@ class Game(object):
         # the game runs "long" there may be some incomplete boards. If the clue data is available though:
         if self.clue.find("div", onmouseout=True) is not None:
 
-            # Extract the question element from the JS function `onmouseout`
-            question = pjs(self.clue.find("div").get("onmouseout"))
+            # Extract the answer element from the JS function `onmouseout`
+            answer = pjs(self.clue.find("div").get("onmouseout"))
 
-            # Extract the answer element from the JS function `onmouseover`
-            answer = pjs(self.clue.find("div").get("onmouseover")).find("em", class_="correct_response")
+            # Extract the question element from the JS function `onmouseover`
+            question = pjs(self.clue.find("div").get("onmouseover")).find("em", class_="correct_response")
 
-            # Check to see if the question has any external media (like pictures, sound clips, video etc.) by looking
+            # Check to see if the answer has any external media (like pictures, sound clips, video etc.) by looking
             # for an <a> tag.
-            if question.a is not None:
+            if answer.a is not None:
 
                 # If it has one, set the external flag to true. Note this flag is set "per-clue".
                 external = True
 
-                # Create a list containing all of the external media found on the question. Some clues have more than
+                # Create a list containing all of the external media found on the answer. Some clues have more than
                 # one  external media item listed. Then pass that list to the function that stores download info in a
                 # separate file.
-                urls = [url.get("href") for url in question.find_all("a")]
+                urls = [url.get("href") for url in answer.find_all("a")]
                 get_external_media(round_=f"{self.show}_{self.round_}_{self.column}_{self.value}", urls=urls)
 
         else:
