@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup, element
 from pyjsparser import parse
 
+import time
 import re
 import string
 import datetime
@@ -11,11 +12,11 @@ SHOW_DATE_MATCH = re.compile(r"^Show #(\d{0,6}) - (.*)$")
 
 
 class Links(object):
-    def __init__(self, type_: str, identifier: str = "", url: str = "") -> None:
+    def __init__(self, type_: str = "", identifier: str = "", url: str = "") -> None:
         if type_ == "season":
             self.url = f"http://www.j-archive.com/showseason.php?season={identifier}"
 
-        elif type_ == "game":
+        else:
             self.url = url
 
     def __repr__(self) -> str:
@@ -27,24 +28,18 @@ class Links(object):
 
 class Season(object):
     def __init__(self, identifier: str) -> None:
-        self.identifier: str = identifier
         self.special: bool = not identifier.isnumeric()
-        self.url = Links(type_="season", identifier=identifier)
+        self.url = Links(url=f"http://www.j-archive.com/showseason.php?season={identifier}")
 
-        self.storage = "clues.json"
-
+        time.sleep(0.5)
         self.data = self.url.get().table
-
-        self.successful = list()
-        self.error = list()
-
-    def get_games(self):
+        
         self.games = [game.get("href") for game in self.data.find_all("a") if "game_id" in game.get("href")]
 
 
 class Game(object):
     def __init__(self, url: str) -> None:
-        self.url = Links(type_="game", url=url)
+        self.url = Links(url=url)
 
         self.data = self.url.get()
         self.board: defaultdict = defaultdict(dict)
