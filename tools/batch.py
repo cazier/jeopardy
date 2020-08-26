@@ -1,12 +1,20 @@
 from scraping.scrape import Links, Season, Game
 import json
+import time
 
+from tqdm import tqdm
 
 def db_add(clue_data: dict, shortnames: bool = True):
     import zlib
     import datetime
     from api import db
     from api.models import Set, Date, Category, Show, Round, Complete, External, Value
+
+    def key(key: str) -> str:
+        if shortnames:
+            return clue_data[key[0].lower() if key.lower() != "complete" else "f"]
+
+        return clue_data[key]
 
     if (date := Date.query.filter_by(date=datetime.date.fromisoformat(key("date"))).first()) is None:
         date = Date(date=datetime.date.fromisoformat(key("date")))
@@ -85,31 +93,96 @@ def get_seasons(start: int, stop: int, include_special: bool) -> list:
 def store_initial_games(seasons: list) -> None:
     with open("status.json", "w") as json_file:
         json.dump(
-            {"error": [], "success": [], "pending": [game_url for season in seasons for game_url in season.games]},
+            {
+                "error": [],
+                "success": [],
+                "pending": [game_url for season in seasons for game_url in season.games],
+                "out_clues": [],
+            },
             json_file,
             indent="\t",
         )
 
 
 class Pull(object):
-    def __init__(self, start: int = 1, stop: int = 36, include_special: bool = False, initial: bool = False):
+    def __init__(
+        self,
+        start: int = 1,
+        stop: int = 36,
+        include_special: bool = False,
+        initial: bool = False,
+        shortnames: bool = False,
+        method: str = "db",
+    ):
         self.start = start
         self.stop = stop
         self.include_specials = include_special
+        self.method = method
+        self.shortnames = shortnames
 
         if initial:
             seasons = get_seasons(start=start, stop=stop, include_special=include_special)
             store_initial_games(seasons)
 
-        else:
-            with open("status.json", "r") as json_file:
-                json_data = json.load(json_file)
+        with open("status.json", "r") as json_file:
+            json_data = json.load(json_file)
 
-            self.error = json_data["error"]
-            self.success = json_data["success"]
-            self.pending = json_data["pending"]
+        self.error = json_data["error"]
+        self.success = json_data["success"]
+        self.pending = json_data["pending"]
+
+        self.outstanding_clues = json_data["out_clues"]
 
     def save(self):
         with open("status.json", "w") as json_file:
-            json.dump({"error": self.error, "success": self.success, "pending": self.pending}, json_file, indent="\t")
+            json.dump(
+                {
+                    "error": self.error,
+                    "success": self.success,
+                    "pending": self.pending,
+                    "out_clues": self.outstanding_clues,
+                },
+                json_file,
+                indent="\t",
+            )
 
+    def scrape(self):
+        while len(self.pending) > 0:
+            url = self.pending.pop()
+
+            try:
+                if url not in self.error and url not in self.success:
+                    clues = Game(url=url)
+                    print(clues.show)
+
+                    self.outstanding_clues = clues.json
+
+                    while len(self.outstanding_clues) > 0:
+                        clue = self.outstanding_clues.pop()
+
+                        if self.method == "db":
+                            db_add(clue_data=clue, shortnames=self.shortnames)
+
+                        elif self.method == "web":
+                            web_add(url=self.url, clue_data=clue, shortnames=self.shortnames)
+
+            except KeyboardInterrupt:
+                self.save()
+                import sys
+
+                sys.quit()
+
+            # except:
+            #     self.error.append(url)
+            #     break
+
+            self.success.append(url)
+
+            time.sleep(0.5)
+
+
+if __name__ == "__main__":
+    a = Pull(start=32, stop=32, initial=True)
+    a.scrape()
+# a = Pull(start=32, stop=32, initial=True)
+# a.scrape()
