@@ -91,3 +91,25 @@ def store_initial_games(seasons: list) -> None:
         )
 
 
+class Pull(object):
+    def __init__(self, start: int = 1, stop: int = 36, include_special: bool = False, initial: bool = False):
+        self.start = start
+        self.stop = stop
+        self.include_specials = include_special
+
+        if initial:
+            seasons = get_seasons(start=start, stop=stop, include_special=include_special)
+            store_initial_games(seasons)
+
+        else:
+            with open("status.json", "r") as json_file:
+                json_data = json.load(json_file)
+
+            self.error = json_data["error"]
+            self.success = json_data["success"]
+            self.pending = json_data["pending"]
+
+    def save(self):
+        with open("status.json", "w") as json_file:
+            json.dump({"error": self.error, "success": self.success, "pending": self.pending}, json_file, indent="\t")
+
