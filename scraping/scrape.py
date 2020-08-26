@@ -5,12 +5,7 @@ from pyjsparser import parse
 import re
 import string
 import datetime
-from pprint import pprint
 from collections import defaultdict
-
-import config
-
-LAST_SEASON = 36
 
 SHOW_DATE_MATCH = re.compile(r"^Show #(\d{0,6}) - (.*)$")
 
@@ -46,15 +41,6 @@ class Season(object):
     def get_games(self):
         self.games = [game.get("href") for game in self.data.find_all("a") if "game_id" in game.get("href")]
 
-    def store_data(self):
-        for url in self.games[:5]:
-            try:
-                item = Game(url=url)
-
-            except:
-                # self.save_and_quit()
-                pass
-
 
 class Game(object):
     def __init__(self, url: str) -> None:
@@ -68,6 +54,8 @@ class Game(object):
         self.get_show_and_date()
         self.get_categories()
         self.get_clues()
+
+        self.schema()
 
     def __repr__(self):
         return f"<GAME URL:{self.url} SHOW: {self.show}>"
@@ -213,8 +201,3 @@ def pjs(function: str):
     of the library to only return the HTML element in the function.
     """
     return BeautifulSoup(parse(function)["body"][0]["expression"]["arguments"][2]["value"], "lxml")
-
-
-a = Game(url="http://www.j-archive.com/showgame.php?game_id=5757")
-b = Game(url="http://www.j-archive.com/showgame.php?game_id=5922")
-# pprint(a.clues)
