@@ -5,8 +5,8 @@ import json
 def db_add(clue_data: dict, shortnames: bool = True):
     import zlib
     import datetime
-    from api.dbapi import db
-    from api.dbapi.models import Set, Date, Category, Show, Round, Complete, External, Value
+    from api import db
+    from api.models import Set, Date, Category, Show, Round, Complete, External, Value
 
     if (date := Date.query.filter_by(date=datetime.date.fromisoformat(key("date"))).first()) is None:
         date = Date(date=datetime.date.fromisoformat(key("date")))
