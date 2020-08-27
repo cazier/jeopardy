@@ -110,6 +110,7 @@ class Pull(object):
         stop: int = 36,
         include_special: bool = False,
         initial: bool = False,
+        error_only: bool = False,
         shortnames: bool = False,
         method: str = "db",
     ):
@@ -118,6 +119,18 @@ class Pull(object):
         self.include_special = include_special
         self.method = method
         self.shortnames = shortnames
+
+        if error_only:
+            with open("status.json", "r") as json_file:
+                json_data = json.load(json_file)
+
+            self.error = list()
+            self.success = json_data["success"]
+            self.pending = json_data["pending"] + json_data["error"]
+            self.outstanding_clues = json_data["out_clues"]
+
+            self.save(clues=False)
+            initial = False
 
         if initial:
             seasons = get_seasons(start=self.start, stop=self.stop, include_special=self.include_special)
@@ -171,9 +184,9 @@ class Pull(object):
 
                 sys.quit()
 
-            # except:
-            #     self.error.append(url)
-            #     break
+            except:
+                print(f"An error occurred with game {clues.show}")
+                self.error.append(url)
 
             self.success.append(url)
 
