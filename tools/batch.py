@@ -120,6 +120,8 @@ class Pull(object):
         self.method = method
         self.shortnames = shortnames
 
+        print("Pulling season data")
+        start = time.perf_counter()
         if error_only:
             with open("status.json", "r") as json_file:
                 json_data = json.load(json_file)
@@ -136,6 +138,8 @@ class Pull(object):
             seasons = get_seasons(start=self.start, stop=self.stop, include_special=self.include_special)
             store_initial_games(seasons)
 
+        elapsed = time.perf_counter() - start
+        print(f"Finished pulling season data! Time taken: {elapsed:.2f} seconds")
         with open("status.json", "r") as json_file:
             json_data = json.load(json_file)
 
@@ -159,7 +163,9 @@ class Pull(object):
             )
 
     def scrape(self):
+        print("Starting to scrape game data")
         while len(self.pending) > 0:
+            start = time.perf_counter()
             url = self.pending.pop()
 
             try:
@@ -188,6 +194,9 @@ class Pull(object):
                 print(f"An error occurred with game {clues.show}")
                 self.error.append(url)
 
+            else:
+                elapsed = time.perf_counter() - start
+                print(f"Successfully scraped game {clues.show} Time taken: {elapsed:.2f} seconds")
             self.success.append(url)
 
             time.sleep(0.5)
