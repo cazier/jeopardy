@@ -116,11 +116,13 @@ class Game(object):
 
         # So iterating over each of the items in the legend, corresponding to the rounds in Jeopardy!
         for self.round_, r_name in enumerate(ROUND_MAP):
+            if (round_html := self.data.find("div", id=r_name[0])) is None:
+                break
 
             # Use each table that has the game board for each round. Note that Final Jeopardy! and any Tiebreaker
             # rounds (for instance in game #7709) are within the same "final_jeopardy" `div`. They're in separate
             # tables within that div, but which both use the same class name "final_round"
-            for count, board in enumerate(self.data.find("div", id=r_name[0]).find_all("table", class_=r_name[1])):
+            for count, board in enumerate(round_html.find_all("table", class_=r_name[1])):
 
                 # Continuing to loop over each ROW in the table, without the `recursive` flag set to `False`. This
                 # only searches the first sublevel, rather than matching every single child `tr` node.
