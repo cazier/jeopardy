@@ -2,7 +2,6 @@ from scraping.scrape import Links, Season, Game
 import json
 import time
 
-from tqdm import tqdm
 
 def db_add(clue_data: dict, shortnames: bool = True):
     import zlib
@@ -116,12 +115,12 @@ class Pull(object):
     ):
         self.start = start
         self.stop = stop
-        self.include_specials = include_special
+        self.include_special = include_special
         self.method = method
         self.shortnames = shortnames
 
         if initial:
-            seasons = get_seasons(start=start, stop=stop, include_special=include_special)
+            seasons = get_seasons(start=self.start, stop=self.stop, include_special=self.include_special)
             store_initial_games(seasons)
 
         with open("status.json", "r") as json_file:
@@ -182,7 +181,4 @@ class Pull(object):
 
 
 if __name__ == "__main__":
-    a = Pull(start=32, stop=32, initial=True)
-    a.scrape()
-# a = Pull(start=32, stop=32, initial=True)
-# a.scrape()
+    _ = Pull()
