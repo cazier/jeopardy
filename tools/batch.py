@@ -119,6 +119,7 @@ class Pull(object):
         self.include_special = include_special
         self.method = method
         self.shortnames = shortnames
+        self.json_backup = list()
 
         print("Pulling season data")
         start = time.perf_counter()
@@ -140,6 +141,8 @@ class Pull(object):
 
         elapsed = time.perf_counter() - start
         print(f"Finished pulling season data! Time taken: {elapsed:.2f} seconds")
+
+        if input("Saved all season data to JSON file. Continue? (yN)").lower() == "y":
         with open("status.json", "r") as json_file:
             json_data = json.load(json_file)
 
@@ -149,7 +152,9 @@ class Pull(object):
 
         self.outstanding_clues = json_data["out_clues"]
 
-    def save(self):
+            self.scrape()
+
+    def save(self, clues: bool = True):
         with open("status.json", "w") as json_file:
             json.dump(
                 {
@@ -162,6 +167,10 @@ class Pull(object):
                 indent="\t",
             )
 
+        if clues:
+            with open("clue_backup.json", "w") as json_file:
+                json.dump(self.json_backup, json_file, indent="\t")
+
     def scrape(self):
         print("Starting to scrape game data")
         while len(self.pending) > 0:
@@ -171,7 +180,6 @@ class Pull(object):
             try:
                 if url not in self.error and url not in self.success:
                     clues = Game(url=url)
-                    print(clues.show)
 
                     self.outstanding_clues = clues.json
 
@@ -183,6 +191,8 @@ class Pull(object):
 
                         elif self.method == "web":
                             web_add(url=self.url, clue_data=clue, shortnames=self.shortnames)
+
+                        self.json_backup.append(clue)
 
             except KeyboardInterrupt:
                 self.save()
@@ -200,6 +210,8 @@ class Pull(object):
             self.success.append(url)
 
             time.sleep(0.5)
+
+        self.save()
 
 
 if __name__ == "__main__":
