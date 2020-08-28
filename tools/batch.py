@@ -143,14 +143,14 @@ class Pull(object):
         print(f"Finished pulling season data! Time taken: {elapsed:.2f} seconds")
 
         if input("Saved all season data to JSON file. Continue? (yN)").lower() == "y":
-        with open("status.json", "r") as json_file:
-            json_data = json.load(json_file)
+            with open("status.json", "r") as json_file:
+                json_data = json.load(json_file)
 
-        self.error = json_data["error"]
-        self.success = json_data["success"]
-        self.pending = json_data["pending"]
+            self.error = json_data["error"]
+            self.success = json_data["success"]
+            self.pending = json_data["pending"]
 
-        self.outstanding_clues = json_data["out_clues"]
+            self.outstanding_clues = json_data["out_clues"]
 
             self.scrape()
 
@@ -207,9 +207,9 @@ class Pull(object):
             else:
                 elapsed = time.perf_counter() - start
                 print(f"Successfully scraped game {clues.show} Time taken: {elapsed:.2f} seconds")
-            self.success.append(url)
+                self.success.append(url)
 
-            time.sleep(0.5)
+                time.sleep(0.5)
 
         self.save()
 
