@@ -3,6 +3,7 @@ import json
 import time
 
 
+
 def db_add(clue_data: dict, shortnames: bool = True):
     import zlib
     import datetime
@@ -101,6 +102,33 @@ def store_initial_games(seasons: list) -> None:
             json_file,
             indent="\t",
         )
+
+
+class External(object):
+    def __init__(self, filename: str, output: str = "media"):
+        with open(filename, "r") as dl_file:
+            data = dl_file.readlines()
+
+        self.dl = [[i.split()[0], i.split()[1]] for i in data]
+
+        self.output = output
+
+    def clean(self):
+        for index, data in enumerate(self.dl):
+            if len(data[1]) < 48:
+                self.dl[index][1] = f'http://www.j-archive.com/media/{data[1].split("/")[-1]}'
+
+    def download(self):
+        import subprocess
+
+        for (file, url) in self.dl[:3]:
+            try:
+                subprocess.check_output(["wget", "-O", f'{self.output}/{file}.{url.split(".")[-1]}', url])
+
+            except subprocess.CalledProcessError as e:
+                print("Fuck...", e)
+
+            time.sleep(0.5)
 
 
 class Pull(object):
@@ -215,4 +243,6 @@ class Pull(object):
 
 
 if __name__ == "__main__":
-    _ = Pull()
+    _ = External(filename="downloads.txt", output="media")
+    _.clean()
+    _.download()
