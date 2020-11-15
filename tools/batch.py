@@ -105,29 +105,29 @@ def store_initial_games(seasons: list) -> None:
         )
 
 
-class External(object):
-    def __init__(self, filename: str, output: str = "media"):
-        with open(filename, "r") as dl_file:
-            data = dl_file.readlines()
+def download_external_files(filename: str, output: str = "media", delay: float = 0.5):
+    import requests
+    import shutil
+    from io import BytesIO
 
-        self.dl = [[i.split()[0], i.split()[1]] for i in data]
+    output_path = pathlib.Path(output)
 
-        self.output = pathlib.Path(".", output)
+    if not output_path.exists():
+        output_path.mkdir()
 
-    def download(self):
-        import requests
-        import shutil
-        from io import BytesIO
+    with open(file=filename, mode="r") as downloads_file:
+        urls: list = [[line.split()[0], line.split()[1]] for line in downloads_file.readlines()]
 
-        for (file, url) in self.dl:
-            data = requests.get(url=url)
-            file += pathlib.Path(url).suffix
+    for (filename, url) in urls[:3]:
+        data = requests.get(url=url)
 
-            if data.status_code == 200:
-                with open(pathlib.Path(self.output, file), "wb") as output:
-                    shutil.copyfileobj(BytesIO(initial_bytes=data.content), output)
+        if data.status_code == 200:
+            filename += pathlib.Path(url).suffix
 
-            time.sleep(0.5)
+            with open(file=pathlib.Path(output_path, filename), mode="wb") as external_file:
+                shutil.copyfileobj(fsrc=BytesIO(initial_bytes=data.content), fdst=external_file)
+
+        time.sleep(delay)
 
 
 class Pull(object):
@@ -242,5 +242,4 @@ class Pull(object):
 
 
 if __name__ == "__main__":
-    _ = External(filename="downloads.txt", output="media")
-    _.download()
+    download_external_files(filename="downloads.txt", output="media")
