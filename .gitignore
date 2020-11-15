@@ -115,8 +115,4 @@ dmypy.json
 
 
 # Custom
-jeopardyenv/
-helpers/older_data/
-helpers/database/clues.json
-.DS_Store
-
+data/database.db
