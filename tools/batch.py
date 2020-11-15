@@ -2,6 +2,7 @@ from scraping.scrape import Links, Season, Game
 import json
 import time
 
+import pathlib
 
 
 def db_add(clue_data: dict, shortnames: bool = True):
@@ -111,17 +112,20 @@ class External(object):
 
         self.dl = [[i.split()[0], i.split()[1]] for i in data]
 
-        self.output = output
+        self.output = pathlib.Path(".", output)
 
     def download(self):
-        import subprocess
+        import requests
+        import shutil
+        from io import BytesIO
 
-        for (file, url) in self.dl[:3]:
-            try:
-                subprocess.check_output(["wget", "-O", f'{self.output}/{file}.{url.split(".")[-1]}', url])
+        for (file, url) in self.dl:
+            data = requests.get(url=url)
+            file += pathlib.Path(url).suffix
 
-            except subprocess.CalledProcessError as e:
-                print("Fuck...", e)
+            if data.status_code == 200:
+                with open(pathlib.Path(self.output, file), "wb") as output:
+                    shutil.copyfileobj(BytesIO(initial_bytes=data.content), output)
 
             time.sleep(0.5)
 
