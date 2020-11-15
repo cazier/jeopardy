@@ -1,10 +1,9 @@
-from flask import Flask, Blueprint
-from flask_socketio import SocketIO, join_room
+from flask import Blueprint
+from sockets import socketio
 
 import config
 import wagers
 import storage
-from sockets import socketio
 
 rounds = Blueprint(name="rounds", import_name=__name__)
 

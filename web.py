@@ -1,27 +1,10 @@
-from flask import (
-    Flask,
-    render_template,
-    request,
-    session,
-    redirect,
-    url_for,
-    abort,
-    flash,
-    get_flashed_messages,
-)
-from flask_socketio import SocketIO, join_room
+from flask import Flask
 
-import random
-
-import alex
 import config
-import storage
 
 import rounds
 import routing
 import sockets
-
-import wagers
 
 app = Flask(__name__)
 app.register_blueprint(blueprint=rounds.rounds)
