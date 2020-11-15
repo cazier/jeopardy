@@ -105,31 +105,6 @@ def store_initial_games(seasons: list) -> None:
         )
 
 
-def download_external_files(filename: str, output: str = "media", delay: float = 0.5):
-    import requests
-    import shutil
-    from io import BytesIO
-
-    output_path = pathlib.Path(output)
-
-    if not output_path.exists():
-        output_path.mkdir()
-
-    with open(file=filename, mode="r") as downloads_file:
-        urls: list = [[line.split()[0], line.split()[1]] for line in downloads_file.readlines()]
-
-    for (filename, url) in urls[:3]:
-        data = requests.get(url=url)
-
-        if data.status_code == 200:
-            filename += pathlib.Path(url).suffix
-
-            with open(file=pathlib.Path(output_path, filename), mode="wb") as external_file:
-                shutil.copyfileobj(fsrc=BytesIO(initial_bytes=data.content), fdst=external_file)
-
-        time.sleep(delay)
-
-
 class Pull(object):
     def __init__(
         self,
@@ -239,6 +214,31 @@ class Pull(object):
                 time.sleep(0.5)
 
         self.save()
+
+
+def download_external_files(filename: str, output: str = "media", delay: float = 0.5):
+    import requests
+    import shutil
+    from io import BytesIO
+
+    output_path = pathlib.Path(output)
+
+    if not output_path.exists():
+        output_path.mkdir()
+
+    with open(file=filename, mode="r") as downloads_file:
+        urls: list = [[line.split()[0], line.split()[1]] for line in downloads_file.readlines()]
+
+    for (filename, url) in urls[:3]:
+        data = requests.get(url=url)
+
+        if data.status_code == 200:
+            filename += pathlib.Path(url).suffix
+
+            with open(file=pathlib.Path(output_path, filename), mode="wb") as external_file:
+                shutil.copyfileobj(fsrc=BytesIO(initial_bytes=data.content), fdst=external_file)
+
+        time.sleep(delay)
 
 
 if __name__ == "__main__":
