@@ -16,13 +16,14 @@ class DetailsResource(Resource):
         dates = Date.query.count()
         is_complete = Set.query.filter(Set.complete.has(state=True)).count()
         has_external = Set.query.filter(Set.external.has(state=True)).count()
+        air_dates = Date.query.order_by(Date.date)
 
         return jsonify(
             {
                 "categories": categories,
                 "sets": sets,
                 "shows": shows,
-                "dates": dates,
+                "air_dates": {"oldest": air_dates[0].date, "most_recent": air_dates[-1].date},
                 "is_complete": {True: is_complete, False: sets - is_complete},
                 "has_external": {True: has_external, False: sets - has_external},
             }
