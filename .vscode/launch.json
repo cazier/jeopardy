@@ -8,6 +8,7 @@
             "name": "Scraper Testing",
             "type": "python",
             "request": "launch",
+            "cwd": "${workspaceFolder}/tools/",
             "program": "${file}",
             "console": "integratedTerminal"
         },
