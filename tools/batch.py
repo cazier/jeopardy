@@ -113,11 +113,6 @@ class External(object):
 
         self.output = output
 
-    def clean(self):
-        for index, data in enumerate(self.dl):
-            if len(data[1]) < 48:
-                self.dl[index][1] = f'http://www.j-archive.com/media/{data[1].split("/")[-1]}'
-
     def download(self):
         import subprocess
 
@@ -244,5 +239,4 @@ class Pull(object):
 
 if __name__ == "__main__":
     _ = External(filename="downloads.txt", output="media")
-    _.clean()
     _.download()
