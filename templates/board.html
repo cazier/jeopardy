@@ -171,7 +171,7 @@
                 socket.on('reveal_wager-s>bh', function (message) {
                     manageModal({ action: 'none', updates: message['updates'] });
 
-                    $('#wager_2').toggle();
+                    $('#wager_2').show();
 
                 });
 
@@ -181,11 +181,16 @@
                     manageModal({ action: 'hide' });
                 });
 
+                socket.on("reset_wagers_modals-s>bh", function (message) {
+                    $('#wager_2').hide();
+
+                    manageModal({ action: 'hide', updates: message['updates']});
+                });
+
+
                 socket.on('update_scores-s>bph', function (message) {
                     for (player in message['scores']) {
                         $('#' + player + '_score').text(message['scores'][player]);
-
-                        console.log(player);
 
                         if (player = $("#player").text()) {
                             $('#final_score').text(message['scores'][player]);

@@ -103,6 +103,16 @@ def wager_responded(data):
     game.score.update(game=game, correct=int(data["correct"]))
 
     socketio.emit(
+        "reset_wagers_modals-s>bh", {
+            "room": game.room,
+            "updates": {
+                "wager_answer": "",
+                "wager_question": ""
+            }
+        }
+    )
+
+    socketio.emit(
         "update_scores-s>bph", {"room": data["room"], "scores": game.score.emit(),},
     )
 

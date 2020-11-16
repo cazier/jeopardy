@@ -286,7 +286,6 @@
                 }
 
                 else if (this.id.endsWith('correct_wager')) {
-                    manageModal({ action: 'hide' });
 
                     socket.emit('wager_responded-h>s', {
                         'room': '{{ game.room }}',
@@ -384,7 +383,7 @@
             };
 
             $('#players').on('click', '.btn', function () {
-                $('#show_-1').toggle();
+                $('#show_-1').hide();
 
                 socket.emit('get_wager-h>s', {
                     'room': '{{ game.room }}',
@@ -400,7 +399,7 @@
             manageModal({ action: 'none', updates: message['updates'] });
             {% endif %}
 
-            $('#show_0').toggle();
+            $('#show_0').show();
         });
 
         socket.on('reset_wager_names-s>h', function (message) {
@@ -422,6 +421,15 @@
             displayedInModal = '#final_reveal';
 
             manageModal({ action: 'show', updates: message['updates'] });
+        });
+
+        socket.on("reset_wagers_modals-s>bh", function (message) {
+            $('#players')[0].innerHTML = ""
+            $('#show_-1').show();
+            $('#show_0').hide()
+
+            manageModal({ action: 'hide', updates: message['updates']});
+
         });
 
         socket.on('update_scores-s>bph', function (message) {
