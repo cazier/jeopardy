@@ -97,7 +97,7 @@ def route_host():
 
     elif request.method == "GET":
         if (room := request.args.get(key="room", default=False)) :
-            if config.debug:
+            if "/test/" in request.headers['Referer']:
                 session["name"] = "Host"
                 session["room"] = room
 
@@ -170,7 +170,7 @@ def route_player():
             session["room"] = room
 
     elif request.method == "GET" and session is not None:
-        if config.debug:
+        if "/test/" in request.headers['Referer']:
             session["name"] = request.args.get(key="name")
             session["room"] = request.args.get(key="room")
 
@@ -200,7 +200,7 @@ def route_board():
             return redirect(url_for("routing.route_join"))
 
     elif request.method == "GET":
-        if config.debug:
+        if "/test/" in request.headers['Referer']:
             session["room"] = request.args.get(key="room")
 
         room = session["room"]
@@ -263,9 +263,14 @@ def route_test():
         ),
     )
 
-    storage.pull(room=room).make_board()
+    game = storage.pull(room=room)
+    game.make_board()
+    game.add_player("Alex")
+    game.add_player("Brad")
+    game.add_player("Carl")
 
-    return render_template(template_name_or_list="testing.html",)
+
+    return render_template(template_name_or_list="testing.html", room=room)
 
 
 @routing.errorhandler(500)

@@ -12,11 +12,11 @@
     <script>
         function setIFrames() {
             urls = [
-                window.location.origin + '/host?room=ABCD',
-                window.location.origin + '/play?room=ABCD&name=Alex',
-                window.location.origin + '/play?room=ABCD&name=Brad',
-                window.location.origin + '/play?room=ABCD&name=Carl',
-                window.location.origin + '/board?room=ABCD',
+                window.location.origin + '/host?room={{ room }}',
+                window.location.origin + '/play?room={{ room }}&name=Alex',
+                window.location.origin + '/play?room={{ room }}&name=Brad',
+                window.location.origin + '/play?room={{ room }}&name=Carl',
+                window.location.origin + '/board?room={{ room }}',
             ]
 
             for (const x of Array(5).keys()) {
