@@ -25,3 +25,8 @@ div.smaller {
 div.tiny {
     font-size: 0.75rem;
 }
+
+a.navbar-link {
+    font-size: 1.25rem;
+}
+
