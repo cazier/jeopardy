@@ -39,17 +39,27 @@ def route_new():
     """
     return render_template(template_name_or_list="new.html")
 
+@routing.route("/join/<room>", methods=["GET"])
 @routing.route("/join/", methods=["GET"])
+def route_join(room: str = ""):
     """Display the page to join a game. This does include some error handling, but largely is messy...
     
     - Players will enter their name, and the room code created by the host. No two players can have the same name
     - The "Board" will just enter a room code.
     - If the host gets disconnected, they can rejoin here too.
+    - Whoever starts the game can also create a "magic link" that will allow people to direcly join without typing in 
+      the room code.
     
     Only allows GET requests.
     """
+    if room != "" and room in storage.rooms():
+        room = room
+    
+    else:
+        room = ""
+
     return render_template(
-        template_name_or_list="join.html", errors=get_flashed_messages()
+        template_name_or_list="join.html", errors=get_flashed_messages(), room_code = room.upper()
     )
 
 
