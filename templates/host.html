@@ -433,7 +433,7 @@
         });
 
         socket.on('results-page-s>bph', function (message) {
-            $("<form method='POST' action='" + window.location.origin + "/results'><input type='hidden' name='room' value='{{ game.room }}'/><input type='hidden' name='type' value='" + type + "'/></form>").appendTo("body").submit();
+            $("<form method='POST' action='" + window.location.origin + "/results/'><input type='hidden' name='room' value='{{ game.room }}'/><input type='hidden' name='type' value='" + type + "'/></form>").appendTo("body").submit();
         });
 
     </script>
