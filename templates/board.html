@@ -152,12 +152,15 @@
                 })
 
                 socket.on('reveal_standard_set-s>bh', function (message) {
-                    $(message['identifier']).addClass('disabled');
-
                     displayedInModal = '#standard_set';
 
                     manageModal({ action: 'show', updates: message['updates'] });
                 });
+
+                socket.on('disable_question-s>b', function (message) {
+                    $(message['identifier']).addClass('disabled');
+                });
+
 
                 socket.on('start_wager_round-s>bh', function (message) {
                     displayedInModal = '#wager_round';

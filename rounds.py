@@ -20,6 +20,14 @@ def host_clicked_answer(data):
     game = storage.pull(data["room"])
     info = game.get(data["identifier"])
 
+    socketio.emit(
+        "disable_question-s>b",
+        {
+            "room": data["room"],
+            "identifier": f'#{data[u"identifier"]}',
+        }
+    )
+
     # If the set is not a Daily Double or Final Round (which would require a wager!)
     if not info["wager"]:
         socketio.emit(
@@ -30,7 +38,6 @@ def host_clicked_answer(data):
                     "question": info["question"].replace("<br />", "\n"),
                     "answer": info["answer"].replace("<br />", "\n"),
                 },
-                "identifier": f'#{data[u"identifier"]}',
             },
         )
 
