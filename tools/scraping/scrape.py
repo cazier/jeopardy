@@ -33,7 +33,7 @@ class Season(object):
 
         time.sleep(0.5)
         self.data = self.url.get().table
-        
+
         self.games = [game.get("href") for game in self.data.find_all("a") if "game_id" in game.get("href")]
 
 
@@ -41,7 +41,7 @@ class Game(object):
     def __init__(self, url: str) -> None:
         if len(url) < 45:
             url = f"http://www.j-archive.com/showgame.php?game_id={url.split('=')[1]}"
-            
+
         self.url = Links(url=url)
 
         self.data = self.url.get()
