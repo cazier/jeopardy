@@ -33,7 +33,7 @@ def db_add(clue_data: dict, shortnames: bool = True):
         complete = Complete(state=key("complete"))
         db.session.add(complete)
 
-    if (category := Category.query.filter_by(name=key("category")).first()) is None:
+    if (category := Category.query.filter_by(name=key("category")).filter_by(date=date).first()) is None:
         category = Category(name=key("category"), show=show, round=round_, complete=complete, date=date)
         db.session.add(category)
 
@@ -241,5 +241,29 @@ def download_external_files(filename: str, output: str = "media", delay: float =
         time.sleep(delay)
 
 
-if __name__ == "__main__":
-    download_external_files(filename="downloads.txt", output="media")
+def add(filename: str, method: str, url: str = "", shortnames: bool = True):
+    import tqdm
+    import glob
+
+    ROUNDS = {"Jeopardy!": 0, "Double Jeopardy!": 1, "Final Jeopardy!": 2, "Tiebreaker": 4}
+
+    for file in tqdm.tqdm(glob.glob(filename)):
+        with open(file=file, mode="r") as json_file:
+            file = json.load(json_file)
+
+        for set_ in tqdm.tqdm(file):
+            set_["v"] = int(set_["v"].replace("$", ""))
+            set_["r"] = ROUNDS[set_["r"]]
+
+            if method == "db":
+                db_add(clue_data=set_, shortnames=shortnames)
+
+            elif method == "web":
+                web_add(url=url, clue_data=set_, shortnames=shortnames)
+
+            else:
+                raise NotImplementedError
+
+
+# if __name__ == "__main__":
+    # do things
