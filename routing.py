@@ -140,6 +140,7 @@ def route_player():
                 category="error",
             )
             error_occurred = True
+            error_room = ""
 
         if name in storage.pull(room=room).score:
             flash(
@@ -147,6 +148,7 @@ def route_player():
                 category="error",
             )
             error_occurred = True
+            error_room = room
 
         elif (len(name) < 1) or (name.isspace()):
             flash(
@@ -154,9 +156,10 @@ def route_player():
                 category="error",
             )
             error_occurred = True
+            error_room = room
 
         if error_occurred:
-            return redirect(url_for("routing.route_join"))
+            return redirect(url_for("routing.route_join", room=error_room))
 
         else:
             storage.pull(room=room).add_player(name)
