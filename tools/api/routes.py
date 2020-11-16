@@ -131,6 +131,10 @@ class ShowListResource(Resource):
 
 class GameResource(Resource):
     def get(self) -> dict:
+        size = int(request.args.get("size", 6))
+        year = int(request.args.get("year", -1))
+        show = int(request.args.get("show", -1))
+
         round_ = request.args.get("round", None)
 
         if (round_ == None) or (round_ not in ["0", "1", "2", "jeopardy", "doublejeopardy", "finaljeopardy"]):
@@ -145,9 +149,7 @@ class GameResource(Resource):
 
         rounds = [r.id for r in Round.query.filter(Round.number == int(round_))]
 
-        year = request.args.get("year", None)
-
-        if year != None:
+        if year != -1:
             year = int(year)
             start = datetime.datetime.strptime(str(year), "%Y")
             stop = datetime.datetime.strptime(str(year + 1), "%Y")
@@ -158,28 +160,35 @@ class GameResource(Resource):
 
         years = [y.id for y in year_.all()]
 
-        categories = (
-            Category.query.filter(Category.round_id.in_(rounds))
-            .filter(Category.complete.has(state=True))
-            .filter(Category.date_id.in_(years))
-            .all()
-        )
-        random.shuffle(categories)
+        if show != -1:
+            shows = Show.query.filter_by(number=show)
+            categories = (
+                Category.query.filter(Category.show == shows.first()).filter(Category.round_id.in_(rounds)).all()
+            )
+
+        else:
+            categories = (
+                Category.query.filter(Category.round_id.in_(rounds))
+                .filter(Category.date_id.in_(years))
+                .filter(Category.complete.has(state=True))
+                .all()
+            )
+            random.shuffle(categories)
 
         column = 0
         sets = dict()
 
-        while column < 5:
+        while column < size:
             sets_ = sets_schema.dump(categories.pop().sets)
 
-            if any([v["external"] for v in sets_]):
+            if any([v["external"] for v in sets_]) and show == -1:
                 continue
 
             elif len(sets_) > 5:
                 continue
 
             else:
-                sets[column] = sets_schema.dump(categories.pop().sets)
+                sets[column] = sets_
                 column += 1
 
         return jsonify(sets)
