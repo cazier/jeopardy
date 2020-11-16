@@ -5,7 +5,7 @@ from api import api, db
 from api.models import Set, Category, Date, Show, Round, Value, External, Complete
 from api.schemas import *
 
-import datetime, zlib
+import datetime, zlib, random
 
 
 class DetailsResource(Resource):
@@ -13,7 +13,6 @@ class DetailsResource(Resource):
         categories = Category.query.count()
         sets = Set.query.count()
         shows = Show.query.count()
-        dates = Date.query.count()
         is_complete = Set.query.filter(Set.complete.has(state=True)).count()
         has_external = Set.query.filter(Set.external.has(state=True)).count()
         air_dates = Date.query.order_by(Date.date)
@@ -47,9 +46,7 @@ class SetResource(Resource):
 
 class SetListResource(Resource):
     def get(self) -> dict:
-        sets = Set.query.all()
-
-        return jsonify(sets_schema.dump(sets))
+        return jsonify(paginate(model=Set, schema=sets_schema.dump, indices=request.args))
 
     def post(self) -> dict:
         payload = request.json
@@ -72,7 +69,7 @@ class SetListResource(Resource):
                 complete = Complete(state=payload["complete"])
                 db.session.add(complete)
 
-            if (category := Category.query.filter_by(name=payload["category"]).first()) is None:
+            if (category := Category.query.filter_by(name=key("category")).filter_by(date=date).first()) is None:
                 category = Category(name=payload["category"], show=show, round=round_, complete=complete, date=date)
                 db.session.add(category)
 
@@ -129,14 +126,87 @@ class ShowResource(Resource):
 
 class ShowListResource(Resource):
     def get(self) -> dict:
-        shows = Show.query.all()
+        return jsonify(paginate(model=Show, schema=shows_schema.dump, indices=request.args))
 
-        return jsonify(shows_schema.dump(shows))
+
+class GameResource(Resource):
+    def get(self) -> dict:
+        round_ = request.args.get("round", None)
+
+        if (round_ == None) or (round_ not in ["0", "1", "2", "jeopardy", "doublejeopardy", "finaljeopardy"]):
+            return jsonify(
+                {
+                    "error": 'round number must be one of: (0, 1, or 2) OR ("jeopardy", "doublejeopardy", or "finaljeopardy")'
+                }
+            )
+
+        if not round_.isnumeric():
+            round_ = {"jeopardy": "0", "doublejeopardy": "1", "finaljeopardy": "2"}[round_]
+
+        rounds = [r.id for r in Round.query.filter(Round.number == int(round_))]
+
+        year = request.args.get("year", None)
+
+        if year != None:
+            year = int(year)
+            start = datetime.datetime.strptime(str(year), "%Y")
+            stop = datetime.datetime.strptime(str(year + 1), "%Y")
+
+            year_ = Date.query.filter(Date.date > start, Date.date < stop)
+        else:
+            year_ = Date.query.filter()
+
+        years = [y.id for y in year_.all()]
+
+        categories = (
+            Category.query.filter(Category.round_id.in_(rounds))
+            .filter(Category.complete.has(state=True))
+            .filter(Category.date_id.in_(years))
+            .all()
+        )
+        random.shuffle(categories)
+
+        column = 0
+        sets = dict()
+
+        while column < 5:
+            sets_ = sets_schema.dump(categories.pop().sets)
+
+            if any([v["external"] for v in sets_]):
+                continue
+
+            elif len(sets_) > 5:
+                continue
+
+            else:
+                sets[column] = sets_schema.dump(categories.pop().sets)
+                column += 1
+
+        return jsonify(sets)
+
+
+def paginate(model, schema, indices):
+    start = int(indices.get("start", 0))
+    number = min(int(indices.get("number", 100)), 200)
+
+    if start > model.query.count():
+        return {"error": "start number too great"}
+
+    if start + number > model.query.count():
+        return {"start": start, "number": number, "results": schema(model.query.filter(model.id >= start).all())}
+
+    else:
+        return {
+            "start": start,
+            "number": number,
+            "results": schema(model.query.filter(model.id >= start, model.id < start + number).all()),
+        }
 
 
 api.add_resource(SetListResource, "/sets")
 api.add_resource(SetResource, "/set/<int:set_id>")
-api.add_resource(DetailsResource, "/details")
-# # api_base = ""  # /api/v1/"
 api.add_resource(ShowListResource, "/shows")
 api.add_resource(ShowResource, "/show/<int:show_id>")
+api.add_resource(DetailsResource, "/details")
+api.add_resource(GameResource, "/game")
+# # api_base = ""  # /api/v1/"
