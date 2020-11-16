@@ -30,7 +30,7 @@ def route_index():
     return render_template(template_name_or_list="index.html")
 
 
-@routing.route("/new", methods=["GET"])
+@routing.route("/new/", methods=["GET"])
 def route_new():
     """Display the option(s) available to start a new game. As of now, this only supports selecting the
     number of categories with which to play. Conceivably "infinte" number of players can join.
@@ -39,9 +39,7 @@ def route_new():
     """
     return render_template(template_name_or_list="new.html")
 
-
-@routing.route("/join", methods=["GET"])
-def route_join():
+@routing.route("/join/", methods=["GET"])
     """Display the page to join a game. This does include some error handling, but largely is messy...
     
     - Players will enter their name, and the room code created by the host. No two players can have the same name
@@ -55,7 +53,7 @@ def route_join():
     )
 
 
-@routing.route("/host", methods=["GET", "POST"])
+@routing.route("/host/", methods=["GET", "POST"])
 def route_host():
     """Displays the page used by the game host to manage the gameplay. It can be "accessed" either from the `/new`
     endpoint or the `/join` endpoint, and will do different things, as needed.
@@ -112,7 +110,7 @@ def route_host():
     )
 
 
-@routing.route("/play", methods=["GET", "POST"])
+@routing.route("/play/", methods=["GET", "POST"])
 def route_player():
     """Displays the page used by the players to "compete". The page will initially run a number of checks
     to verify that the room code was valid, or that the name entered can be done. If anything is invalid,
@@ -170,7 +168,7 @@ def route_player():
     )
 
 
-@routing.route("/board", methods=["GET", "POST"])
+@routing.route("/board/", methods=["GET", "POST"])
 def route_board():
     """Displays the page used to display the board. As with `/play`, performs a small amount of error checking
     to ensure the room exists.
@@ -199,7 +197,7 @@ def route_board():
     )
 
 
-@routing.route("/results", methods=["POST", "GET"])
+@routing.route("/results/", methods=["POST", "GET"])
 def route_results():
     """Displays a final results page, ranking the players from first to last. There are also a number of 
     buttons to allow the host to choose to restart the game with the same, or new, players.
@@ -235,7 +233,7 @@ def route_results():
         # return redirect(url_for("routing.route_join"))
 
 
-@routing.route("/test", methods=["GET"])
+@routing.route("/test/", methods=["GET"])
 def route_test():
     """Displays a (rather convoluted) testing page with a number of iframes to show each user
     type. The test sets the `config.debug` variable to true, because it is assumed to be so,
