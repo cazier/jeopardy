@@ -133,21 +133,26 @@ class ShowResourceById(Resource):
 
 class ShowResourceByDate(Resource):
     def get(self, year: int, month: int = -1, day: int = -1) -> dict:
-        return jsonify({"error": "not yet implemented"})
-        # start = arrow.get(f"{year:04d}/01/01", "YYYY/MM/DD")
-        # stop = start.shift(years=+1)
+        try:
+            date = datetime.datetime.strptime(f"{year:04d}/{abs(month):02d}/{abs(day):02d}", "%Y/%m/%d")
+            
+        except ValueError:
+            return jsonify({"error": "please check that your date is valid (i.e., year between 1000 and 9999, month between 1 and 12, and day between 1 and 31, as the month allows)"})
 
-        # try:
-        #     if month != -1:
-        #         start = start.replace(month=month)
+        results = Show.query.filter(Show.date.has(year=date.year))
 
-        # except ValueError:
-        #     return jsonify({"error": "please check that your months and dates are valid"})
+        if month != -1:
+            results = results.filter(Show.date.has(month = date.month))
 
-        # return jsonify({"year": year, "month": month, "day": day})
+            if day != -1:
+                results = results.filter(Show.date.has(day = date.day))
+
+        results.order_by(Show.number)
+
+        return paginate(results, shows_schema.dump, request.args)
 
 
-class ShowListResource(Resource):
+class ShowResource(Resource):
     def get(self) -> dict:
         return paginate(model=Show.query, schema=shows_schema.dump, indices=request.args)
 
@@ -270,14 +275,14 @@ def no_results():
 api.add_resource(SetListResource, "/sets")
 api.add_resource(SetResource, "/set/<int:set_id>")
 
-api.add_resource(ShowListResource, "/shows")
-api.add_resource(ShowResourceByNumber, "/show/number/<int:entry>")
-api.add_resource(ShowResourceById, "/show/id/<int:entry>")
+api.add_resource(ShowResource, "/show", "/shows")
+api.add_resource(ShowResourceByNumber, "/show/number/<int:entry>", "/shows/number/<int:entry>")
+api.add_resource(ShowResourceById, "/show/id/<int:entry>", "/shows/id/<int:entry>")
 api.add_resource(
     ShowResourceByDate,
-    "/show/date/<int:year>/",
-    "/show/date/<int:year>/<int:month>/",
-    "/show/date/<int:year>/<int:month>/<int:day>/",
+    "/show/date/<int:year>/", "/shows/date/<int:year>/",
+    "/show/date/<int:year>/<int:month>/", "/shows/date/<int:year>/<int:month>/",
+    "/show/date/<int:year>/<int:month>/<int:day>/", "/shows/date/<int:year>/<int:month>/<int:day>/",
 )
 
 api.add_resource(CategoryListResource, "/categories")
