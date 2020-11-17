@@ -1,8 +1,6 @@
 from flask import jsonify, request
 from flask_restful import Resource
 
-import arrow
-
 from api import api, db
 from api.models import Set, Category, Date, Show, Round, Value, External, Complete
 from api.schemas import *
