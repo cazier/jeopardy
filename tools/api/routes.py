@@ -244,19 +244,23 @@ def paginate(model, schema, indices):
 
     start = int(indices.get("start", 0))
     number = min(int(indices.get("number", 100)), 200)
+    data = schema(model.all())
 
-    if start > model.query.count():
+    if start > model.count():
         return {"error": "start number too great"}
 
-    if start + number > model.query.count():
-        return {"start": start, "number": number, "results": schema(model.query.filter(model.id >= start).all())}
+    if start + number > model.count():
+        data = data[start:]
 
     else:
-        return {
-            "start": start,
-            "number": number,
-            "results": schema(model.query.filter(model.id >= start, model.id < start + number).all()),
-        }
+        data = data[start: start + number]
+
+    return jsonify({
+        "start": start,
+        "number": number,
+        "data": data,
+        "results": model.count()
+    })
 
 
 def no_results():
