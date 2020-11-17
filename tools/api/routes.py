@@ -46,7 +46,7 @@ class SetResource(Resource):
 
 class SetListResource(Resource):
     def get(self) -> dict:
-        return jsonify(paginate(model=Set, schema=sets_schema.dump, indices=request.args))
+        return paginate(model=Set.query, schema=sets_schema.dump, indices=request.args)
 
     def post(self) -> dict:
         payload = request.json
@@ -149,7 +149,7 @@ class ShowResourceByDate(Resource):
 
 class ShowListResource(Resource):
     def get(self) -> dict:
-        return jsonify(paginate(model=Show, schema=shows_schema.dump, indices=request.args))
+        return paginate(model=Show.query, schema=shows_schema.dump, indices=request.args)
 
 
 # class CategoryResource(Resource):
@@ -169,7 +169,7 @@ class ShowListResource(Resource):
 
 class CategoryListResource(Resource):
     def get(self) -> dict:
-        return jsonify(paginate(model=Category, schema=categories_schema.dump, indices=request.args))
+        return paginate(model=Category, schema=categories_schema.dump, indices=request.args)
 
 
 class GameResource(Resource):
