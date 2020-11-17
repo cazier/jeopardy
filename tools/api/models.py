@@ -1,5 +1,7 @@
 from api import db
 
+from sqlalchemy import extract
+from sqlalchemy.ext.hybrid import hybrid_property
 
 class Set(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -38,6 +40,30 @@ class Date(db.Model):
     sets = db.relationship("Set", backref="date")
     show = db.relationship("Show", backref="date", uselist=False)
     categories = db.relationship("Category", backref="date")
+
+    @hybrid_property
+    def year(self):
+        return self.date.year
+    
+    @year.expression
+    def year(cls):
+        return extract("year", cls.date)
+
+    @hybrid_property
+    def month(self):
+        return self.date.month
+    
+    @month.expression
+    def month(cls):
+        return extract("month", cls.date)
+
+    @hybrid_property
+    def day(self):
+        return self.date.day
+    
+    @day.expression
+    def day(cls):
+        return extract("day", cls.date)
 
     def __repr__(self):
         return f"<Date {self.date}>"
