@@ -239,6 +239,9 @@ class GameResource(Resource):
 
 
 def paginate(model, schema, indices):
+    if model.count() == 0:
+        return no_results()
+
     start = int(indices.get("start", 0))
     number = min(int(indices.get("number", 100)), 200)
 
