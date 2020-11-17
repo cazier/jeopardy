@@ -147,9 +147,9 @@ class ShowResourceByDate(Resource):
             if day != -1:
                 results = results.filter(Show.date.has(day = date.day))
 
-        results.order_by(Show.number)
+        results = results.order_by(Show.number)
 
-        return paginate(results, shows_schema.dump, request.args)
+        return paginate(model=results, schema=shows_schema.dump, indices=request.args)
 
 
 class ShowResource(Resource):
@@ -249,21 +249,20 @@ def paginate(model, schema, indices):
 
     start = int(indices.get("start", 0))
     number = min(int(indices.get("number", 100)), 200)
-    data = schema(model.all())
 
     if start > model.count():
         return {"error": "start number too great"}
 
     if start + number > model.count():
-        data = data[start:]
+        data = model[start:]
 
     else:
-        data = data[start: start + number]
+        data = model[start: start + number]
 
     return jsonify({
         "start": start,
         "number": number,
-        "data": data,
+        "data": schema(data),
         "results": model.count()
     })
 
