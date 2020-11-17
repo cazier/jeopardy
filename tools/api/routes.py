@@ -1,6 +1,8 @@
 from flask import jsonify, request
 from flask_restful import Resource
 
+import arrow
+
 from api import api, db
 from api.models import Set, Category, Date, Show, Round, Value, External, Complete
 from api.schemas import *
@@ -109,24 +111,67 @@ class SetListResource(Resource):
             return jsonify({"missing": "key or value"})
 
 
-class ShowResource(Resource):
-    def get(self, show_id: int) -> dict:
-        show = Show.query.get_or_404(show_id)
+class ShowResourceByNumber(Resource):
+    def get(self, entry: int) -> dict:
+        show = Show.query.filter_by(number=entry).first()
 
-        return jsonify(show_schema.dump(show))
+        if show == None:
+            return no_results()
 
-    def delete(self, show_id: int) -> dict:
-        show = Show.query.get(show_id)
+        else:
+            return jsonify(show_schema.dump(show))
 
-        db.session.delete(show)
-        db.session.commit()
 
-        return jsonify({"delete": "success"})
+class ShowResourceById(Resource):
+    def get(self, entry: int) -> dict:
+        show = Show.query.filter_by(id=entry).first()
+
+        if show == None:
+            return no_results()
+
+        else:
+            return jsonify(show_schema.dump(show))
+
+
+class ShowResourceByDate(Resource):
+    def get(self, year: int, month: int = -1, day: int = -1) -> dict:
+        return jsonify({"error": "not yet implemented"})
+        # start = arrow.get(f"{year:04d}/01/01", "YYYY/MM/DD")
+        # stop = start.shift(years=+1)
+
+        # try:
+        #     if month != -1:
+        #         start = start.replace(month=month)
+
+        # except ValueError:
+        #     return jsonify({"error": "please check that your months and dates are valid"})
+
+        # return jsonify({"year": year, "month": month, "day": day})
 
 
 class ShowListResource(Resource):
     def get(self) -> dict:
         return jsonify(paginate(model=Show, schema=shows_schema.dump, indices=request.args))
+
+
+# class CategoryResource(Resource):
+#     def get(self, category_id: int) -> dict:
+#         show = Show.query.get_or_404(show_id)
+
+#         return jsonify(show_schema.dump(show))
+
+#     def delete(self, show_id: int) -> dict:
+#         show = Show.query.get(show_id)
+
+#         db.session.delete(show)
+#         db.session.commit()
+
+#         return jsonify({"delete": "success"})
+
+
+class CategoryListResource(Resource):
+    def get(self) -> dict:
+        return jsonify(paginate(model=Category, schema=categories_schema.dump, indices=request.args))
 
 
 class GameResource(Resource):
@@ -179,7 +224,8 @@ class GameResource(Resource):
         sets = dict()
 
         while column < size:
-            sets_ = sets_schema.dump(categories.pop().sets)
+            category = categories.pop()
+            sets_ = sets_schema.dump(category.sets)
 
             if any([v["external"] for v in sets_]) and show == -1:
                 continue
@@ -188,7 +234,7 @@ class GameResource(Resource):
                 continue
 
             else:
-                sets[column] = sets_
+                sets[category.name] = sets_
                 column += 1
 
         return jsonify(sets)
@@ -212,10 +258,25 @@ def paginate(model, schema, indices):
         }
 
 
+def no_results():
+    return jsonify({"error": "no results found"})
+
+
 api.add_resource(SetListResource, "/sets")
 api.add_resource(SetResource, "/set/<int:set_id>")
+
 api.add_resource(ShowListResource, "/shows")
-api.add_resource(ShowResource, "/show/<int:show_id>")
+api.add_resource(ShowResourceByNumber, "/show/number/<int:entry>")
+api.add_resource(ShowResourceById, "/show/id/<int:entry>")
+api.add_resource(
+    ShowResourceByDate,
+    "/show/date/<int:year>/",
+    "/show/date/<int:year>/<int:month>/",
+    "/show/date/<int:year>/<int:month>/<int:day>/",
+)
+
+api.add_resource(CategoryListResource, "/categories")
+# api.add_resource(CategoryResource, "/category/<int:category_id>")
 api.add_resource(DetailsResource, "/details")
 api.add_resource(GameResource, "/game")
 # # api_base = ""  # /api/v1/"

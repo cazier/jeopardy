@@ -29,16 +29,6 @@ class RoundSchema(ma.SQLAlchemySchema):
         model = Round
         fields = ("number",)
 
-
-class CategorySchema(ma.SQLAlchemySchema):
-    class Meta:
-        model = Category
-        fields = (
-            "id",
-            "name",
-        )
-
-
 class ValueSchema(ma.SQLAlchemySchema):
     class Meta:
         model = Value
@@ -57,7 +47,26 @@ class CompleteSchema(ma.SQLAlchemySchema):
         fields = ("state",)
 
 
-class SetSchema(ma.SQLAlchemyAutoSchema):
+
+class CategorySchema(ma.SQLAlchemySchema):
+    complete = fields.fields.Pluck("CompleteSchema", "state")
+    date = fields.fields.Pluck("DateSchema", "date")
+    show = fields.fields.Pluck("ShowSchema", "number")
+    round = fields.fields.Pluck("RoundSchema", "number")
+
+    class Meta:
+        model = Category
+        fields = (
+            "id",
+            "name",
+            "show",
+            "date",
+            "round",
+            "complete",
+        )
+
+
+class SetSchema(ma.SQLAlchemySchema):
     category = fields.fields.Pluck("CategorySchema", "name")
     date = fields.fields.Pluck("DateSchema", "date")
     show = fields.fields.Pluck("ShowSchema", "number")
@@ -88,5 +97,8 @@ sets_schema = SetSchema(many=True)
 show_schema = ShowSchema()
 shows_schema = ShowSchema(many=True)
 
-# category_schema = CategorySchema()
-# categories_schema = CategorySchema(many=True)
+category_schema = CategorySchema()
+categories_schema = CategorySchema(many=True)
+
+date_schema = DateSchema()
+dates_schema = DateSchema(many=True)
