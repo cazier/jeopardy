@@ -46,7 +46,18 @@ class SetResource(Resource):
 
 class SetListResource(Resource):
     def get(self) -> dict:
-        return paginate(model=Set.query, schema=sets_schema.dump, indices=request.args)
+        results = Set.query
+
+        results = (
+            results.join(Date, Date.id == Set.date_id)
+            .join(Round, Round.id == Set.round_id)
+            .join(Category, Category.id == Set.category_id)
+            .join(Value, Value.id == Set.value_id)
+        )
+
+        results = results.order_by(Date.date, Set.round, Category.name, Value.amount)
+
+        return paginate(model=results, schema=sets_schema.dump, indices=request.args)
 
     def post(self) -> dict:
         payload = request.json
