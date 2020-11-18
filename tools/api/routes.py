@@ -22,7 +22,7 @@ class DetailsResource(Resource):
                 "categories": categories,
                 "sets": sets,
                 "shows": shows,
-                "air_dates": {"oldest": air_dates[0].date, "most_recent": air_dates[-1].date},
+                "air_dates": {"oldest": air_dates[0].date, "most_recent": air_dates[-1].date,},
                 "is_complete": {True: is_complete, False: sets - is_complete},
                 "has_external": {True: has_external, False: sets - has_external},
             }
@@ -62,9 +62,23 @@ class SetListResource(Resource):
     def post(self) -> dict:
         payload = request.json
         if set(payload.keys()) == set(
-            ("date", "show", "round", "complete", "category", "value", "external", "question", "answer")
+            (
+                "date",
+                "show",
+                "round",
+                "complete",
+                "category",
+                "value",
+                "external",
+                "question",
+                "answer",
+            )
         ) and all((len(str(v)) > 0 for k, v in payload.items())):
-            if (date := Date.query.filter_by(date=datetime.date.fromisoformat(payload["date"])).first()) is None:
+            if (
+                date := Date.query.filter_by(
+                    date=datetime.date.fromisoformat(payload["date"])
+                ).first()
+            ) is None:
                 date = Date(date=datetime.date.fromisoformat(payload["date"]))
                 db.session.add(date)
 
@@ -80,8 +94,18 @@ class SetListResource(Resource):
                 complete = Complete(state=payload["complete"])
                 db.session.add(complete)
 
-            if (category := Category.query.filter_by(name=key("category")).filter_by(date=date).first()) is None:
-                category = Category(name=payload["category"], show=show, round=round_, complete=complete, date=date)
+            if (
+                category := Category.query.filter_by(name=key("category"))
+                .filter_by(date=date)
+                .first()
+            ) is None:
+                category = Category(
+                    name=payload["category"],
+                    show=show,
+                    round=round_,
+                    complete=complete,
+                    date=date,
+                )
                 db.session.add(category)
 
             if (value := Value.query.filter_by(amount=payload["value"]).first()) is None:
@@ -145,18 +169,24 @@ class ShowResourceById(Resource):
 class ShowResourceByDate(Resource):
     def get(self, year: int, month: int = -1, day: int = -1) -> dict:
         try:
-            date = datetime.datetime.strptime(f"{year:04d}/{abs(month):02d}/{abs(day):02d}", "%Y/%m/%d")
-            
+            date = datetime.datetime.strptime(
+                f"{year:04d}/{abs(month):02d}/{abs(day):02d}", "%Y/%m/%d"
+            )
+
         except ValueError:
-            return jsonify({"error": "please check that your date is valid (i.e., year between 1000 and 9999, month between 1 and 12, and day between 1 and 31, as the month allows)"})
+            return jsonify(
+                {
+                    "error": "please check that your date is valid (i.e., year between 1000 and 9999, month between 1 and 12, and day between 1 and 31, as the month allows)"
+                }
+            )
 
         results = Show.query.filter(Show.date.has(year=date.year))
 
         if month != -1:
-            results = results.filter(Show.date.has(month = date.month))
+            results = results.filter(Show.date.has(month=date.month))
 
             if day != -1:
-                results = results.filter(Show.date.has(day = date.day))
+                results = results.filter(Show.date.has(day=date.day))
 
         results = results.order_by(Show.number)
 
@@ -196,10 +226,13 @@ class GameResource(Resource):
 
         round_ = request.args.get("round", None)
 
-        if (round_ == None) or (round_ not in ["0", "1", "2", "jeopardy", "doublejeopardy", "finaljeopardy"]):
+        if (round_ == None) or (
+            round_ not in ["0", "1", "2", "jeopardy", "doublejeopardy", "finaljeopardy"]
+        ):
             return jsonify(
                 {
-                    "error": 'round number must be one of: (0, 1, or 2) OR ("jeopardy", "doublejeopardy", or "finaljeopardy")'
+                    "error": "round number must be one of: "
+                    '(0, 1, or 2) OR ("jeopardy", "doublejeopardy", or "finaljeopardy")'
                 }
             )
 
@@ -222,7 +255,9 @@ class GameResource(Resource):
         if show != -1:
             shows = Show.query.filter_by(number=show)
             categories = (
-                Category.query.filter(Category.show == shows.first()).filter(Category.round_id.in_(rounds)).all()
+                Category.query.filter(Category.show == shows.first())
+                .filter(Category.round_id.in_(rounds))
+                .all()
             )
 
         else:
@@ -268,14 +303,11 @@ def paginate(model, schema, indices):
         data = model[start:]
 
     else:
-        data = model[start: start + number]
+        data = model[start : start + number]
 
-    return jsonify({
-        "start": start,
-        "number": number,
-        "data": schema(data),
-        "results": model.count()
-    })
+    return jsonify(
+        {"start": start, "number": number, "data": schema(data), "results": model.count(),}
+    )
 
 
 def no_results():
@@ -290,9 +322,12 @@ api.add_resource(ShowResourceByNumber, "/show/number/<int:entry>", "/shows/numbe
 api.add_resource(ShowResourceById, "/show/id/<int:entry>", "/shows/id/<int:entry>")
 api.add_resource(
     ShowResourceByDate,
-    "/show/date/<int:year>/", "/shows/date/<int:year>/",
-    "/show/date/<int:year>/<int:month>/", "/shows/date/<int:year>/<int:month>/",
-    "/show/date/<int:year>/<int:month>/<int:day>/", "/shows/date/<int:year>/<int:month>/<int:day>/",
+    "/show/date/<int:year>/",
+    "/shows/date/<int:year>/",
+    "/show/date/<int:year>/<int:month>/",
+    "/shows/date/<int:year>/<int:month>/",
+    "/show/date/<int:year>/<int:month>/<int:day>/",
+    "/shows/date/<int:year>/<int:month>/<int:day>/",
 )
 
 api.add_resource(CategoryListResource, "/categories")

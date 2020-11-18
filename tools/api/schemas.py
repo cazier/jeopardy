@@ -29,6 +29,7 @@ class RoundSchema(ma.SQLAlchemySchema):
         model = Round
         fields = ("number",)
 
+
 class ValueSchema(ma.SQLAlchemySchema):
     class Meta:
         model = Value
@@ -45,7 +46,6 @@ class CompleteSchema(ma.SQLAlchemySchema):
     class Meta:
         model = Complete
         fields = ("state",)
-
 
 
 class CategorySchema(ma.SQLAlchemySchema):
