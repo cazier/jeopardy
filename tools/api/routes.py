@@ -29,9 +29,12 @@ class DetailsResource(Resource):
         )
 
 
-class SetResource(Resource):
+class SetById(Resource):
     def get(self, set_id: int) -> dict:
-        set_ = Set.query.get_or_404(set_id)
+        set_ = Set.query.get(set_id)
+
+        if set_ == None:
+            return no_results()
 
         return jsonify(set_schema.dump(set_))
 
@@ -44,7 +47,7 @@ class SetResource(Resource):
         return jsonify({"delete": "success"})
 
 
-class SetListResource(Resource):
+class SetsMultiple(Resource):
     def get(self) -> dict:
         results = Set.query
 
@@ -144,18 +147,7 @@ class SetListResource(Resource):
             return jsonify({"missing": "key or value"})
 
 
-class ShowResourceByNumber(Resource):
-    def get(self, entry: int) -> dict:
-        show = Show.query.filter_by(number=entry).first()
-
-        if show == None:
-            return no_results()
-
-        else:
-            return jsonify(show_schema.dump(show))
-
-
-class ShowResourceById(Resource):
+class ShowById(Resource):
     def get(self, entry: int) -> dict:
         show = Show.query.filter_by(id=entry).first()
 
@@ -166,7 +158,18 @@ class ShowResourceById(Resource):
             return jsonify(show_schema.dump(show))
 
 
-class ShowResourceByDate(Resource):
+class ShowByNumber(Resource):
+    def get(self, entry: int) -> dict:
+        show = Show.query.filter_by(number=entry).first()
+
+        if show == None:
+            return no_results()
+
+        else:
+            return jsonify(show_schema.dump(show))
+
+
+class ShowOrShowsByDate(Resource):
     def get(self, year: int, month: int = -1, day: int = -1) -> dict:
         try:
             date = datetime.datetime.strptime(
@@ -314,14 +317,14 @@ def no_results():
     return jsonify({"error": "no results found"})
 
 
-api.add_resource(SetListResource, "/sets")
-api.add_resource(SetResource, "/set/<int:set_id>")
+api.add_resource(SetsMultiple, "/sets")
+api.add_resource(SetById, "/set/<int:set_id>")
 
 api.add_resource(ShowResource, "/show", "/shows")
-api.add_resource(ShowResourceByNumber, "/show/number/<int:entry>", "/shows/number/<int:entry>")
-api.add_resource(ShowResourceById, "/show/id/<int:entry>", "/shows/id/<int:entry>")
+api.add_resource(ShowByNumber, "/show/number/<int:entry>", "/shows/number/<int:entry>")
+api.add_resource(ShowById, "/show/id/<int:entry>", "/shows/id/<int:entry>")
 api.add_resource(
-    ShowResourceByDate,
+    ShowOrShowsByDate,
     "/show/date/<int:year>/",
     "/shows/date/<int:year>/",
     "/show/date/<int:year>/<int:month>/",
