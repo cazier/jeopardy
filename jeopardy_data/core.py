@@ -25,10 +25,27 @@ def cli():
 )
 @click.option("--host", default="0.0.0.0", help="the address on which to run the api", show_default=True)
 @click.option("--port", default=5001, help="the port on which to run the API", show_default=True)
+@click.option(
+    "--create/--no-create",
+    help="create a new database if one doesn't exist",
+    type=bool,
+    default=True,
+    show_default=True,
+)
+def run(host: str, port: int, file: str, debug: bool, create=bool):
     db_file = pathlib.Path(file).absolute()
     api.app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_file}"
 
-    api.app.run(debug=debug, host=host, port = port)
+    if not db_file.exists() and create:
+        api.db.drop_all()
+        api.db.create_all()
+
+    elif not db_file.exists() and not create:
+        click.echo("Error: No database file was found or could be created.", err=True)
+        sys.exit(1)
+
+    api.app.run(debug=debug, host=host, port=port)
+
 
 @cli.command(name="import")
 @click.option(
@@ -51,15 +68,25 @@ def cli():
 )
 @click.option("--progress", is_flag=True, help="show a progress bar", default=False, show_default=True)
 @click.option("--url", "endpoint", help="the url for the api import endpoint", type=str)
+@click.option(
+    "--create/--no-create",
+    help="create a new database if one doesn't exist",
+    type=bool,
+    default=True,
+    show_default=True,
+)
 def import_(json_file: str, db_file: str, method: str, progress: bool, endpoint: str, create: bool):
     json_file = pathlib.Path(json_file).absolute()
     db_file = pathlib.Path(os.getcwd(), db_file).absolute()
     api.app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_file}"
 
-
-    if not db_file.exists():            
+    if not db_file.exists() and create:
         api.db.drop_all()
         api.db.create_all()
+
+    elif not db_file.exists() and not create:
+        click.echo("Error: No database file was found or could be created.", err=True)
+        sys.exit(1)
 
     if (method == "api") and (endpoint == None):
         click.echo("Error: Missing option '--url' for the url endpoint when using api import.", err=True)
