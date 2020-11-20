@@ -1,10 +1,12 @@
 import os
+import json
 import pathlib
 import sys
 
 import click
 
 import api
+import scraping.scrape
 
 import batch
 
@@ -94,6 +96,27 @@ def import_(json_file: str, db_file: str, method: str, progress: bool, endpoint:
 
     batch.add(filename=str(json_file.absolute()), method=method, url=endpoint, shortnames=True, progress=progress)
 
+
+@cli.group()
+def scrape():
+    pass
+
+@scrape.command(name="seasons")
+@click.option("--out", "season_file", help="file to store season urls", type=str, default="seasons.json", show_default = True)
+def seasons(season_file: str):
+    season_file = pathlib.Path(season_file).absolute()
+
+    if False:#season_file.exists():
+        with open(season_file, 'r') as input_file:
+            data = json.load(input_file)
+    
+    else:
+        data = list()
+    
+    data = scraping.scrape.get_seasons_game_ids(start=10, stop=11, include_special = True)
+
+    with open(season_file, 'w') as output_file:
+        json.dump(data, output_file, indent="\t", sort_keys=True)
 
 if __name__ == "__main__":
     cli()

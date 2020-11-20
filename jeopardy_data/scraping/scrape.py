@@ -11,13 +11,9 @@ from collections import defaultdict
 SHOW_DATE_MATCH = re.compile(r"^Show #(\d{0,6}) - (.*)$")
 
 
-class Links(object):
-    def __init__(self, type_: str = "", identifier: str = "", url: str = "") -> None:
-        if type_ == "season":
-            self.url = f"http://www.j-archive.com/showseason.php?season={identifier}"
-
-        else:
-            self.url = url
+class Webpage(object):
+    def __init__(self, resource: str) -> None:
+        self.url = f"http://www.j-archive.com/{resource}"
 
     def __repr__(self) -> str:
         return self.url
@@ -29,7 +25,7 @@ class Links(object):
 class Season(object):
     def __init__(self, identifier: str) -> None:
         self.special: bool = not identifier.isnumeric()
-        self.url = Links(url=f"http://www.j-archive.com/showseason.php?season={identifier}")
+        self.url = Webpage(resource=f"showseason.php?season={identifier}")
 
         time.sleep(0.5)
         self.data = self.url.get().table
@@ -39,10 +35,9 @@ class Season(object):
 
 class Game(object):
     def __init__(self, url: str) -> None:
-        if len(url) < 45:
-            url = f"http://www.j-archive.com/showgame.php?game_id={url.split('=')[1]}"
+        game_id = resource_id(url=url)
 
-        self.url = Links(url=url)
+        self.url = Webpage(resource=f"showgame.php?game_id={game_id}")
 
         self.data = self.url.get()
         self.board: defaultdict = defaultdict(dict)
@@ -186,6 +181,116 @@ class Game(object):
         return {"question": question.text, "answer": answer.text, "external": external}
 
 
+class Pull(object):
+    def __init__(
+        self,
+        start: int = 1,
+        stop: int = 36,
+        include_special: bool = False,
+        initial: bool = False,
+        error_only: bool = False,
+        shortnames: bool = False,
+        method: str = "db",
+    ):
+        self.start = start
+        self.stop = stop
+        self.include_special = include_special
+        self.method = method
+        self.shortnames = shortnames
+        self.json_backup = list()
+
+        print("Pulling season data")
+        start = time.perf_counter()
+        if error_only:
+            with open("status.json", "r") as json_file:
+                json_data = json.load(json_file)
+
+            self.error = list()
+            self.success = json_data["success"]
+            self.pending = json_data["pending"] + json_data["error"]
+            self.outstanding_clues = json_data["out_clues"]
+
+            self.save(clues=False)
+            initial = False
+
+        if initial:
+            seasons = get_seasons(start=self.start, stop=self.stop, include_special=self.include_special)
+            store_initial_games(seasons)
+
+        elapsed = time.perf_counter() - start
+        print(f"Finished pulling season data! Time taken: {elapsed:.2f} seconds")
+
+        if input("Saved all season data to JSON file. Continue? (yN)").lower() == "y":
+            with open("status.json", "r") as json_file:
+                json_data = json.load(json_file)
+
+            self.error = json_data["error"]
+            self.success = json_data["success"]
+            self.pending = json_data["pending"]
+
+            self.outstanding_clues = json_data["out_clues"]
+
+            self.scrape()
+
+    def save(self, clues: bool = True):
+        with open("status.json", "w") as json_file:
+            json.dump(
+                {
+                    "error": self.error,
+                    "success": self.success,
+                    "pending": self.pending,
+                    "out_clues": self.outstanding_clues,
+                },
+                json_file,
+                indent="\t",
+            )
+
+        if clues:
+            with open("clue_backup.json", "w") as json_file:
+                json.dump(self.json_backup, json_file, indent="\t")
+
+    def scrape(self):
+        print("Starting to scrape game data")
+        while len(self.pending) > 0:
+            start = time.perf_counter()
+            url = self.pending.pop()
+
+            try:
+                if url not in self.error and url not in self.success:
+                    clues = Game(url=url)
+
+                    self.outstanding_clues = clues.json
+
+                    while len(self.outstanding_clues) > 0:
+                        clue = self.outstanding_clues.pop()
+
+                        if self.method == "db":
+                            db_add(clue_data=clue, shortnames=self.shortnames)
+
+                        elif self.method == "web":
+                            web_add(url=self.url, clue_data=clue, shortnames=self.shortnames)
+
+                        self.json_backup.append(clue)
+
+            except KeyboardInterrupt:
+                self.save()
+                import sys
+
+                sys.quit()
+
+            except:
+                print(f"An error occurred with game {clues.show}")
+                self.error.append(url)
+
+            else:
+                elapsed = time.perf_counter() - start
+                print(f"Successfully scraped game {clues.show} Time taken: {elapsed:.2f} seconds")
+                self.success.append(url)
+
+                time.sleep(0.5)
+
+        self.save()
+
 def get_external_media(round_: str, urls: list) -> None:
     """Create a list of the external media found in the clue. The list will have identifiers for the show, round,
     question, and an incrementing letter for each item in the clue. This file can then be run in a bash script
@@ -201,3 +306,29 @@ def pjs(function: str):
     of the library to only return the HTML element in the function.
     """
     return BeautifulSoup(parse(function)["body"][0]["expression"]["arguments"][2]["value"], "lxml")
+
+def get_seasons(start: int, stop: int, include_special: bool) -> list:
+    seasons = Webpage(resource="listseasons.php").get().find(id="content").find_all("a")
+    urls = (a.get("href").split("=")[1] for a in seasons)
+
+    standard = [Season(id) for id in (url for url in urls if url.isnumeric()) if (start <= int(id) <= stop)]
+    specials = [Season(id) for id in urls if (not id.isnumeric()) & include_special]
+
+    return standard + specials
+
+def resource_id(url: str) -> str:
+    return url.split("=")[-1]
+
+def get_seasons_game_ids(start: int, stop: int, include_special: bool) -> dict:
+    all_seasons = Webpage(resource="listseasons.php").get().find(id="content").find_all("a")
+
+    season_ids = (resource_id(url = season.get("href")) for season in all_seasons)
+
+    return {number: list() for number in season_ids}
+
+
+    
+
+# def scrape(get: str, start: int):
+#     if get == "seasons":
+
