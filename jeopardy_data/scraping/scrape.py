@@ -8,18 +8,37 @@ import string
 import datetime
 from collections import defaultdict
 
+import pathlib
+import os
+
 SHOW_DATE_MATCH = re.compile(r"^Show #(\d{0,6}) - (.*)$")
+
+CACHE = False
+CACHE_PATH = ""
 
 
 class Webpage(object):
     def __init__(self, resource: str) -> None:
         self.url = f"http://www.j-archive.com/{resource}"
 
+        self.storage = pathlib.Path(CACHE_PATH, resource).absolute()
+
     def __repr__(self) -> str:
         return self.url
 
     def get(self):
-        return BeautifulSoup(requests.get(self.url).text, "lxml")
+        if self.storage.exists() and CACHE:
+            with open(self.storage, 'r') as store_file:
+                page = store_file.read()
+        
+        else:
+            page = requests.get(self.url).text
+
+            if CACHE:
+                with open(self.storage, 'w') as store_file:
+                    store_file.write(page)
+
+        return BeautifulSoup(page, "lxml")
 
 
 class Season(object):

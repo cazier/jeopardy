@@ -103,7 +103,9 @@ def scrape():
 
 @scrape.command(name="seasons")
 @click.option("--out", "season_file", help="file to store season urls", type=str, default="seasons.json", show_default = True)
-def seasons(season_file: str):
+@click.option("--cache/--no-cache", help="cache files to a local directory", default=False, show_default = True)
+@click.option("--cache-path", help="directory to store cached files", type=str)
+def seasons(season_file: str, cache: bool, cache_path: str):
     season_file = pathlib.Path(season_file).absolute()
 
     if False:#season_file.exists():
@@ -112,6 +114,21 @@ def seasons(season_file: str):
     
     else:
         data = list()
+
+    if cache:
+        if cache_path == None:
+            click.echo("Error: A caching path must be supplied when --cache is used", err=True)
+            sys.exit(1)
+
+        scraping.scrape.CACHE = True
+        scraping.scrape.CACHE_PATH = pathlib.Path(cache_path)
+
+        if not scraping.scrape.CACHE_PATH.exists():
+            if click.confirm("The caching directory does not exist. Create it?", abort=True, default=True):
+                scraping.scrape.CACHE_PATH.mkdir(parents=True)
+            
+            else:
+                sys.exit()
     
     data = scraping.scrape.get_seasons_game_ids(start=10, stop=11, include_special = True)
 

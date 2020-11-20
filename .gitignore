@@ -123,3 +123,5 @@ helpers/database/clues.json
 *.db
 downloads.txt
 tools/media/*
+storage/
+output/
