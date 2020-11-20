@@ -4,7 +4,7 @@ import datetime
 from . import db
 from .models import *
 
-def add(clue_data: dict, uses_shortnames: bool = True) -> bool:
+def add(clue_data: dict, uses_shortnames: bool = True) -> tuple:
     def key(key: str) -> str:
         if uses_shortnames:
             return clue_data[key[0].lower() if key.lower() != "complete" else "f"]
@@ -58,8 +58,9 @@ def add(clue_data: dict, uses_shortnames: bool = True) -> bool:
         db.session.add(set_)
         db.session.commit()
 
-        return True
+        return True, set_
     
     else:
-        return False
+        return False, {'already': 'exists'}
+
 
