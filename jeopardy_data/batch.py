@@ -265,7 +265,8 @@ def add(filename: str, method: str, progress: bool, url: str = "", shortnames: b
             set_["r"] = ROUNDS[set_["r"]]
 
             if method == "db":
-                db_add(clue_data=set_, shortnames=shortnames)
+                from api.database import add
+                add(clue_data=set_, uses_shortnames=shortnames)
 
             elif method == "web":
                 web_add(url=url, clue_data=set_, shortnames=shortnames)
