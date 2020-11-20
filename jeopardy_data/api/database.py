@@ -4,6 +4,7 @@ import datetime
 from . import db
 from .models import *
 
+
 def add(clue_data: dict, uses_shortnames: bool = True) -> tuple:
     def key(key: str) -> str:
         if uses_shortnames:
@@ -59,8 +60,7 @@ def add(clue_data: dict, uses_shortnames: bool = True) -> tuple:
         db.session.commit()
 
         return True, set_
-    
-    else:
-        return False, {'already': 'exists'}
 
+    else:
+        return False, {"already": "exists"}
 

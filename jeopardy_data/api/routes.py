@@ -66,19 +66,9 @@ class SetsMultiple(Resource):
     def post(self) -> dict:
         payload = request.json
         if set(payload.keys()) == set(
-            (
-                "date",
-                "show",
-                "round",
-                "complete",
-                "category",
-                "value",
-                "external",
-                "question",
-                "answer",
-            )
+            ("date", "show", "round", "complete", "category", "value", "external", "question", "answer",)
         ) and all((len(str(v)) > 0 for k, v in payload.items())):
-            success, resp = database.add(clue_data = payload, uses_shortnames=False)
+            success, resp = database.add(clue_data=payload, uses_shortnames=False)
 
             if success:
                 return jsonify(set_schema.dump(resp))
@@ -115,9 +105,7 @@ class ShowByNumber(Resource):
 class ShowOrShowsByDate(Resource):
     def get(self, year: int, month: int = -1, day: int = -1) -> dict:
         try:
-            date = datetime.datetime.strptime(
-                f"{year:04d}/{abs(month):02d}/{abs(day):02d}", "%Y/%m/%d"
-            )
+            date = datetime.datetime.strptime(f"{year:04d}/{abs(month):02d}/{abs(day):02d}", "%Y/%m/%d")
 
         except ValueError:
             return jsonify(
@@ -172,9 +160,7 @@ class GameResource(Resource):
 
         round_ = request.args.get("round", None)
 
-        if (round_ == None) or (
-            round_ not in ["0", "1", "2", "jeopardy", "doublejeopardy", "finaljeopardy"]
-        ):
+        if (round_ == None) or (round_ not in ["0", "1", "2", "jeopardy", "doublejeopardy", "finaljeopardy"]):
             return jsonify(
                 {
                     "error": "round number must be one of: "
@@ -201,9 +187,7 @@ class GameResource(Resource):
         if show != -1:
             shows = Show.query.filter_by(number=show)
             categories = (
-                Category.query.filter(Category.show == shows.first())
-                .filter(Category.round_id.in_(rounds))
-                .all()
+                Category.query.filter(Category.show == shows.first()).filter(Category.round_id.in_(rounds)).all()
             )
 
         else:
@@ -251,9 +235,7 @@ def paginate(model, schema, indices):
     else:
         data = model[start : start + number]
 
-    return jsonify(
-        {"start": start, "number": number, "data": schema(data), "results": model.count(),}
-    )
+    return jsonify({"start": start, "number": number, "data": schema(data), "results": model.count(),})
 
 
 def no_results():
