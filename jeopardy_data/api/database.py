@@ -18,7 +18,7 @@ def add(clue_data: dict, uses_shortnames: bool = True) -> tuple:
 
     if uses_shortnames:
         keys = {i[0] if i != "complete" else "f" for i in keys}
-    
+
     if (missing := keys.difference(set(clue_data.keys()))) != set():
         return False, {"message": f"this set is missing the following keys: {' '.join(missing)}"}
 
@@ -28,7 +28,7 @@ def add(clue_data: dict, uses_shortnames: bool = True) -> tuple:
 
     try:
         date_format = datetime.date.fromisoformat(key("date"))
-    
+
     except ValueError:
         return False, {"message": "please format the date in the isoformat: YYY-MM-DD"}
 
@@ -38,7 +38,7 @@ def add(clue_data: dict, uses_shortnames: bool = True) -> tuple:
 
     try:
         show_format = int(key("show"))
-    
+
     except ValueError:
         return False, {"message": "please ensure the show number is an integer (positive or negative)"}
 
@@ -50,7 +50,7 @@ def add(clue_data: dict, uses_shortnames: bool = True) -> tuple:
         round_format = int(key("round"))
         if round_format not in (0, 1, 2, 4):
             raise ValueError
-    
+
     except ValueError:
         return False, {"message": "please ensure the round number is one of the following integers: (0, 1, 2, 4)"}
 
@@ -73,9 +73,9 @@ def add(clue_data: dict, uses_shortnames: bool = True) -> tuple:
         value_format = int(str(key("value")).replace("$", ""))
         if value_format < 0:
             raise ValueError
-    
+
     except ValueError:
-        return False, {"message": "please ensure the value is a positive number, with or without, a \"$\""}
+        return False, {"message": 'please ensure the value is a positive number, with or without, a "$"'}
 
     if (value := Value.query.filter_by(amount=value_format).first()) is None:
         value = Value(amount=value_format, round=round_)
