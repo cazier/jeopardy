@@ -5,7 +5,7 @@ from flask_marshmallow import Marshmallow
 
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = f":memory:"
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite://"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app=app)
 ma = Marshmallow(app=app)
