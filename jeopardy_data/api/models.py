@@ -1,4 +1,4 @@
-from api import db
+from . import db
 
 from sqlalchemy import extract
 from sqlalchemy.ext.hybrid import hybrid_property

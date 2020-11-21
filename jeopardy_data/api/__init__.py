@@ -12,4 +12,4 @@ ma = Marshmallow(app=app)
 api = Api(app=app)
 
 
-from api import routes
+from . import routes

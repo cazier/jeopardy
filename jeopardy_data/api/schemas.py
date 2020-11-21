@@ -1,6 +1,6 @@
 from flask_marshmallow import fields
 
-from api import ma
+from . import ma
 from .models import *
 
 
