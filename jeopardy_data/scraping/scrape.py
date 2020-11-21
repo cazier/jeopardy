@@ -6,15 +6,15 @@ import time
 import re
 import string
 import datetime
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 
 import pathlib
 import os
 
-SHOW_DATE_MATCH = re.compile(r"^Show #(\d{0,6}) - (.*)$")
-
 CACHE = False
 CACHE_PATH = ""
+
+DELAY = 5
 
 
 class Webpage(object):
@@ -28,35 +28,35 @@ class Webpage(object):
 
     def get(self):
         if self.storage.exists() and CACHE:
-            with open(self.storage, 'r') as store_file:
+            print("using cache")
+            with open(self.storage, "r") as store_file:
                 page = store_file.read()
-        
+
         else:
+            print("downloading")
+            time.sleep(DELAY)
             page = requests.get(self.url).text
 
             if CACHE:
-                with open(self.storage, 'w') as store_file:
+                with open(self.storage, "w") as store_file:
                     store_file.write(page)
 
         return BeautifulSoup(page, "lxml")
 
 
-class Season(object):
-    def __init__(self, identifier: str) -> None:
-        self.special: bool = not identifier.isnumeric()
-        self.url = Webpage(resource=f"showseason.php?season={identifier}")
+# class Season(object):
+#     def __init__(self, identifier: str) -> None:
+#         self.url = Webpage(resource=f"showseason.php?season={identifier}")
 
-        time.sleep(0.5)
-        self.data = self.url.get().table
+#         time.sleep(DELAY)
+#         self.data = self.url.get().table
 
-        self.games = [game.get("href") for game in self.data.find_all("a") if "game_id" in game.get("href")]
+#         self.games = [game.get("href") for game in self.data.find_all("a") if "game_id" in game.get("href")]
 
 
 class Game(object):
-    def __init__(self, url: str) -> None:
-        game_id = resource_id(url=url)
-
-        self.url = Webpage(resource=f"showgame.php?game_id={game_id}")
+    def __init__(self, identifier: str) -> None:
+        self.url = Webpage(resource=f"showgame.php?game_id={identifier}")
 
         self.data = self.url.get()
         self.board: defaultdict = defaultdict(dict)
@@ -72,14 +72,23 @@ class Game(object):
     def __repr__(self):
         return f"<GAME URL:{self.url} SHOW: {self.show}>"
 
-    def schema(self):
-        for round_, categories in self.board.items():
+    def schema(self, board: dict = {}, show: int = None, date: datetime.datetime = None) -> dict:
+        if board == {}:
+            board = self.board
+
+        if show == None:
+            show = self.show
+
+        if date == None:
+            date = self.date
+
+        for round_, categories in board.items():
             for _, category in categories.items():
                 for value, clue in category["clues"].items():
                     self.json.append(
                         {
-                            "show": self.show,
-                            "date": self.date,
+                            "show": show,
+                            "date": date,
                             "category": category["name"],
                             "complete": category["complete"],
                             "answer": clue["answer"],
@@ -90,19 +99,31 @@ class Game(object):
                         }
                     )
 
-    def get_show_and_date(self):
-        """Using the div with the ID matching "game_title, match to the above compiled regex string. It contains
+        return self.json
+
+    def get_show_and_date(self, show_title: str = "") -> tuple:
+        """Using the div with the ID matching "game_title, match to the supplied regex string. It contains
         the show number, and the date the show aired, using a number of written out, English words for the day
-        of the week and of the month.
+        of the week and of the month. Occasionally, if it's a "special" season, there will also be a title for
+        the season written before the Show number.
         
         Prior to saving the results, convert the show string into an `int`, and the date string into a `datetime`
+
+        If the show is one of the "special" seasons, in order to maintain the show number as an integer, invert to
+        negative, and subtract some constants to keep separation. The only reason these numbers are chosen is to
+        provide clear distinction between these seasons' games.
         """
-        [(s, d)] = SHOW_DATE_MATCH.findall(self.data.find(id="game_title").text)
+        if show_title == "":
+            show_title = self.data.find(id="game_title").text
 
-        self.show = int(s)
-        self.date = datetime.datetime.strptime(d, "%A, %B %d, %Y").date().isoformat()
+        (title, show, date) = re.findall(pattern=r"^(.*)?[Ss]how #(\d{0,6}) - (.*)$", string=show_title)[0]
 
-    def get_categories(self):
+        self.date = datetime.datetime.strptime(date, "%A, %B %d, %Y").date().isoformat()
+        self.show = int(show)
+
+        return (show, date)
+
+    def get_categories(self, game_board: str = "") -> list:
         """Extract the categories from each round of the game. This assumes there are 6 categories in each game,
         which appears to have been the case since the original Trebek run of the show.
 
@@ -110,16 +131,29 @@ class Game(object):
         the category name, the assumption that it is complete (which can be "corrected" later) and an empty
         `defaultdict` for the clues.
         """
-        for num, category in enumerate(self.data.find_all("td", class_="category_name")):
+        if game_board == "":
+            game_board = self.data.find_all("td", class_="category_name")
+
+        resp = list()
+
+        for num, category in enumerate(game_board):
             self.board[num // 6][num % 6] = {
                 "name": category.text,
                 "complete": True,
                 "clues": defaultdict(dict),
             }
 
-    def get_clues(self) -> None:
+            resp.append(category)
+
+        return resp
+
+    def get_clues(self, game_board: str = "") -> dict:
         """Start pulling out the question data!
         """
+        if game_board == "":
+            game_board = self.data
+
+        resp = list()
 
         # The variable `ROUND_MAP` has a "legend" for the HTML IDs or class names in which the data is stored
         ROUND_MAP = (
@@ -130,7 +164,7 @@ class Game(object):
 
         # So iterating over each of the items in the legend, corresponding to the rounds in Jeopardy!
         for self.round_, r_name in enumerate(ROUND_MAP):
-            if (round_html := self.data.find("div", id=r_name[0])) is None:
+            if (round_html := game_board.find("div", id=r_name[0])) is None:
                 break
 
             # Use each table that has the game board for each round. Note that Final Jeopardy! and any Tiebreaker
@@ -158,23 +192,25 @@ class Game(object):
                         # Then save that to the Game object.
                         self.board[self.round_][self.column if self.round_ < 2 else count]["clues"][self.value] = set_
 
-    def get_clue_data(self) -> dict:
+    def get_clue_data(self, clue_data="") -> dict:
         """Extracts the clue information (primarily from some JS code on the web page) and sets both the `external` and
         `complete flags as needed.
         """
+        if clue_data == "":
+            clue_data = self.clue
 
         # Prep default flags
         external, complete = (False, True)
 
         # Check to see if the square has a question on the square. In particular on some of the older boards, or whenever
         # the game runs "long" there may be some incomplete boards. If the clue data is available though:
-        if self.clue.find("div", onmouseout=True) is not None:
+        if clue_data.find("div", onmouseout=True) is not None:
 
             # Extract the answer element from the JS function `onmouseout`
-            answer = pjs(self.clue.find("div").get("onmouseout"))
+            answer = pjs(clue_data.find("div").get("onmouseout"))
 
             # Extract the question element from the JS function `onmouseover`
-            question = pjs(self.clue.find("div").get("onmouseover")).find("em", class_="correct_response")
+            question = pjs(clue_data.find("div").get("onmouseover")).find("em", class_="correct_response")
 
             # Check to see if the answer has any external media (like pictures, sound clips, video etc.) by looking
             # for an <a> tag.
@@ -310,6 +346,7 @@ class Pull(object):
 
         self.save()
 
+
 def get_external_media(round_: str, urls: list) -> None:
     """Create a list of the external media found in the clue. The list will have identifiers for the show, round,
     question, and an incrementing letter for each item in the clue. This file can then be run in a bash script
@@ -326,28 +363,40 @@ def pjs(function: str):
     """
     return BeautifulSoup(parse(function)["body"][0]["expression"]["arguments"][2]["value"], "lxml")
 
-def get_seasons(start: int, stop: int, include_special: bool) -> list:
-    seasons = Webpage(resource="listseasons.php").get().find(id="content").find_all("a")
-    urls = (a.get("href").split("=")[1] for a in seasons)
 
-    standard = [Season(id) for id in (url for url in urls if url.isnumeric()) if (start <= int(id) <= stop)]
-    specials = [Season(id) for id in urls if (not id.isnumeric()) & include_special]
+# def get_seasons(start: int, stop: int, include_special: bool) -> list:
+#     seasons = Webpage(resource="listseasons.php").get().find(id="content").find_all("a")
+#     urls = (a.get("href").split("=")[1] for a in seasons)
 
-    return standard + specials
+#     standard = [Season(id) for id in (url for url in urls if url.isnumeric()) if (start <= int(id) <= stop)]
+#     specials = [Season(id) for id in urls if (not id.isnumeric()) & include_special]
+
+#     return standard + specials
+
 
 def resource_id(url: str) -> str:
     return url.split("=")[-1]
 
-def get_seasons_game_ids(start: int, stop: int, include_special: bool) -> dict:
+
+def get_seasons(start: int, stop: int, include_special: bool) -> list:
     all_seasons = Webpage(resource="listseasons.php").get().find(id="content").find_all("a")
 
-    season_ids = (resource_id(url = season.get("href")) for season in all_seasons)
+    season_ids = (resource_id(url=season.get("href")) for season in all_seasons)
 
-    return {number: list() for number in season_ids}
+    return [num for num in season_ids if ((num.isnumeric() and (start <= int(num) <= stop)) or include_special)]
 
 
-    
+def get_games(identifier: int) -> dict:
+    games = dict()
 
-# def scrape(get: str, start: int):
-#     if get == "seasons":
+    load = Webpage(resource=f"showseason.php?season={identifier}")
+
+    table = load.get().table
+
+    return {
+        "url": load.url,
+        "games": {
+            resource_id(url=game.get("href")): False for game in table.find_all("a") if "game_id" in game.get("href")
+        },
+    }
 
