@@ -7,7 +7,7 @@ from .models import *
 KEYS = {"date", "show", "round", "complete", "answer", "question", "external", "value", "category"}
 
 
-def add(clue_data: dict, uses_shortnames: bool = True) -> tuple:
+def add(clue_data: dict, uses_shortnames: bool) -> tuple:
     def key(key: str) -> str:
         if uses_shortnames:
             return clue_data[key[0].lower() if key.lower() != "complete" else "f"]
