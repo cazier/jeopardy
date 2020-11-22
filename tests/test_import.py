@@ -84,7 +84,7 @@ def test_add_one_short_missing():
     assert not success, message
 
 
-def test_add_multiple_short():
+def test_add_multiple():
     clues = [
         {
             "d": "2020-01-01",
