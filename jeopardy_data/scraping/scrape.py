@@ -53,6 +53,8 @@ class Webpage(object):
             page = page.text
             
             if CACHE:
+                self.storage.mkdir(parents=True, exist_ok=True)
+
                 with open(self.storage, "w") as store_file:
                     store_file.write(page)
 
