@@ -396,20 +396,29 @@ def pjs(function: str):
 
 
 def resource_id(url: str) -> str:
+    if type(url) != str:
+        raise TypeError("variable must be a string")
+
     return url.split("=")[-1]
 
 
-def get_seasons(start: int, stop: int, include_special: bool) -> list:
-    success, page = Webpage(resource="listseasons.php").get()
+def get_seasons(page: BeautifulSoup, start: int, stop: int, include_special: bool) -> tuple:
+    try:
+        all_seasons = page.find(id="content").find_all("a")
+        all_seasons = [season.get("href") for season in all_seasons]
 
-    if not success:
-        raise NotImplementedError("Error handling en route")
+        if len(all_seasons) < 1:
+            raise AttributeError
 
-    all_seasons = page.find(id="content").find_all("a")
+        season_ids = (resource_id(url=season) for season in all_seasons)
 
-    season_ids = (resource_id(url=season.get("href")) for season in all_seasons)
+        return (
+            True,
+            [num for num in season_ids if ((num.isnumeric() and (start <= int(num) <= stop)) or include_special)],
+        )
 
-    return [num for num in season_ids if ((num.isnumeric() and (start <= int(num) <= stop)) or include_special)]
+    except AttributeError:
+        return False, {"message": "the webpage may have changed and cannot be parsed as is"}
 
 
 def get_games(identifier: int) -> dict:
@@ -421,7 +430,6 @@ def get_games(identifier: int) -> dict:
 
     if not success:
         raise NotImplementedError("Error handling en route")
-
 
     table = page.table
 
