@@ -58,7 +58,7 @@ class Webpage(object):
                 with open(self.storage, "w") as store_file:
                     store_file.write(page)
 
-        return BeautifulSoup(page, "lxml")
+        return True, BeautifulSoup(page, "lxml")
 
 
 # class Season(object):
@@ -75,7 +75,11 @@ class Game(object):
     def __init__(self, identifier: str) -> None:
         self.url = Webpage(resource=f"showgame.php?game_id={identifier}")
 
-        self.data = self.url.get()
+        success, self.data = self.url.get()
+
+        if not success:
+            raise NotImplementedError("Error handling en route")
+
         self.board: defaultdict = defaultdict(dict)
         self.show = -1
         self.json: list = list()
@@ -396,7 +400,12 @@ def resource_id(url: str) -> str:
 
 
 def get_seasons(start: int, stop: int, include_special: bool) -> list:
-    all_seasons = Webpage(resource="listseasons.php").get().find(id="content").find_all("a")
+    success, page = Webpage(resource="listseasons.php").get()
+
+    if not success:
+        raise NotImplementedError("Error handling en route")
+
+    all_seasons = page.find(id="content").find_all("a")
 
     season_ids = (resource_id(url=season.get("href")) for season in all_seasons)
 
@@ -408,7 +417,13 @@ def get_games(identifier: int) -> dict:
 
     load = Webpage(resource=f"showseason.php?season={identifier}")
 
-    table = load.get().table
+    success, page = load.get()
+
+    if not success:
+        raise NotImplementedError("Error handling en route")
+
+
+    table = page.table
 
     return {
         "url": load.url,
