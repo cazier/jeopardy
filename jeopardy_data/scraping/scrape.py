@@ -26,7 +26,7 @@ class Webpage(object):
 
         if BASE_URL[-1] == "/":
             self.url = f"{BASE_URL}{resource}"
-        
+
         else:
             self.url = f"{BASE_URL}/{resource}"
 
@@ -44,7 +44,7 @@ class Webpage(object):
         else:
             print("downloading")
             time.sleep(DELAY)
-            
+
             page = requests.get(self.url)
 
             if page.status_code != 200:
