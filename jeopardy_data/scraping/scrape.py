@@ -14,12 +14,20 @@ import os
 CACHE = False
 CACHE_PATH = ""
 
+BASE_URL = "http://www.j-archive.com"
+
 DELAY = 5
 
 
 class Webpage(object):
     def __init__(self, resource: str) -> None:
         self.url = f"http://www.j-archive.com/{resource}"
+
+        if BASE_URL[-1] == "/":
+            self.url = f"{BASE_URL}{resource}"
+        
+        else:
+            self.url = f"{BASE_URL}/{resource}"
 
         self.storage = pathlib.Path(CACHE_PATH, resource).absolute()
 
