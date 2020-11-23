@@ -21,7 +21,8 @@ DELAY = 5
 
 class Webpage(object):
     def __init__(self, resource: str) -> None:
-        self.url = f"http://www.j-archive.com/{resource}"
+        if len(resource) == 0:
+            raise ValueError("resource argument cannot be empty")
 
         if BASE_URL[-1] == "/":
             self.url = f"{BASE_URL}{resource}"
@@ -43,8 +44,14 @@ class Webpage(object):
         else:
             print("downloading")
             time.sleep(DELAY)
-            page = requests.get(self.url).text
+            
+            page = requests.get(self.url)
 
+            if page.status_code != 200:
+                return False, {"message": f"failed to receive webpage data"}
+
+            page = page.text
+            
             if CACHE:
                 with open(self.storage, "w") as store_file:
                     store_file.write(page)
