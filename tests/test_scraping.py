@@ -125,8 +125,8 @@ def test_cache_load(TestFiles, empty_cache_after_test):
 def test_get_seasons(TestFiles):
     page = scrape.Webpage(resource="listseasons.php")
 
-    start = random.randint(1, 36)
-    stop = random.randint(start, 37)
+    start = random.randint(1, 15)
+    stop = random.randint(start, 16)
 
     _, data = page.get()
 
