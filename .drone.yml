@@ -2,9 +2,7 @@ kind: pipeline
 name: CI
 steps:
     - name: testing
-      image: python:3.8.3-buster
+      image: cazier/jd_test:latest
       commands:
-        - python -m pip install --upgrade pip
-        - pip install -r requirements.txt
         - pytest
         
