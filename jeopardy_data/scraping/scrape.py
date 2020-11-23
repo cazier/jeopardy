@@ -51,9 +51,9 @@ class Webpage(object):
                 return False, {"message": f"failed to receive webpage data"}
 
             page = page.text
-            
+
             if CACHE:
-                self.storage.mkdir(parents=True, exist_ok=True)
+                self.storage.parent.mkdir(parents=True, exist_ok=True)
 
                 with open(self.storage, "w") as store_file:
                     store_file.write(page)

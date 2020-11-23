@@ -57,15 +57,18 @@ def test_get_download(example_org):
     success, bs = example_org.get()
     assert success & (bs.body.text == '"Page Definitely Absolutely Found"')
 
-def test_caching(example_org):
+def test_caching(PatchedRequests):
     scrape.CACHE = True
     scrape.CACHE_PATH = pathlib.Path(os.getcwd(), "tests/files/cache").absolute()
 
-    assert not pathlib.Path(os.getcwd(), "tests/files/cache/test").exists
-    example_org.get()
-    assert pathlib.Path(os.getcwd(), "tests/files/cache/test").exists
+    page = scrape.Webpage(resource="test")
 
-def test_get_download_404():
+    assert not pathlib.Path(scrape.CACHE_PATH, "test").exists()
+    page.get()
+    assert pathlib.Path(scrape.CACHE_PATH, "test").exists()
+
+
+def test_get_download_404(PatchedRequests):
     page = scrape.Webpage(resource="404")
 
     success, message = page.get()
