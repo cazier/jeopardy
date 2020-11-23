@@ -10,12 +10,20 @@ def empty_cache_upon_completion():
     yield
 
     path = pathlib.Path(os.getcwd(), "tests/files/cache").absolute()
-    shutil.rmtree(path=path)
-    path.mkdir()
+    
+    if path.exists():
+        shutil.rmtree(path=path)
+
+    else:
+        path.mkdir(parents=True)
 
 
 @pytest.fixture()
 def empty_cache_after_test():
     path = pathlib.Path(os.getcwd(), "tests/files/cache").absolute()
-    shutil.rmtree(path=path)
-    path.mkdir()
+
+    if path.exists():
+        shutil.rmtree(path=path)
+
+    else:
+        path.mkdir(parents=True)
