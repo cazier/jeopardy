@@ -1,0 +1,50 @@
+<html>
+<head>
+</head>
+<body>
+<div id="content">
+<table>
+  <tr>
+    <td>
+      <a href="http://www.j-archive.com/showgame.php?game_id=1"></a>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <a href="http://www.j-archive.com/showgame.php?game_id=2"></a>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <a href="http://www.j-archive.com/showgame.php?game_id=3"></a>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <a href="http://www.j-archive.com/showgame.php?game_id=4"></a>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <a href="http://www.j-archive.com/showgame.php?game_id=5"></a>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <a href="http://www.j-archive.com/showgame.php?game_id=6"></a>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <a href="http://www.j-archive.com/showgame.php?game_id=7"></a>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <a href="http://www.j-archive.com/showgame.php?game_id=8"></a>
+    </td>
+  </tr>
+</table>
+</div>
+</body>
+</html>

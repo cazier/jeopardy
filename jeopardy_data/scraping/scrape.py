@@ -61,16 +61,6 @@ class Webpage(object):
         return True, BeautifulSoup(page, "lxml")
 
 
-# class Season(object):
-#     def __init__(self, identifier: str) -> None:
-#         self.url = Webpage(resource=f"showseason.php?season={identifier}")
-
-#         time.sleep(DELAY)
-#         self.data = self.url.get().table
-
-#         self.games = [game.get("href") for game in self.data.find_all("a") if "game_id" in game.get("href")]
-
-
 class Game(object):
     def __init__(self, identifier: str) -> None:
         self.url = Webpage(resource=f"showgame.php?game_id={identifier}")
@@ -427,21 +417,22 @@ def get_seasons(page: BeautifulSoup, start: int, stop: int, include_special: boo
         return False, {"message": "the webpage may have changed and cannot be parsed as is"}
 
 
-def get_games(identifier: int) -> dict:
-    games = dict()
+def get_games(page: BeautifulSoup) -> dict:
+    try:
+        all_games = page.find(id="content").find_all("a")
 
-    load = Webpage(resource=f"showseason.php?season={identifier}")
+        results = dict()
 
-    success, page = load.get()
+        for game in all_games:
+            url = game.get("href")
 
-    if not success:
-        raise NotImplementedError("Error handling en route")
+            if "game_id" in url:
+                results[resource_id(url=url)] = False
 
-    table = page.table
+        if len(results.keys()) < 1:
+            raise AttributeError
 
-    return {
-        "url": load.url,
-        "games": {
-            resource_id(url=game.get("href")): False for game in table.find_all("a") if "game_id" in game.get("href")
-        },
-    }
+        return True, results
+
+    except AttributeError:
+        return False, {"message": "the webpage may have changed and cannot be parsed as is"}
