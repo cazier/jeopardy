@@ -6,23 +6,3 @@ steps:
       commands:
         - pytest
 
-    - name: generate coverage
-      image: cazier/jd_test:latest
-      environment:
-        CODECOV_TOKEN:
-        from_secret: codecov_token
-
-      commands:
-        - coverage run -m pytest
-        - coverage xml --include="jeopardy_data/*"
-        - bash <(curl -s https://codecov.io/bash) -f coverage.xml
-        
-    # - name: coverage
-    #   image: plugins/codecov
-    #   settings:
-    #     token: 
-    #       from_secret: codecov_token
-    #     files:
-          
-          
-        
