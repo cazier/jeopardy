@@ -5,14 +5,13 @@ import random
 
 import pytest
 import requests
+from bs4 import BeautifulSoup
 
 import jeopardy_data.scraping.scrape as scrape
 
 
 @pytest.fixture
 def PatchedRequests(monkeypatch):
-    standard = requests.get
-
     def localGet(uri, *args, **kwargs):
         file = uri.split("/")[-1]
 
@@ -133,5 +132,17 @@ def test_get_seasons(TestFiles):
     success, message = scrape.get_seasons(page=data, start=start, stop=stop, include_special=False)
 
     assert success
-    assert len(message) == 1 + stop - start
+    assert len(message) == stop - start
 
+    success, message = scrape.get_seasons(page=data, start=start, stop=stop, include_special=True)
+
+    assert success
+    assert len(message) == 3 + stop - start
+
+
+def test_get_seasons_empty(TestFiles):
+    page = BeautifulSoup('<html><head></head><body id="content">Empty Seasons</body></html>', "lxml")
+
+    success, message = scrape.get_seasons(page=page, start=0, stop=0, include_special=False)
+
+    assert (not success) & (message == {"message": "the webpage may have changed and cannot be parsed as is"})

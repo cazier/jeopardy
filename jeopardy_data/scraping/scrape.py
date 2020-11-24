@@ -412,10 +412,16 @@ def get_seasons(page: BeautifulSoup, start: int, stop: int, include_special: boo
 
         season_ids = (resource_id(url=season) for season in all_seasons)
 
-        return (
-            True,
-            [num for num in season_ids if ((num.isnumeric() and (start <= int(num) <= stop)) or include_special)],
-        )
+        results = list()
+
+        for num in season_ids:
+            if num.isnumeric() and (start <= int(num) < stop):
+                results.append(num)
+
+            elif (not num.isnumeric()) and include_special:
+                results.append(num)
+
+        return True, results
 
     except AttributeError:
         return False, {"message": "the webpage may have changed and cannot be parsed as is"}
@@ -439,4 +445,3 @@ def get_games(identifier: int) -> dict:
             resource_id(url=game.get("href")): False for game in table.find_all("a") if "game_id" in game.get("href")
         },
     }
-

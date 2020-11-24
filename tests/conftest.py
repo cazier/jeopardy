@@ -10,7 +10,7 @@ def empty_cache_upon_completion():
     yield
 
     path = pathlib.Path(os.getcwd(), "tests/files/cache").absolute()
-    
+
     if path.exists():
         shutil.rmtree(path=path)
 
