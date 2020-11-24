@@ -13,7 +13,7 @@ import jeopardy_data.scraping.scrape as scrape
 @pytest.fixture
 def PatchedRequests(monkeypatch):
     def localGet(uri, *args, **kwargs):
-        file = uri.split("/")[-1]
+        file = uri.split("/")[-1].replace("?", "_")
 
         path = pathlib.Path(os.getcwd(), "tests/files/mock_get", file).absolute()
 

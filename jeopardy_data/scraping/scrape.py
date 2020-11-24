@@ -30,7 +30,7 @@ class Webpage(object):
         else:
             self.url = f"{BASE_URL}/{resource}"
 
-        self.storage = pathlib.Path(CACHE_PATH, resource).absolute()
+        self.storage = pathlib.Path(CACHE_PATH, resource.replace("?", "_")).absolute()
 
     def __repr__(self) -> str:
         return self.url
