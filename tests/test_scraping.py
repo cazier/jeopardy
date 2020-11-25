@@ -9,6 +9,8 @@ from bs4 import BeautifulSoup
 
 import jeopardy_data.scraping.scrape as scrape
 
+scrape.DELAY = 0
+
 
 @pytest.fixture
 def PatchedRequests(monkeypatch):
@@ -39,7 +41,6 @@ def PatchedRequests(monkeypatch):
 
 @pytest.fixture
 def TestFiles(PatchedRequests):
-    scrape.DELAY = 0
     scrape.CACHE = True
     scrape.CACHE_PATH = pathlib.Path(os.getcwd(), "tests/files/cache/").absolute()
 
@@ -47,7 +48,6 @@ def TestFiles(PatchedRequests):
 @pytest.fixture
 def example_org(PatchedRequests):
     scrape.BASE_URL = "https://example.org"
-    scrape.DELAY = 0
 
     return scrape.Webpage(resource="test")
 
