@@ -139,12 +139,12 @@ def test_get_seasons(TestFiles):
     assert success
     assert len(message) == 3 + stop - start
 
+def test_get_seasons_empty():
     page = BeautifulSoup('<html><head></head><body id="content">Empty Seasons</body></html>', "lxml")
+    
+    with pytest.raises(scrape.NoItemsFoundError):
 
-    success, message = scrape.get_seasons(page=page, start=0, stop=0, include_special=False)
-
-    assert (not success) & (message == {"message": "the webpage may have changed and cannot be parsed as is"})
-
+        scrape.get_seasons(page=page, start=0, stop=0, include_special=False)
 
 def test_get_games(TestFiles):
     page = scrape.Webpage(resource="showseason.php?season=1")
@@ -156,9 +156,11 @@ def test_get_games(TestFiles):
     assert success
     assert len(message) == 8
 
+
+def test_get_games_empty():
     page = BeautifulSoup('<html><head></head><body id="content">Empty Games</body></html>', "lxml")
+    
+    with pytest.raises(scrape.NoItemsFoundError):
 
-    success, message = scrape.get_games(page=page)
-
-    assert (not success) & (message == {"message": "the webpage may have changed and cannot be parsed as is"})
+        scrape.get_games(page=page)
 

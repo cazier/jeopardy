@@ -60,6 +60,14 @@ class Webpage(object):
 
         return True, BeautifulSoup(page, "lxml")
 
+class NoItemsFoundError(Exception):
+    def __init__(self):
+        self.message = "The page was parsed properly, however no results were found. It may be empty?"
+        
+        super().__init__(self.message)
+
+    def __str__(self):
+        return self.message
 
 class Game(object):
     def __init__(self, identifier: str) -> None:
@@ -397,9 +405,6 @@ def get_seasons(page: BeautifulSoup, start: int, stop: int, include_special: boo
         all_seasons = page.find(id="content").find_all("a")
         all_seasons = [season.get("href") for season in all_seasons]
 
-        if len(all_seasons) < 1:
-            raise AttributeError
-
         season_ids = (resource_id(url=season) for season in all_seasons)
 
         results = list()
@@ -410,6 +415,9 @@ def get_seasons(page: BeautifulSoup, start: int, stop: int, include_special: boo
 
             elif (not num.isnumeric()) and include_special:
                 results.append(num)
+
+        if len(results) < 1:
+            raise NoItemsFoundError()
 
         return True, results
 
@@ -430,7 +438,7 @@ def get_games(page: BeautifulSoup) -> dict:
                 results[resource_id(url=url)] = False
 
         if len(results.keys()) < 1:
-            raise AttributeError
+            raise NoItemsFoundError()
 
         return True, results
 
