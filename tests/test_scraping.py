@@ -187,3 +187,16 @@ def test_get_games_parse_error():
     with pytest.raises(scrape.ParsingError):
         scrape.get_games(page=page)
 
+
+def test_pjs():
+    result = scrape.pjs("toggle('', '', 'This is a string')")
+    assert result.text == "This is a string"
+
+    result = scrape.pjs("toggle('Only', 'This', 'Matters')")
+    assert result.text == "Matters"
+
+    result = scrape.pjs("toggle('', '', '&quot;HTML&quot; escapes are converted')")
+    assert result.text == '"HTML" escapes are converted'
+
+    with pytest.raises(scrape.ParsingError):
+        result = scrape.pjs("console.log('Other code fails')")

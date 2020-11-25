@@ -69,8 +69,8 @@ class NoItemsFoundError(Exception):
 
 
 class ParsingError(Exception):
-    def __init__(self):
-        self.message = "The page was unable to be parsed. Check the HTML and text as it may have changed."
+    def __init__(self, message="The page was unable to be parsed. Check the HTML and text as it may have changed."):
+        self.message = message
 
         super().__init__(self.message)
 
@@ -386,17 +386,11 @@ def pjs(function: str):
     """ A simple wrapper function around the super useful pyjsparser library. This steps through all of the AST tree
     of the library to only return the HTML element in the function.
     """
-    return BeautifulSoup(parse(function)["body"][0]["expression"]["arguments"][2]["value"], "lxml")
+    try:
+        return BeautifulSoup(parse(function)["body"][0]["expression"]["arguments"][2]["value"], "lxml")
 
-
-# def get_seasons(start: int, stop: int, include_special: bool) -> list:
-#     seasons = Webpage(resource="listseasons.php").get().find(id="content").find_all("a")
-#     urls = (a.get("href").split("=")[1] for a in seasons)
-
-#     standard = [Season(id) for id in (url for url in urls if url.isnumeric()) if (start <= int(id) <= stop)]
-#     specials = [Season(id) for id in urls if (not id.isnumeric()) & include_special]
-
-#     return standard + specials
+    except (KeyError, IndexError):
+        raise ParsingError("The javascript with the clues/answers failed to parse")
 
 
 def resource_id(url: str) -> str:
