@@ -125,7 +125,7 @@ def test_get_seasons(TestFiles):
     page = scrape.Webpage(resource="listseasons.php")
 
     start = random.randint(1, 15)
-    stop = random.randint(start, 16)
+    stop = random.randint(start + 1, 16)
 
     _, data = page.get()
 
@@ -139,12 +139,28 @@ def test_get_seasons(TestFiles):
     assert success
     assert len(message) == 3 + stop - start
 
+
 def test_get_seasons_empty():
     page = BeautifulSoup('<html><head></head><body id="content">Empty Seasons</body></html>', "lxml")
-    
-    with pytest.raises(scrape.NoItemsFoundError):
 
-        scrape.get_seasons(page=page, start=0, stop=0, include_special=False)
+    with pytest.raises(scrape.NoItemsFoundError):
+        scrape.get_seasons(page=page, start=0, stop=1, include_special=False)
+
+
+def test_get_seasons_parse_error():
+    page = BeautifulSoup('<html><head></head><body>No `id="content"`</body></html>', "lxml")
+
+    with pytest.raises(scrape.ParsingError):
+        scrape.get_seasons(page=page, start=0, stop=1, include_special=True)
+
+
+def test_get_seasons_start_stop():
+    page = BeautifulSoup('<html><head></head><body id="content">Empty Seasons</body></html>', "lxml")
+
+    with pytest.raises(SyntaxError):
+        scrape.get_seasons(page=page, start=0, stop=0, include_special=True)
+        scrape.get_seasons(page=page, start=1, stop=0, include_special=True)
+
 
 def test_get_games(TestFiles):
     page = scrape.Webpage(resource="showseason.php?season=1")
@@ -159,8 +175,15 @@ def test_get_games(TestFiles):
 
 def test_get_games_empty():
     page = BeautifulSoup('<html><head></head><body id="content">Empty Games</body></html>', "lxml")
-    
+
     with pytest.raises(scrape.NoItemsFoundError):
 
+        scrape.get_games(page=page)
+
+
+def test_get_games_parse_error():
+    page = BeautifulSoup('<html><head></head><body>No `id="content"`</body></html>', "lxml")
+
+    with pytest.raises(scrape.ParsingError):
         scrape.get_games(page=page)
 

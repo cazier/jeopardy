@@ -60,14 +60,20 @@ class Webpage(object):
 
         return True, BeautifulSoup(page, "lxml")
 
+
 class NoItemsFoundError(Exception):
     def __init__(self):
         self.message = "The page was parsed properly, however no results were found. It may be empty?"
-        
+
         super().__init__(self.message)
 
-    def __str__(self):
-        return self.message
+
+class ParsingError(Exception):
+    def __init__(self):
+        self.message = "The page was unable to be parsed. Check the HTML and text as it may have changed."
+
+        super().__init__(self.message)
+
 
 class Game(object):
     def __init__(self, identifier: str) -> None:
@@ -401,6 +407,9 @@ def resource_id(url: str) -> str:
 
 
 def get_seasons(page: BeautifulSoup, start: int, stop: int, include_special: bool) -> tuple:
+    if stop <= start:
+        raise SyntaxError("The stop season must be greater than the start season")
+
     try:
         all_seasons = page.find(id="content").find_all("a")
         all_seasons = [season.get("href") for season in all_seasons]
@@ -422,7 +431,7 @@ def get_seasons(page: BeautifulSoup, start: int, stop: int, include_special: boo
         return True, results
 
     except AttributeError:
-        return False, {"message": "the webpage may have changed and cannot be parsed as is"}
+        raise ParsingError()
 
 
 def get_games(page: BeautifulSoup) -> dict:
@@ -443,4 +452,4 @@ def get_games(page: BeautifulSoup) -> dict:
         return True, results
 
     except AttributeError:
-        return False, {"message": "the webpage may have changed and cannot be parsed as is"}
+        raise ParsingError()
