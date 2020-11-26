@@ -276,10 +276,42 @@ def pjs(function: str):
     of the library to only return the HTML element in the function.
     """
     try:
-        return BeautifulSoup(parse(function)["body"][0]["expression"]["arguments"][2]["value"], "lxml")
+        arguments = parse(function)["body"][0]["expression"]["arguments"]
+
+        return BeautifulSoup(arguments[0]["value"], "lxml"), BeautifulSoup(arguments[2]["value"], "lxml")
 
     except (KeyError, IndexError):
         raise ParsingError("The javascript with the clues/answers failed to parse")
+
+
+def get_clue_data(clue: BeautifulSoup) -> dict:
+    try:
+        numbers, answer = pjs(clue.find("div").get("onmouseout"))
+
+        if answer.a is None:
+            external = False
+
+        else:
+            external = True
+
+        _, question = pjs(clue.find("div").get("onmouseover"))
+        question = question.find("em", class_="correct_response")
+
+        category, value = map(int, numbers.text.split("_")[2:])
+
+        return {
+            "category": category,
+            "value": value,
+            "answer": answer.text,
+            "question": question.text,
+            "external": external,
+        }
+
+    except AttributeError:
+        raise ParsingError()
+
+    except ValueError:
+        raise ParsingError(message=f"The clue number identifier was malformed. (It should look like 'clue_J_#_#')")
 
 
 def resource_id(url: str) -> str:

@@ -52,6 +52,19 @@ def example_org(PatchedRequests):
     return scrape.Webpage(resource="test")
 
 
+@pytest.fixture
+def test_game(PatchedRequests):
+    success, page = scrape.Webpage(resource="showgame.php?game_id=1").get()
+
+    return scrape.Game(page=page)
+
+
+@pytest.fixture
+def loaded_file():
+    with open("json/sample.json", "r") as sample_file:
+        return json.load(sample_file)
+
+
 def test_resource_id():
     assert type(scrape.resource_id("")) == str
 
@@ -189,14 +202,61 @@ def test_get_games_parse_error():
 
 
 def test_pjs():
-    result = scrape.pjs("toggle('', '', 'This is a string')")
-    assert result.text == "This is a string"
+    a, b = scrape.pjs("toggle('', '', 'This is a string')")
+    assert (a.text == "") & (b.text == "This is a string")
 
-    result = scrape.pjs("toggle('Only', 'This', 'Matters')")
-    assert result.text == "Matters"
+    results = scrape.pjs("toggle('True', 'False', 'True')")
+    assert all(i.text == "True" for i in results)
 
-    result = scrape.pjs("toggle('', '', '&quot;HTML&quot; escapes are converted')")
+    _, result = scrape.pjs("toggle('', '', '&quot;HTML&quot; escapes are converted')")
     assert result.text == '"HTML" escapes are converted'
 
     with pytest.raises(scrape.ParsingError):
-        result = scrape.pjs("console.log('Other code fails')")
+        scrape.pjs("console.log('Javascript with less than three arguments fails')")
+        scrape.pjs("")  # As do empty strings
+
+
+def test_get_clue_data():
+    data = BeautifulSoup(
+        """<div onmouseout="toggle('clue_J_1_1', 'clue_J_1_1_stuck', 'A')" onmouseover="toggle('clue_J_1_1', 'clue_J_1_1_stuck', '&lt;em class=&quot;correct_response&quot;&gt;B&lt;/em&gt;')">""",
+        "lxml",
+    )
+
+    expected_results = {"category": 1, "value": 1, "question": "B", "answer": "A", "external": False}
+
+    results = scrape.get_clue_data(clue=data)
+
+    assert results == expected_results
+
+    data = BeautifulSoup(
+        """<div onmouseout="toggle('clue_J_1_1', 'clue_J_1_1_stuck', '&lt;a href=&quot;/&quot;&gt;A&lt;/a&gt;')" onmouseover="toggle('clue_J_1_1', 'clue_J_1_1_stuck', '&lt;em class=&quot;correct_response&quot;&gt;B&lt;/em&gt;')">""",
+        "lxml",
+    )
+
+    expected_results = {"category": 1, "value": 1, "question": "B", "answer": "A", "external": True}
+
+    results = scrape.get_clue_data(clue=data)
+
+    assert results == expected_results
+
+    data = BeautifulSoup("", "lxml")
+
+    with pytest.raises(scrape.ParsingError):
+        scrape.get_clue_data(clue=data)
+
+    data = BeautifulSoup(  # CAN'T CONVERT v LETTER "P" TO AN INTEGER
+        """<div onmouseout="toggle('clue_J_P_1', 'clue_J_1_1_stuck', 'A')" onmouseover="toggle('clue_J_1_1', 'clue_J_1_1_stuck', '&lt;em class=&quot;correct_response&quot;&gt;B&lt;/em&gt;')">""",
+        "lxml",
+    )
+
+    with pytest.raises(scrape.ParsingError):
+        scrape.get_clue_data(clue=data)
+
+    data = BeautifulSoup(
+        """<div onmouseout="toggle('clue_J_1_1', 'clue_J_1_1_stuck', 'A')" onmouseover="toggle('clue_J_1_1', 'clue_J_1_1_stuck', 'B')">""",
+        "lxml",
+    )
+
+    with pytest.raises(scrape.ParsingError):
+        scrape.get_clue_data(clue=data)
+
