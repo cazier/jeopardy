@@ -234,7 +234,7 @@ def test_get_clue_data():
     assert results == expected_results
 
     data = BeautifulSoup(
-        """<div onmouseover="toggle('clue_FJ', 'clue_FJ_stuck', '&lt;em class=\&quot;correct_response\&quot;&gt;B&lt;/em&gt;')" onmouseout="toggle('clue_FJ', 'clue_FJ_stuck', 'A')">""",
+        """<div onmouseover="toggle('clue_FJ', 'clue_FJ_stuck', '&lt;em class=&quot;correct_response&quot;&gt;B&lt;/em&gt;')" onmouseout="toggle('clue_FJ', 'clue_FJ_stuck', 'A')">""",
         "lxml",
     )
 
