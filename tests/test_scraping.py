@@ -65,6 +65,21 @@ def loaded_file():
         return json.load(sample_file)
 
 
+def test_pjs():
+    a, b = scrape.pjs("toggle('', '', 'This is a string')")
+    assert (a.text == "") & (b.text == "This is a string")
+
+    results = scrape.pjs("toggle('True', 'False', 'True')")
+    assert all(i.text == "True" for i in results)
+
+    _, result = scrape.pjs("toggle('', '', '&quot;HTML&quot; escapes are converted')")
+    assert result.text == '"HTML" escapes are converted'
+
+    with pytest.raises(scrape.ParsingError):
+        scrape.pjs("console.log('Javascript with less than three arguments fails')")
+        scrape.pjs("")  # As do empty strings
+
+
 def test_resource_id():
     assert type(scrape.resource_id("")) == str
 
@@ -193,21 +208,6 @@ def test_get_games(TestFiles):
 
     assert success
     assert len(message) == 8
-
-
-def test_pjs():
-    a, b = scrape.pjs("toggle('', '', 'This is a string')")
-    assert (a.text == "") & (b.text == "This is a string")
-
-    results = scrape.pjs("toggle('True', 'False', 'True')")
-    assert all(i.text == "True" for i in results)
-
-    _, result = scrape.pjs("toggle('', '', '&quot;HTML&quot; escapes are converted')")
-    assert result.text == '"HTML" escapes are converted'
-
-    with pytest.raises(scrape.ParsingError):
-        scrape.pjs("console.log('Javascript with less than three arguments fails')")
-        scrape.pjs("")  # As do empty strings
 
 
 def test_get_clue_data():
