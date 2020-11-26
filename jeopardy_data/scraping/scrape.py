@@ -320,7 +320,7 @@ def get_games(page: BeautifulSoup) -> dict:
         raise ParsingError()
 
 
-def get_show_and_date(page: BeautifulSoup) -> tuple:
+def get_show_and_date(page: BeautifulSoup) -> dict:
     pattern = r"^(.*)?[Ss]how #(\d{0,6}) - (.*)$"
 
     game = page.find("div", id="game_title")
@@ -343,13 +343,13 @@ def get_show_and_date(page: BeautifulSoup) -> tuple:
         date = datetime.datetime.strptime(date, "%A, %B %d, %Y").date().isoformat()
         show = int(show)
 
-        return (show, date)
+        return {"show": show, "date": date}
 
     except ValueError:
         raise ParsingError("Date format could not be read")
 
 
-def get_clues(page: BeautifulSoup):
+def get_clues(page: BeautifulSoup) -> list:
     clues = page.find_all("div", onmouseover=True)
 
     if len(clues) < 1:
@@ -397,7 +397,7 @@ def get_clue_data(clue: BeautifulSoup) -> dict:
         raise ParsingError(message=f"The clue number identifier was malformed. (It should look like 'clue_J_#_#')")
 
 
-def pjs(function: str):
+def pjs(function: str) -> tuple:
     """ A simple wrapper function around the super useful pyjsparser library. This steps through all of the AST tree
     of the library to only return the HTML element in the function.
     """
