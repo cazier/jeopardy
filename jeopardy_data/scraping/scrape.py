@@ -271,74 +271,6 @@ def get_external_media(round_: str, urls: list) -> None:
         file.writelines(downloads)
 
 
-def pjs(function: str):
-    """ A simple wrapper function around the super useful pyjsparser library. This steps through all of the AST tree
-    of the library to only return the HTML element in the function.
-    """
-    try:
-        arguments = parse(function)["body"][0]["expression"]["arguments"]
-
-        return BeautifulSoup(arguments[0]["value"], "lxml"), BeautifulSoup(arguments[2]["value"], "lxml")
-
-    except (KeyError, IndexError):
-        raise ParsingError("The javascript with the clues/answers failed to parse")
-
-
-def get_clue_data(clue: BeautifulSoup) -> dict:
-    try:
-        numbers, answer = pjs(clue.find("div").get("onmouseout"))
-
-        if answer.a is None:
-            external = False
-
-        else:
-            external = True
-
-        _, question = pjs(clue.find("div").get("onmouseover"))
-        question = question.find("em", class_="correct_response")
-
-        details = numbers.text.split("_")
-
-        round_ = details[1]
-
-        if round_ == "FJ":
-            category, value = -1, 0
-
-        else:
-            category, value = map(int, details[2:])
-
-        return {
-            "category": category,
-            "value": value,
-            "answer": answer.text,
-            "question": question.text,
-            "external": external,
-        }
-
-    except AttributeError:
-        raise ParsingError()
-
-    except ValueError:
-        raise ParsingError(message=f"The clue number identifier was malformed. (It should look like 'clue_J_#_#')")
-
-
-def get_clues(page: BeautifulSoup):
-    clues = page.find_all("div", onmouseover=True)
-
-    if len(clues) < 1:
-        raise NoItemsFoundError()
-
-    else:
-        return clues
-
-
-def resource_id(url: str) -> str:
-    if type(url) != str:
-        raise TypeError("variable must be a string")
-
-    return url.split("=")[-1]
-
-
 def get_seasons(page: BeautifulSoup, start: int, stop: int, include_special: bool) -> tuple:
     if stop <= start:
         raise SyntaxError("The stop season must be greater than the start season")
@@ -386,3 +318,89 @@ def get_games(page: BeautifulSoup) -> dict:
 
     except AttributeError:
         raise ParsingError()
+
+
+def get_show_and_date(page: BeautifulSoup) -> tuple:
+    pattern = r"^(.*)?[Ss]how #(\d{0,6}) - (.*)$"
+
+    try:
+        game = page.find("div", id="game_title").text
+
+        [(title, show, date)] = re.findall(pattern=pattern, string=game.strip())
+
+        date = datetime.datetime.strptime(date, "%A, %B %d, %Y").date().isoformat()
+        show = int(show)
+
+        return (show, date)
+
+    except (AttributeError, ValueError):
+        raise ParsingError()
+
+
+def get_clues(page: BeautifulSoup):
+    clues = page.find_all("div", onmouseover=True)
+
+    if len(clues) < 1:
+        raise NoItemsFoundError()
+
+    else:
+        return clues
+
+
+def get_clue_data(clue: BeautifulSoup) -> dict:
+    try:
+        numbers, answer = pjs(clue.find("div").get("onmouseout"))
+
+        if answer.a is None:
+            external = False
+
+        else:
+            external = True
+
+        _, question = pjs(clue.find("div").get("onmouseover"))
+        question = question.find("em", class_="correct_response")
+
+        details = numbers.text.split("_")
+
+        round_ = details[1]
+
+        if round_ == "FJ":
+            category, value = -1, 0
+
+        else:
+            category, value = map(int, details[2:])
+
+        return {
+            "category": category,
+            "value": value,
+            "answer": answer.text,
+            "question": question.text,
+            "external": external,
+        }
+
+    except AttributeError:
+        raise ParsingError()
+
+    except ValueError:
+        raise ParsingError(message=f"The clue number identifier was malformed. (It should look like 'clue_J_#_#')")
+
+
+def pjs(function: str):
+    """ A simple wrapper function around the super useful pyjsparser library. This steps through all of the AST tree
+    of the library to only return the HTML element in the function.
+    """
+    try:
+        arguments = parse(function)["body"][0]["expression"]["arguments"]
+
+        return BeautifulSoup(arguments[0]["value"], "lxml"), BeautifulSoup(arguments[2]["value"], "lxml")
+
+    except (KeyError, IndexError):
+        raise ParsingError("The javascript with the clues/answers failed to parse")
+
+
+def resource_id(url: str) -> str:
+    if type(url) != str:
+        raise TypeError("variable must be a string")
+
+    return url.split("=")[-1]
+

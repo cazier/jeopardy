@@ -273,3 +273,22 @@ def test_get_clues(PatchedRequests):
 
     assert len(results) == 61
 
+
+def test_get_game_title(PatchedRequests):
+    _, game = scrape.Webpage(resource="showgame.php_game_id=1").get()
+
+    show, date = scrape.get_show_and_date(page=game)
+
+    assert (show == 1) & (date == "1992-08-13")
+    assert (type(show) == int) and (type(date) == str)
+
+    page = BeautifulSoup("<html><head></head><div>Missing ID</body></html>", "lxml")
+
+    with pytest.raises(scrape.ParsingError):
+        scrape.get_show_and_date(page=page)
+
+    page = BeautifulSoup('<html><head></head><div id="game_title">No matches</body></html>', "lxml")
+
+    with pytest.raises(scrape.ParsingError):
+        scrape.get_show_and_date(page=page)
+
