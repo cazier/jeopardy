@@ -297,7 +297,15 @@ def get_clue_data(clue: BeautifulSoup) -> dict:
         _, question = pjs(clue.find("div").get("onmouseover"))
         question = question.find("em", class_="correct_response")
 
-        category, value = map(int, numbers.text.split("_")[2:])
+        details = numbers.text.split("_")
+
+        round_ = details[1]
+
+        if round_ == "FJ":
+            category, value = -1, 0
+
+        else:
+            category, value = map(int, details[2:])
 
         return {
             "category": category,
@@ -312,6 +320,16 @@ def get_clue_data(clue: BeautifulSoup) -> dict:
 
     except ValueError:
         raise ParsingError(message=f"The clue number identifier was malformed. (It should look like 'clue_J_#_#')")
+
+
+def get_clues(page: BeautifulSoup):
+    clues = page.find_all("div", onmouseover=True)
+
+    if len(clues) < 1:
+        raise NoItemsFoundError()
+
+    else:
+        return clues
 
 
 def resource_id(url: str) -> str:

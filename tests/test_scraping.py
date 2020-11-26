@@ -153,18 +153,27 @@ def test_get_seasons(TestFiles):
     assert len(message) == 3 + stop - start
 
 
-def test_get_seasons_empty():
-    page = BeautifulSoup('<html><head></head><body id="content">Empty Seasons</body></html>', "lxml")
+def test_empty_pages():
+    page = BeautifulSoup('<html><head></head><body id="content">Empty Page</body></html>', "lxml")
 
     with pytest.raises(scrape.NoItemsFoundError):
         scrape.get_seasons(page=page, start=0, stop=1, include_special=False)
 
+    with pytest.raises(scrape.NoItemsFoundError):
+        scrape.get_games(page=page)
 
-def test_get_seasons_parse_error():
+    with pytest.raises(scrape.NoItemsFoundError):
+        scrape.get_clues(page=page)
+
+
+def test_parse_error_pages():
     page = BeautifulSoup('<html><head></head><body>No `id="content"`</body></html>', "lxml")
 
     with pytest.raises(scrape.ParsingError):
         scrape.get_seasons(page=page, start=0, stop=1, include_special=True)
+
+    with pytest.raises(scrape.ParsingError):
+        scrape.get_games(page=page)
 
 
 def test_get_seasons_start_stop():
@@ -184,21 +193,6 @@ def test_get_games(TestFiles):
 
     assert success
     assert len(message) == 8
-
-
-def test_get_games_empty():
-    page = BeautifulSoup('<html><head></head><body id="content">Empty Games</body></html>', "lxml")
-
-    with pytest.raises(scrape.NoItemsFoundError):
-
-        scrape.get_games(page=page)
-
-
-def test_get_games_parse_error():
-    page = BeautifulSoup('<html><head></head><body>No `id="content"`</body></html>', "lxml")
-
-    with pytest.raises(scrape.ParsingError):
-        scrape.get_games(page=page)
 
 
 def test_pjs():
@@ -239,6 +233,17 @@ def test_get_clue_data():
 
     assert results == expected_results
 
+    data = BeautifulSoup(
+        """<div onmouseover="toggle('clue_FJ', 'clue_FJ_stuck', '&lt;em class=\&quot;correct_response\&quot;&gt;B&lt;/em&gt;')" onmouseout="toggle('clue_FJ', 'clue_FJ_stuck', 'A')">""",
+        "lxml",
+    )
+
+    expected_results = {"category": -1, "value": 0, "question": "B", "answer": "A", "external": False}
+
+    results = scrape.get_clue_data(clue=data)
+
+    assert results == expected_results
+
     data = BeautifulSoup("", "lxml")
 
     with pytest.raises(scrape.ParsingError):
@@ -259,4 +264,12 @@ def test_get_clue_data():
 
     with pytest.raises(scrape.ParsingError):
         scrape.get_clue_data(clue=data)
+
+
+def test_get_clues(PatchedRequests):
+    _, game = scrape.Webpage(resource="showgame.php_game_id=1").get()
+
+    results = scrape.get_clues(page=game)
+
+    assert len(results) == 61
 
