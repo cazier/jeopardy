@@ -349,6 +349,22 @@ def get_show_and_date(page: BeautifulSoup) -> dict:
         raise ParsingError("Date format could not be read")
 
 
+def get_categories(page: BeautifulSoup) -> None:
+    categories = page.find_all("td", class_="category_name")
+
+    if (num := len(categories)) < 1:
+        raise NoItemsFoundError()
+
+    elif num != 13:
+        raise ParsingError("An incorrect number of categories was found. Perhaps there's a Tiebreaker?")
+
+    names = [category.text for category in categories]
+
+    results = {i: j for i, j in zip(generate_headers(length=num), names)}
+
+    return results
+
+
 def get_clues(page: BeautifulSoup) -> list:
     clues = page.find_all("div", onmouseover=True)
 
@@ -416,3 +432,9 @@ def resource_id(url: str) -> str:
 
     return url.split("=")[-1]
 
+
+def generate_headers(length: int) -> list:
+    if length > 13:
+        raise ParsingError()
+
+    return [f"{round_}_{category}" for round_ in ["J", "DJ", "FJ"] for category in range(1, 7)][:length]

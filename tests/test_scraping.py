@@ -87,6 +87,13 @@ def test_resource_id():
         scrape.resource_id(0)
 
 
+def test_generate_headers():
+    assert ["J_1", "J_2", "J_3"] == scrape.generate_headers(3)
+
+    with pytest.raises(scrape.ParsingError):
+        scrape.generate_headers(15)
+
+
 def test_webpage_url_creation(example_org):
     assert example_org.url == "https://example.org/test"
 
@@ -296,4 +303,26 @@ def test_get_game_title(PatchedRequests):
 
     with pytest.raises(scrape.ParsingError):
         scrape.get_show_and_date(page=page)
+
+
+def test_get_categories(PatchedRequests, loaded_file):
+    _, game = scrape.Webpage(resource="showgame.php_game_id=1").get()
+
+    results = scrape.get_categories(page=game)
+
+    values = {set["c"] for set in loaded_file}
+
+    assert len(results.items()) == 13
+    assert set(results.values()) == values
+
+    page = BeautifulSoup("<html><head></head><td>Missing class</body></html>", "lxml")
+
+    with pytest.raises(scrape.NoItemsFoundError):
+        scrape.get_categories(page=page)
+
+    page = BeautifulSoup('<html><head></head><td class="category_name">DOGS</body></html>', "lxml")
+
+    with pytest.raises(scrape.ParsingError):
+        scrape.get_categories(page=page)
+
 
