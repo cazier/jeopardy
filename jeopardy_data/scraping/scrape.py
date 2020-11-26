@@ -323,18 +323,30 @@ def get_games(page: BeautifulSoup) -> dict:
 def get_show_and_date(page: BeautifulSoup) -> tuple:
     pattern = r"^(.*)?[Ss]how #(\d{0,6}) - (.*)$"
 
+    game = page.find("div", id="game_title")
+
+    if game == None:
+        raise NoItemsFoundError()
+
+    else:
+        game = game.text.strip()
+
+    matches = re.findall(pattern=pattern, string=game)
+
+    if matches == []:
+        raise ParsingError("Unable to parse show title into individual parts using regex")
+
+    else:
+        [(title, show, date)] = matches
+
     try:
-        game = page.find("div", id="game_title").text
-
-        [(title, show, date)] = re.findall(pattern=pattern, string=game.strip())
-
         date = datetime.datetime.strptime(date, "%A, %B %d, %Y").date().isoformat()
         show = int(show)
 
         return (show, date)
 
-    except (AttributeError, ValueError):
-        raise ParsingError()
+    except ValueError:
+        raise ParsingError("Date format could not be read")
 
 
 def get_clues(page: BeautifulSoup):

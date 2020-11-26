@@ -284,10 +284,15 @@ def test_get_game_title(PatchedRequests):
 
     page = BeautifulSoup("<html><head></head><div>Missing ID</body></html>", "lxml")
 
-    with pytest.raises(scrape.ParsingError):
+    with pytest.raises(scrape.NoItemsFoundError):
         scrape.get_show_and_date(page=page)
 
     page = BeautifulSoup('<html><head></head><div id="game_title">No matches</body></html>', "lxml")
+
+    with pytest.raises(scrape.ParsingError):
+        scrape.get_show_and_date(page=page)
+
+    page = BeautifulSoup('<html><head></head><div id="game_title">Show #1 - Bad Date</body></html>', "lxml")
 
     with pytest.raises(scrape.ParsingError):
         scrape.get_show_and_date(page=page)
