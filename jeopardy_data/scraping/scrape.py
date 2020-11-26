@@ -404,6 +404,7 @@ def get_clue_data(clue: BeautifulSoup) -> dict:
             "answer": answer.text,
             "question": question.text,
             "external": external,
+            "round": round_,
         }
 
     except AttributeError:

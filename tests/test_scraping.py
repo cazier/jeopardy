@@ -223,7 +223,7 @@ def test_get_clue_data():
         "lxml",
     )
 
-    expected_results = {"category": 1, "value": 1, "question": "B", "answer": "A", "external": False}
+    expected_results = {"category": 1, "value": 1, "question": "B", "answer": "A", "external": False, "round": "J"}
 
     results = scrape.get_clue_data(clue=data)
 
@@ -234,7 +234,7 @@ def test_get_clue_data():
         "lxml",
     )
 
-    expected_results = {"category": 1, "value": 1, "question": "B", "answer": "A", "external": True}
+    expected_results = {"category": 1, "value": 1, "question": "B", "answer": "A", "external": True, "round": "J"}
 
     results = scrape.get_clue_data(clue=data)
 
@@ -245,7 +245,7 @@ def test_get_clue_data():
         "lxml",
     )
 
-    expected_results = {"category": -1, "value": 0, "question": "B", "answer": "A", "external": False}
+    expected_results = {"category": -1, "value": 0, "question": "B", "answer": "A", "external": False, "round": "FJ"}
 
     results = scrape.get_clue_data(clue=data)
 
