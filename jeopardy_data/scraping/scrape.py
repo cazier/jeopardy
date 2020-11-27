@@ -398,10 +398,19 @@ def get_clue_data(clue: BeautifulSoup) -> dict:
         round_ = details[1]
 
         if round_ == "FJ":
-            category, value = -1, 0
+            category, value, round_ = -1, 0, 2
 
         else:
-            category, value = map(int, details[2:])
+            category, value = map(lambda k: int(k) - 1, details[2:])
+
+            if round_ == "DJ":
+                round_ = 1
+
+            elif round_ == "J":
+                round_ = 0
+
+            else:
+                raise ParsingError(message="The clue number identifier didn't match 'J', 'DJ', or 'FJ'")
 
         return {
             "category": category,

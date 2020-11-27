@@ -218,7 +218,7 @@ def test_get_clue_data():
         "lxml",
     )
 
-    expected_results = {"category": 1, "value": 1, "question": "B", "answer": "A", "external": False, "round": "J"}
+    expected_results = {"category": 0, "value": 0, "question": "B", "answer": "A", "external": False, "round": 0}
 
     results = scrape.get_clue_data(clue=data)
 
@@ -229,7 +229,18 @@ def test_get_clue_data():
         "lxml",
     )
 
-    expected_results = {"category": 1, "value": 1, "question": "B", "answer": "A", "external": True, "round": "J"}
+    expected_results = {"category": 0, "value": 0, "question": "B", "answer": "A", "external": True, "round": 0}
+
+    results = scrape.get_clue_data(clue=data)
+
+    assert results == expected_results
+
+    data = BeautifulSoup(
+        """<div onmouseout="toggle('clue_DJ_1_1', 'clue_DJ_1_1_stuck', '&lt;a href=&quot;/&quot;&gt;A&lt;/a&gt;')" onmouseover="toggle('clue_J_1_1', 'clue_J_1_1_stuck', '&lt;em class=&quot;correct_response&quot;&gt;B&lt;/em&gt;')">""",
+        "lxml",
+    )
+
+    expected_results = {"category": 0, "value": 0, "question": "B", "answer": "A", "external": True, "round": 1}
 
     results = scrape.get_clue_data(clue=data)
 
@@ -240,7 +251,7 @@ def test_get_clue_data():
         "lxml",
     )
 
-    expected_results = {"category": -1, "value": 0, "question": "B", "answer": "A", "external": False, "round": "FJ"}
+    expected_results = {"category": -1, "value": 0, "question": "B", "answer": "A", "external": False, "round": 2}
 
     results = scrape.get_clue_data(clue=data)
 
