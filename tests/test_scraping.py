@@ -329,7 +329,7 @@ def test_get_categories(PatchedRequests, loaded_file):
     values = {set["c"] for set in loaded_file}
 
     assert len(results.items()) == 13
-    assert set(results.values()) == values
+    assert set((i["title"] for i in results.values())) == values
 
     page = BeautifulSoup("<html><head></head><td>Missing class</body></html>", "lxml")
 

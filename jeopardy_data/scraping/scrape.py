@@ -360,7 +360,7 @@ def get_categories(page: BeautifulSoup) -> None:
 
     names = [category.text for category in categories]
 
-    results = {i: j for i, j in zip(generate_headers(length=num), names)}
+    results = {i: {"title": j, "complete": True} for i, j in zip(generate_headers(length=num), names)}
 
     return results
 
