@@ -398,7 +398,7 @@ def get_clue_data(clue: BeautifulSoup) -> dict:
         round_ = details[1]
 
         if round_ == "FJ":
-            category, value, round_ = -1, 0, 2
+            category, value, round_ = 0, 0, 2
 
         else:
             category, value = map(lambda k: int(k) - 1, details[2:])
@@ -455,4 +455,5 @@ def generate_headers(length: int) -> list:
     if length > 13:
         raise ParsingError()
 
-    return [f"{round_}_{category}" for round_ in ["J", "DJ", "FJ"] for category in range(1, 7)][:length]
+    return [f"{round_}_{category}" for round_ in range(0, 3) for category in range(0, 6)][:length]
+

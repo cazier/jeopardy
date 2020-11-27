@@ -83,7 +83,7 @@ def test_resource_id():
 
 
 def test_generate_headers():
-    assert ["J_1", "J_2", "J_3"] == scrape.generate_headers(3)
+    assert ["0_0", "0_1", "0_2", "0_3"] == scrape.generate_headers(4)
 
     with pytest.raises(scrape.ParsingError):
         scrape.generate_headers(15)
@@ -251,7 +251,7 @@ def test_get_clue_data():
         "lxml",
     )
 
-    expected_results = {"category": -1, "value": 0, "question": "B", "answer": "A", "external": False, "round": 2}
+    expected_results = {"category": 0, "value": 0, "question": "B", "answer": "A", "external": False, "round": 2}
 
     results = scrape.get_clue_data(clue=data)
 
