@@ -290,7 +290,7 @@ def test_get_clue_data_failures():
 
 
 def test_get_clues(PatchedRequests):
-    _, game = scrape.Webpage(resource="showgame.php_game_id=1").get()
+    _, game = scrape.Webpage(resource="showgame.php?game_id=1").get()
 
     results = scrape.get_clues(page=game)
 
@@ -298,7 +298,7 @@ def test_get_clues(PatchedRequests):
 
 
 def test_get_game_title(PatchedRequests, loaded_file):
-    _, game = scrape.Webpage(resource="showgame.php_game_id=1").get()
+    _, game = scrape.Webpage(resource="showgame.php?game_id=1").get()
 
     results = scrape.get_show_and_date(page=game)
     values = {"date": loaded_file[0]["d"], "show": loaded_file[0]["s"]}
@@ -322,7 +322,7 @@ def test_get_game_title(PatchedRequests, loaded_file):
 
 
 def test_get_categories(PatchedRequests, loaded_file):
-    _, game = scrape.Webpage(resource="showgame.php_game_id=1").get()
+    _, game = scrape.Webpage(resource="showgame.php?game_id=1").get()
 
     results = scrape.get_categories(page=game)
 
