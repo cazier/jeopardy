@@ -75,11 +75,11 @@ class ParsingError(Exception):
         super().__init__(self.message)
 
 
-class Game(object):
-    def __init__(self, identifier: str) -> None:
-        self.url = Webpage(resource=f"showgame.php?game_id={identifier}")
+class NoInputSuppliedError(Exception):
+    def __init__(self, message="The BeautifulSoup object was empty. Check the HTML to ensure data is supplied."):
+        self.message = message
 
-        success, self.data = self.url.get()
+        super().__init__(self.message)
 
         if not success:
             raise NotImplementedError("Error handling en route")
@@ -376,6 +376,11 @@ def get_clues(page: BeautifulSoup) -> list:
 
 
 def get_clue_data(clue: BeautifulSoup) -> dict:
+    clue = BeautifulSoup(str(clue), "lxml")
+
+    if clue.html == None:
+        raise NoInputSuppliedError()
+
     try:
         numbers, answer = pjs(clue.find("div").get("onmouseout"))
 
@@ -418,6 +423,9 @@ def pjs(function: str) -> tuple:
     """ A simple wrapper function around the super useful pyjsparser library. This steps through all of the AST tree
     of the library to only return the HTML element in the function.
     """
+    if function == "":
+        raise NoInputSuppliedError("The javascript function supplied was empty")
+
     try:
         arguments = parse(function)["body"][0]["expression"]["arguments"]
 

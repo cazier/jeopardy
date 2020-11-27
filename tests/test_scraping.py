@@ -75,8 +75,10 @@ def test_pjs():
     _, result = scrape.pjs("toggle('', '', '&quot;HTML&quot; escapes are converted')")
     assert result.text == '"HTML" escapes are converted'
 
-    with pytest.raises(scrape.ParsingError):
+    with pytest.raises(scrape.ParsingError, match=r".*javascript.*failed to parse.*"):
         scrape.pjs("console.log('Javascript with less than three arguments fails')")
+
+    with pytest.raises(scrape.NoInputSuppliedError, match=r".*javascript.*"):
         scrape.pjs("")  # As do empty strings
 
 
@@ -251,9 +253,11 @@ def test_get_clue_data():
 
     assert results == expected_results
 
+
+def test_get_clue_data_failures():
     data = BeautifulSoup("", "lxml")
 
-    with pytest.raises(scrape.ParsingError):
+    with pytest.raises(scrape.NoInputSuppliedError):
         scrape.get_clue_data(clue=data)
 
     data = BeautifulSoup(  # CAN'T CONVERT v LETTER "P" TO AN INTEGER
@@ -261,7 +265,7 @@ def test_get_clue_data():
         "lxml",
     )
 
-    with pytest.raises(scrape.ParsingError):
+    with pytest.raises(scrape.ParsingError, match=r".*was malformed.*"):
         scrape.get_clue_data(clue=data)
 
     data = BeautifulSoup(
@@ -269,7 +273,15 @@ def test_get_clue_data():
         "lxml",
     )
 
-    with pytest.raises(scrape.ParsingError):
+    with pytest.raises(scrape.ParsingError, match=r".*unable to be parsed.*"):
+        scrape.get_clue_data(clue=data)
+
+    data = BeautifulSoup(
+        """<div onmouseout="toggle('clue_P_1_1', 'clue_J_1_1_stuck', 'A')" onmouseover="toggle('clue_J_1_1', 'clue_J_1_1_stuck', '&lt;em class=&quot;correct_response&quot;&gt;B&lt;/em&gt;')">""",
+        "lxml",
+    )
+
+    with pytest.raises(scrape.ParsingError, match=r".*didn't match.*"):
         scrape.get_clue_data(clue=data)
 
 
