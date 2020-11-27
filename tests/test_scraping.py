@@ -53,13 +53,6 @@ def example_org(PatchedRequests):
 
 
 @pytest.fixture
-def test_game(PatchedRequests):
-    success, page = scrape.Webpage(resource="showgame.php?game_id=1").get()
-
-    return scrape.Game(page=page)
-
-
-@pytest.fixture
 def loaded_file():
     with open("json/sample.json", "r") as sample_file:
         return json.load(sample_file)
