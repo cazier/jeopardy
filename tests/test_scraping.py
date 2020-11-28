@@ -301,7 +301,7 @@ def test_get_game_title(PatchedRequests, loaded_file):
     _, game = scrape.Webpage(resource="showgame.php?game_id=1").get()
 
     results = scrape.get_show_and_date(page=game)
-    values = {"date": loaded_file[0]["d"], "show": loaded_file[0]["s"]}
+    values = {"date": loaded_file[0]["date"], "show": loaded_file[0]["show"]}
 
     assert results == values
 
@@ -326,7 +326,7 @@ def test_get_categories(PatchedRequests, loaded_file):
 
     results = scrape.get_categories(page=game)
 
-    values = {set["c"] for set in loaded_file}
+    values = {set["category"] for set in loaded_file}
 
     assert len(results.items()) == 13
     assert set((i["title"] for i in results.values())) == values
