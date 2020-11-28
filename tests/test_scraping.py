@@ -386,8 +386,67 @@ def test_get_board(PatchedRequests, complete_file, incomplete_file):
     _, game = scrape.Webpage(resource="showgame.php?game_id=2").get()
     results = scrape.get_board(page=game)
 
+    _, game = scrape.Webpage(resource="showgame.php?game_id=2").get()
+    results = scrape.get_board(page=game, store_external=True)
+
     results = sorted(results, key=operator.itemgetter("round", "category", "value"))
     incomplete_file = sorted(incomplete_file, key=operator.itemgetter("round", "category", "value"))
 
     assert results == incomplete_file
+
+
+def test_get_external_media():
+    scrape.EXTERNAL_LINKS = list()
+    scrape.BASE_URL = "http://example.org"
+
+    item = {
+        "show": 1,
+        "round": 0,
+        "value": 0,
+        "answer": BeautifulSoup('<a href="/media/1992-08-13_J_1.jpg">A</a>', "lxml"),
+    }
+
+    scrape.get_external_media(item=item, category=0)
+
+    assert scrape.EXTERNAL_LINKS == [("00001_0_0_0a", "http://example.org/media/1992-08-13_J_1.jpg")]
+    scrape.EXTERNAL_LINKS = list()
+
+    item = {
+        "show": 1,
+        "round": 0,
+        "value": 0,
+        "answer": BeautifulSoup('<a href="http://example.org/media/1992-08-13_J_1.jpg">A</a>', "lxml"),
+    }
+
+    scrape.get_external_media(item=item, category=0)
+
+    assert scrape.EXTERNAL_LINKS == [("00001_0_0_0a", "http://example.org/media/1992-08-13_J_1.jpg")]
+    scrape.EXTERNAL_LINKS = list()
+
+    item = {
+        "show": 1,
+        "round": 0,
+        "value": 0,
+        "answer": BeautifulSoup(
+            '<a href="/media/1992-08-13_J_1.jpg">A</a><a href="/media/1992-08-13_J_2.jpg">B</a>', "lxml"
+        ),
+    }
+
+    scrape.get_external_media(item=item, category=0)
+
+    assert scrape.EXTERNAL_LINKS == [
+        ("00001_0_0_0a", "http://example.org/media/1992-08-13_J_1.jpg"),
+        ("00001_0_0_0b", "http://example.org/media/1992-08-13_J_2.jpg"),
+    ]
+    scrape.EXTERNAL_LINKS = list()
+
+    item = {
+        "show": 1,
+        "round": 0,
+        "value": 0,
+        "answer": BeautifulSoup('<a href="">A</a>', "lxml"),
+    }
+
+    with pytest.raises(scrape.ParsingError, match=".*has no url"):
+        scrape.get_external_media(item=item, category=0)
 

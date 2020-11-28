@@ -1035,7 +1035,7 @@
                 <td>
                   <div
                     onmouseover="toggle('clue_DJ_5_2', 'clue_DJ_5_2_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Voyager 1&lt;/em&gt;')"
-                    onmouseout="toggle('clue_DJ_5_2', 'clue_DJ_5_2_stuck', 'Launched in 1977, this probe was the first man-made object to enter interstellar space in 2012.')"
+                    onmouseout="toggle('clue_DJ_5_2', 'clue_DJ_5_2_stuck', 'Launched in 1977, &lt;a href=&quot;/spacecraft.jpg&quot;&gt;this probe&lt;/a&gt; was the first man-made object to enter interstellar space in 2012.')"
                     onclick="togglestick('clue_DJ_5_2_stuck')">
                     <table class="clue_header">
                       <tr>
@@ -1047,7 +1047,7 @@
                 </td>
               </tr>
               <tr>
-                <td id="clue_DJ_5_2" class="clue_text">Launched in 1977, this probe was the first man-made object to
+                <td id="clue_DJ_5_2" class="clue_text">Launched in 1977, <a href="/spacecraft.jpg">this probe</a> was the first man-made object to
                   enter
                   interstellar space in 2012.</td>
               </tr>

@@ -2,14 +2,16 @@ import requests
 from bs4 import BeautifulSoup, element
 from pyjsparser import parse
 
-import time
+import os
 import re
+import json
+import time
 import string
+import pathlib
 import datetime
 from collections import defaultdict
+import urllib.parse as urlparse
 
-import pathlib
-import os
 
 CACHE = False
 CACHE_PATH = ""
@@ -17,6 +19,8 @@ CACHE_PATH = ""
 BASE_URL = "http://www.j-archive.com"
 
 DELAY = 5
+
+EXTERNAL_LINKS: list = list()
 
 
 class Webpage(object):
@@ -80,7 +84,7 @@ class NoInputSuppliedError(Exception):
         super().__init__(self.message)
 
 
-def get_seasons(page: BeautifulSoup, start: int, stop: int, include_special: bool) -> tuple:
+def get_seasons(page: BeautifulSoup, start: int, stop: int, include_special: bool) -> list:
     if stop <= start:
         raise SyntaxError("The stop season must be greater than the start season")
 
@@ -108,7 +112,7 @@ def get_seasons(page: BeautifulSoup, start: int, stop: int, include_special: boo
         raise ParsingError()
 
 
-def get_games(page: BeautifulSoup) -> tuple:
+def get_games(page: BeautifulSoup) -> dict:
     try:
         all_games = page.find(id="content").find_all("a")
 
@@ -129,7 +133,7 @@ def get_games(page: BeautifulSoup) -> tuple:
         raise ParsingError()
 
 
-def get_game_title(page: BeautifulSoup) -> dict:
+def get_game_title(page: BeautifulSoup) -> tuple:
     pattern = r"^(.*)?[Ss]how #(\d{0,6}) - (.*)$"
 
     game = page.find("div", id="game_title")
@@ -240,7 +244,7 @@ def get_clue_data(clue: BeautifulSoup) -> dict:
         raise ParsingError(message=f"The clue number identifier was malformed. (It should look like 'clue_J_#_#')")
 
 
-def get_board(page: BeautifulSoup) -> list:
+def get_board(page: BeautifulSoup, store_external: bool = False) -> list:
     show, date = get_game_title(page=page)
     category_names = get_categories(page=page)
     clues = [get_clue_data(clue=clue) for clue in get_clues(page=page)]
@@ -271,6 +275,11 @@ def get_board(page: BeautifulSoup) -> list:
                 item["show"] = show
                 item["date"] = date
 
+                if store_external:
+                    item["answer_html"] = str(item["answer"])
+
+                    if item["external"]:
+                        get_external_media(item=item, category=category_number)
 
                 item["answer"] = item["answer"].text
 
@@ -310,8 +319,21 @@ def generate_headers(length: int) -> list:
     return [f"{round_}_{category}" for round_ in range(0, 3) for category in range(0, 6)][:length]
 
 
-def get_external_media(round_: str, urls: list) -> None:
-    downloads = [f"curl -O downloads/{round_}{string.ascii_lowercase[i]} {j}\n" for i, j in enumerate(urls)]
-    with open("downloads.txt", "a") as file:
-        file.writelines(downloads)
+def get_external_media(item: dict, category: int) -> None:
+    global EXTERNAL_LINKS
 
+    files = item["answer"].find_all("a")
+
+    base = "{show:05d}_{round}_{category}_{value}".format(
+        show=item["show"], round=item["round"], category=category, value=item["value"]
+    )
+
+    for key, file in zip(string.ascii_lowercase, files):
+        url_path = file.get("href")
+
+        if url_path == "":
+            raise ParsingError(f"The external file for a clue (id: {base}{key} has no url")
+
+        url = urlparse.urljoin(f"{BASE_URL}/media", url_path)
+
+        EXTERNAL_LINKS.append((f"{base}{key}", url))
