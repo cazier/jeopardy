@@ -6,7 +6,7 @@ import time
 import re
 import string
 import datetime
-from collections import defaultdict, OrderedDict
+from collections import defaultdict
 
 import pathlib
 import os
@@ -37,12 +37,10 @@ class Webpage(object):
 
     def get(self):
         if self.storage.exists() and CACHE:
-            print("using cache")
             with open(self.storage, "r") as store_file:
                 page = store_file.read()
 
         else:
-            print("downloading")
             time.sleep(DELAY)
 
             page = requests.get(self.url)
@@ -110,7 +108,7 @@ def get_seasons(page: BeautifulSoup, start: int, stop: int, include_special: boo
         raise ParsingError()
 
 
-def get_games(page: BeautifulSoup) -> dict:
+def get_games(page: BeautifulSoup) -> tuple:
     try:
         all_games = page.find(id="content").find_all("a")
 
@@ -160,7 +158,7 @@ def get_show_and_date(page: BeautifulSoup) -> dict:
         raise ParsingError("Date format could not be read")
 
 
-def get_categories(page: BeautifulSoup) -> None:
+def get_categories(page: BeautifulSoup) -> dict:
     categories = page.find_all("td", class_="category_name")
 
     if (num := len(categories)) < 1:
@@ -242,12 +240,12 @@ def get_clue_data(clue: BeautifulSoup) -> dict:
         raise ParsingError(message=f"The clue number identifier was malformed. (It should look like 'clue_J_#_#')")
 
 
-def get_board(page: BeautifulSoup) -> dict:
+def get_board(page: BeautifulSoup) -> list:
     show_and_date = get_show_and_date(page=page)
     category_names = get_categories(page=page)
     clues = [get_clue_data(clue=clue) for clue in get_clues(page=page)]
 
-    board = defaultdict(dict)
+    board: dict = defaultdict(dict)
 
     for category in category_names:
         round_number, category_number = map(int, category.split("_"))
@@ -257,7 +255,7 @@ def get_board(page: BeautifulSoup) -> dict:
     for clue in clues:
         board[clue["round"]][clue["category"]].append(clue)
 
-    results = list()
+    results: list = list()
 
     for round_number, categories in board.items():
         for category_number, question_sets in categories.items():
