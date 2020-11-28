@@ -275,13 +275,10 @@ def get_board(page: BeautifulSoup, store_external: bool = False) -> list:
                 item["show"] = show
                 item["date"] = date
 
-                if store_external:
-                    item["answer_html"] = str(item["answer"])
+                if store_external and item["external"]:
+                    get_external_media(item=item, category=category_number)
 
-                    if item["external"]:
-                        get_external_media(item=item, category=category_number)
-
-                item["answer"] = item["answer"].text
+                item["answer"] = str(item["answer"])
 
                 results.append(item)
 
