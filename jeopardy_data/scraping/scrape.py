@@ -102,7 +102,7 @@ def get_seasons(page: BeautifulSoup, start: int, stop: int, include_special: boo
         if len(results) < 1:
             raise NoItemsFoundError()
 
-        return True, results
+        return results
 
     except AttributeError:
         raise ParsingError()
@@ -123,7 +123,7 @@ def get_games(page: BeautifulSoup) -> tuple:
         if len(results.keys()) < 1:
             raise NoItemsFoundError()
 
-        return True, results
+        return results
 
     except AttributeError:
         raise ParsingError()

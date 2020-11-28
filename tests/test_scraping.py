@@ -166,14 +166,12 @@ def test_get_seasons(TestFiles):
 
     _, data = page.get()
 
-    success, message = scrape.get_seasons(page=data, start=start, stop=stop, include_special=False)
+    message = scrape.get_seasons(page=data, start=start, stop=stop, include_special=False)
 
-    assert success
     assert len(message) == stop - start
 
-    success, message = scrape.get_seasons(page=data, start=start, stop=stop, include_special=True)
+    message = scrape.get_seasons(page=data, start=start, stop=stop, include_special=True)
 
-    assert success
     assert len(message) == 3 + stop - start
 
 
@@ -213,9 +211,8 @@ def test_get_games(TestFiles):
 
     _, data = page.get()
 
-    success, message = scrape.get_games(page=data)
+    message = scrape.get_games(page=data)
 
-    assert success
     assert len(message) == 8
 
 
