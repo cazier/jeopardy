@@ -1557,7 +1557,39 @@
           </td>
         </tr>
       </table>
+      <h2>Tiebreaker Round</h2>
 
+      <table class="final_round">
+        <tr>
+          <td class="category">
+
+            <div
+              onmouseover="toggle('clue_TB', 'clue_TB_stuck', '<em class=\&quot;correct_response\&quot;>James Marsters</em>')"
+              onmouseout="toggle('clue_TB', 'clue_TB_stuck', 'This American actor, known for playing a Brit in a different supernatural series, is the narrator for the audiobook release of the Dresden Files')"
+              onclick="togglestick('clue_TB_stuck')">
+              <table>
+                <tr>
+                  <td class="category_name">AUDIOBOOKS</td>
+                </tr>
+                <tr>
+                  <td class="category_comments"></td>
+                </tr>
+              </table>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td class="clue">
+            <table>
+              <tr>
+                <td id="clue_TB" class="clue_text">This American actor, known for playing a Brit in a different
+                  supernatural series, is the narrator for the audiobook release of the Dresden Files</td>
+              </tr>
+            </table>
+            <var id="clue_TB_stuck"></var>
+          </td>
+        </tr>
+      </table>
     </div>
   </div>
 </body>

@@ -166,8 +166,8 @@ def get_categories(page: BeautifulSoup) -> None:
     if (num := len(categories)) < 1:
         raise NoItemsFoundError()
 
-    elif num != 13:
-        raise ParsingError("An incorrect number of categories was found. Perhaps there's a Tiebreaker?")
+    elif num not in [13, 14]:
+        raise ParsingError("An incorrect number of categories was found.")
 
     names = [category.text for category in categories]
 
@@ -210,6 +210,9 @@ def get_clue_data(clue: BeautifulSoup) -> dict:
 
         if round_ == "FJ":
             category, value, round_ = 0, 0, 2
+
+        elif round_ == "TB":
+            category, value, round_ = 1, 0, 2
 
         else:
             category, value = map(lambda k: int(k) - 1, details[2:])
@@ -298,7 +301,7 @@ def resource_id(url: str) -> str:
 
 
 def generate_headers(length: int) -> list:
-    if length > 13:
+    if length > 14:
         raise ParsingError()
 
     return [f"{round_}_{category}" for round_ in range(0, 3) for category in range(0, 6)][:length]

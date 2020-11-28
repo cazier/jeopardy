@@ -625,5 +625,16 @@
 		"show": 2,
 		"external": false,
 		"complete": true
+	},
+	{
+		"category": "AUDIOBOOKS",
+		"date": "1990-11-26",
+		"answer": "This American actor, known for playing a Brit in a different supernatural series, is the narrator for the audiobook release of the Dresden Files",
+		"value": 0,
+		"question": "James Marsters",
+		"round": 2,
+		"show": 2,
+		"external": false,
+		"complete": true
 	}
 ]
