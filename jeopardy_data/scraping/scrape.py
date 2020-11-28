@@ -129,7 +129,7 @@ def get_games(page: BeautifulSoup) -> tuple:
         raise ParsingError()
 
 
-def get_show_and_date(page: BeautifulSoup) -> dict:
+def get_game_title(page: BeautifulSoup) -> dict:
     pattern = r"^(.*)?[Ss]how #(\d{0,6}) - (.*)$"
 
     game = page.find("div", id="game_title")
@@ -152,7 +152,7 @@ def get_show_and_date(page: BeautifulSoup) -> dict:
         date = datetime.datetime.strptime(date, "%A, %B %d, %Y").date().isoformat()
         show = int(show)
 
-        return {"show": show, "date": date}
+        return (show, date)
 
     except ValueError:
         raise ParsingError("Date format could not be read")
@@ -241,7 +241,7 @@ def get_clue_data(clue: BeautifulSoup) -> dict:
 
 
 def get_board(page: BeautifulSoup) -> list:
-    show_and_date = get_show_and_date(page=page)
+    show, date = get_game_title(page=page)
     category_names = get_categories(page=page)
     clues = [get_clue_data(clue=clue) for clue in get_clues(page=page)]
 
@@ -267,7 +267,9 @@ def get_board(page: BeautifulSoup) -> list:
                     item["complete"] = True
 
                 item["category"] = category_names[f"{item['round']}_{item['category']}"]
-                item.update(show_and_date)
+
+                item["show"] = show
+                item["date"] = date
 
                 results.append(item)
 

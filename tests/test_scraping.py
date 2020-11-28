@@ -304,25 +304,25 @@ def test_get_clues(PatchedRequests):
 def test_get_game_title(PatchedRequests, complete_file):
     _, game = scrape.Webpage(resource="showgame.php?game_id=1").get()
 
-    results = scrape.get_show_and_date(page=game)
-    values = {"date": complete_file[0]["date"], "show": complete_file[0]["show"]}
+    show, date = scrape.get_game_title(page=game)
+    values = (complete_file[0]["show"], complete_file[0]["date"])
 
-    assert results == values
+    assert (show, date) == values
 
     page = BeautifulSoup("<html><head></head><div>Missing ID</body></html>", "lxml")
 
     with pytest.raises(scrape.NoItemsFoundError):
-        scrape.get_show_and_date(page=page)
+        scrape.get_game_title(page=page)
 
     page = BeautifulSoup('<html><head></head><div id="game_title">No matches</body></html>', "lxml")
 
     with pytest.raises(scrape.ParsingError):
-        scrape.get_show_and_date(page=page)
+        scrape.get_game_title(page=page)
 
     page = BeautifulSoup('<html><head></head><div id="game_title">Show #1 - Bad Date</body></html>', "lxml")
 
     with pytest.raises(scrape.ParsingError):
-        scrape.get_show_and_date(page=page)
+        scrape.get_game_title(page=page)
 
 
 def test_get_categories(PatchedRequests, complete_file):
