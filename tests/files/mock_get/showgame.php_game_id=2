@@ -1,0 +1,1565 @@
+<html>
+
+<head>
+</head>
+
+<body>
+  <div id="content">
+    <div id="game_title">
+      <h1>Show #2 - Monday, November 26, 1990</h1>
+    </div>
+    <div id="game_comments"></div>
+    <div id="contestants">
+      <h2>Contestants</h2>
+      <table id="contestants_table">
+      </table>
+    </div>
+    <div id="jeopardy_round">
+      <h2>Jeopardy! Round</h2>
+
+      <table class="round">
+        <tr>
+          <td class="category">
+
+            <table>
+              <tr>
+                <td class="category_name">DRESDEN FILES</td>
+              </tr>
+              <tr>
+                <td class="category_comments"></td>
+              </tr>
+            </table>
+          </td>
+          <td class="category">
+
+            <table>
+              <tr>
+                <td class="category_name">CELTIC MYTHOLOGY</td>
+              </tr>
+              <tr>
+                <td class="category_comments"></td>
+              </tr>
+            </table>
+          </td>
+          <td class="category">
+
+            <table>
+              <tr>
+                <td class="category_name">ZEUS WAS NOT A GOOD DAD</td>
+              </tr>
+              <tr>
+                <td class="category_comments"></td>
+              </tr>
+            </table>
+          </td>
+          <td class="category">
+
+            <table>
+              <tr>
+                <td class="category_name">THE ALL FATHER</td>
+              </tr>
+              <tr>
+                <td class="category_comments"></td>
+              </tr>
+            </table>
+          </td>
+          <td class="category">
+
+            <table>
+              <tr>
+                <td class="category_name">JIM BUTCHER'S CHRISTIANITY</td>
+              </tr>
+              <tr>
+                <td class="category_comments"></td>
+              </tr>
+            </table>
+          </td>
+          <td class="category">
+
+            <table>
+              <tr>
+                <td class="category_name">FOOTBALL</td>
+              </tr>
+              <tr>
+                <td class="category_comments"></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_J_1_1', 'clue_J_1_1_stuck', '&lt;em class=&quot;correct_response&quot;&gt;fuego&lt;/em&gt;')"
+                    onmouseout="toggle('clue_J_1_1', 'clue_J_1_1_stuck', 'Harry Dresden\&#x27;s favorite spell uses this Spanish word for &quot;fire&quot;')"
+                    onclick="togglestick('clue_J_1_1_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_J_1_1_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$200</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_J_1_1" class="clue_text">Harry Dresden's favorite spell uses this Spanish word for fire
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_J_3_1', 'clue_J_3_1_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Cronos&lt;/em&gt;')"
+                    onmouseout="toggle('clue_J_3_1', 'clue_J_3_1_stuck', 'Not a good son either, Zeus commited patricide on this Titan')"
+                    onclick="togglestick('clue_J_3_1_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_J_3_1_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$200</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_J_3_1" class="clue_text">Not a good son either, Zeus commited patricide on this Titan
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_J_4_1', 'clue_J_4_1_stuck', '&lt;em class=&quot;correct_response&quot;&gt;with one eye&lt;/em&gt;')"
+                    onmouseout="toggle('clue_J_4_1', 'clue_J_4_1_stuck', 'Odin is often depicted in this way because of the price he paid for wisdom at Memir\&#x27;s Well')"
+                    onclick="togglestick('clue_J_4_1_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_J_4_1_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$200</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_J_4_1" class="clue_text">Odin is often depicted in this way because of the price he paid
+                  for
+                  wisdom at Memir's Well
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_J_5_1', 'clue_J_5_1_stuck', '&lt;em class=&quot;correct_response&quot;&gt;a carpenter&lt;/em&gt;')"
+                    onmouseout="toggle('clue_J_5_1', 'clue_J_5_1_stuck', 'The character Michael in Jim Butcher\&#x27;s The Dresden Files, shares this occupation with a famous Christian Joseph')"
+                    onclick="togglestick('clue_J_5_1_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_J_5_1_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$200</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_J_5_1" class="clue_text">The character Michael in Jim Butcher's The Dresden Files, shares
+                  this
+                  occupation with a famous Christian Joseph
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_J_6_1', 'clue_J_6_1_stuck', '&lt;em class=&quot;correct_response&quot;&gt;soccer&lt;/em&gt;')"
+                    onmouseout="toggle('clue_J_6_1', 'clue_J_6_1_stuck', 'Known by this to the Americans, whose best World Cup performance was getting 3rd place in 1930.')"
+                    onclick="togglestick('clue_J_6_1_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_J_6_1_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$200</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_J_6_1" class="clue_text">Known by this to the American's, who's best World Cup performance
+                  was
+                  getting 3rd place in 1930.</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_J_1_2', 'clue_J_1_2_stuck', '&lt;em class=&quot;correct_response&quot;&gt;black, red, and white&lt;/em&gt;')"
+                    onmouseout="toggle('clue_J_1_2', 'clue_J_1_2_stuck', 'The Vampires in the Dresden Files are primarily members of these three courts')"
+                    onclick="togglestick('clue_J_1_2_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_J_1_2_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$400</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_J_1_2" class="clue_text">The Vampires in the Dresden Files are primarily members of these
+                  three courts
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_J_2_2', 'clue_J_2_2_stuck', '&lt;em class=&quot;correct_response&quot;&gt;the Long Arm&lt;/em&gt;')"
+                    onmouseout="toggle('clue_J_2_2', 'clue_J_2_2_stuck', 'Due to his association with the spear Luin, the Celtic god Lugh is often refered to with this epithet')"
+                    onclick="togglestick('clue_J_2_2_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_J_2_2_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$400</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_J_2_2" class="clue_text">Due to his association with the spear Luin, the Celtic god Lugh is
+                  often refered to with this epithet
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_J_4_2', 'clue_J_4_2_stuck', '&lt;em class=&quot;correct_response&quot;&gt;eight (8)&lt;/em&gt;')"
+                    onmouseout="toggle('clue_J_4_2', 'clue_J_4_2_stuck', 'Odin\&#x27;s steed, Sleipnir, has this many legs')"
+                    onclick="togglestick('clue_J_4_2_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_J_4_2_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$400</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_J_4_2" class="clue_text">Odin's steed, Sleipnir, has this many legs
+                </td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_J_6_2', 'clue_J_6_2_stuck', '&lt;em class=&quot;correct_response&quot;&gt;pitch (or field)&lt;/em&gt;')"
+                    onmouseout="toggle('clue_J_6_2', 'clue_J_6_2_stuck', 'These aren\&#x27;t always the same, varying in length and width within a range codified in the Laws of the Game')"
+                    onclick="togglestick('clue_J_6_2_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_J_6_2_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$400</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_J_6_2" class="clue_text">These aren't always the same, varying in length and width within a
+                  range
+                  codified in the Laws of the Game</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_J_1_3', 'clue_J_1_3_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Maeve and Sarissa&lt;/em&gt;')"
+                    onmouseout="toggle('clue_J_1_3', 'clue_J_1_3_stuck', 'These twin daughters of Queen Mab, are both Faerie Queens themselves')"
+                    onclick="togglestick('clue_J_1_3_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_J_1_3_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$600</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_J_1_3" class="clue_text">These twin daughters of Queen Mab, are both Faerie Queens
+                  themselves</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_J_2_3', 'clue_J_2_3_stuck', '&lt;em class=&quot;correct_response&quot;&gt;all of them&lt;/em&gt;')"
+                    onmouseout="toggle('clue_J_2_3', 'clue_J_2_3_stuck', 'Lugh, a wright, smith, champion, swordsman, harpist, hero, poet, historian, sorcerer, and craftsman, was permitted to enter the court of the Tuatha Dé Danann due to his mastery of which of these skills')"
+                    onclick="togglestick('clue_J_2_3_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_J_2_3_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$600</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_J_2_3" class="clue_text">Lugh, a wright, smith, champion, swordsman, harpist, hero, poet,
+                  historian, sorcerer, and craftsman, was permitted to enter the court of the Tuatha Dé Danann due to
+                  his mastery of which of these skills</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_J_3_3', 'clue_J_3_3_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Persephone&lt;/em&gt;')"
+                    onmouseout="toggle('clue_J_3_3', 'clue_J_3_3_stuck', 'This daughter of Zeus was said to be stolen by his brother (her uncle), Hades, to eventually become his Queen')"
+                    onclick="togglestick('clue_J_3_3_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_J_3_3_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$600</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_J_3_3" class="clue_text">This daughter of Zeus was said to be stolen by his brother (her
+                  uncle), Hades, to eventually become his Queen</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_J_4_3', 'clue_J_4_3_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Yggrdasil&lt;/em&gt;')"
+                    onmouseout="toggle('clue_J_4_3', 'clue_J_4_3_stuck', 'Odin is often associated with gallows, and hanging, due to the three days he spent on this tree')"
+                    onclick="togglestick('clue_J_4_3_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_J_4_3_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$600</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_J_4_3" class="clue_text">Odin is often associated with gallows, and hanging, due to the
+                  three days he spent on this tree</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_J_5_3', 'clue_J_5_3_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Denarian (or Denarii)&lt;/em&gt;')"
+                    onmouseout="toggle('clue_J_5_3', 'clue_J_5_3_stuck', 'These coins are said to be the 30 pieces of gold given to Judas Iscariot. They\&#x27;re also said to contain the spirit of a fallen angel')"
+                    onclick="togglestick('clue_J_5_3_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_J_5_3_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$600</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_J_5_3" class="clue_text">These coins are said to be the 30 pieces of gold given to Judas
+                  Iscariot. They're also said to contain the spirit of a fallen angel</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_J_6_3', 'clue_J_6_3_stuck', '&lt;em class=&quot;correct_response&quot;&gt;a hat trick&lt;/em&gt;')"
+                    onmouseout="toggle('clue_J_6_3', 'clue_J_6_3_stuck', 'If the same player scores two goals in one game, he records a &quot;brace&quot;. If they get three, it\&#x27;s called this')"
+                    onclick="togglestick('clue_J_6_3_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_J_6_3_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$600</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_J_6_3" class="clue_text">If the same player scores two goals in one game, he records a
+                  "brace". If
+                  they get three, it's called this</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_J_1_4', 'clue_J_1_4_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Magog&lt;/em&gt;')"
+                    onmouseout="toggle('clue_J_1_4', 'clue_J_1_4_stuck', 'Sanya, Knight of the Cross and professed agnostic, once possesed the Denarius of this fallen angel')"
+                    onclick="togglestick('clue_J_1_4_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_J_1_4_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$800</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_J_1_4" class="clue_text">Sanya, Knight of the Cross and professed agnostic, once possesed
+                  the Denarius of this fallen angel</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_J_2_4', 'clue_J_2_4_stuck', '&lt;em class=&quot;correct_response&quot;&gt;the Eye of Balor&lt;/em&gt;')"
+                    onmouseout="toggle('clue_J_2_4', 'clue_J_2_4_stuck', 'This Fomori superweapon was held away from the world through the use of nine leather shields')"
+                    onclick="togglestick('clue_J_2_4_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_J_2_4_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$800</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_J_2_4" class="clue_text">This Fomori superweapon was held away from the world through the
+                  use of nine leather shields</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_J_3_4', 'clue_J_3_4_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Artemis and Apollo&lt;/em&gt;')"
+                    onmouseout="toggle('clue_J_3_4', 'clue_J_3_4_stuck', 'These alliterative twins are the heavenly children of Zeus and Leto')"
+                    onclick="togglestick('clue_J_3_4_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_J_3_4_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$800</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_J_3_4" class="clue_text">These alliterative twins are the heavenly children of Zeus and
+                  Leto</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_J_5_4', 'clue_J_5_4_stuck', '&lt;em class=&quot;correct_response&quot;&gt;faith, hope, and love&lt;/em&gt;')"
+                    onmouseout="toggle('clue_J_5_4', 'clue_J_5_4_stuck', 'These three tenets of 1 Corinthians 13:13 are each embodied by a Sword of the Cross in the Dresden Files')"
+                    onclick="togglestick('clue_J_5_4_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_J_5_4_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$800</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_J_5_4" class="clue_text">These three tenets of 1 Corinthians 13:13 are each embodied by a
+                  Sword of the Cross in the Dresden Files</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_J_6_4', 'clue_J_6_4_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Camp Nou&lt;/em&gt;')"
+                    onmouseout="toggle('clue_J_6_4', 'clue_J_6_4_stuck', 'This stadium in Antoni Gaudí\&#x27;s city, though not designed by him, boasts the largest capacity in Europe')"
+                    onclick="togglestick('clue_J_6_4_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_J_6_4_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$800</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_J_6_4" class="clue_text">This stadium in Antoni Gaudí's city, though not designed by him,
+                  boasts the
+                  largest capacity in Europe</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_J_1_5', 'clue_J_1_5_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Hog Hollow, Missouri&lt;/em&gt;')"
+                    onmouseout="toggle('clue_J_1_5', 'clue_J_1_5_stuck', 'Harry Dresden\&#x27;s mentor, Ebenezer McCoy, lives on a farm in the Ozarks of this backcountry town')"
+                    onclick="togglestick('clue_J_1_5_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_J_1_5_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$1000</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_J_1_5" class="clue_text">Harry Dresden's mentor, Ebenezer McCoy, lives on a farm in the
+                  Ozarks of this backcountry town</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_J_2_5', 'clue_J_2_5_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Gwyn ap Nudd&lt;/em&gt;')"
+                    onmouseout="toggle('clue_J_2_5', 'clue_J_2_5_stuck', 'The Welsh King of the Tylwyth Teg or Tuatha Dé Danann')"
+                    onclick="togglestick('clue_J_2_5_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_J_2_5_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$1000</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_J_2_5" class="clue_text">The Welsh King of the Tylwyth Teg or Tuatha Dé Danann</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_J_3_5', 'clue_J_3_5_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Tantalus&lt;/em&gt;')"
+                    onmouseout="toggle('clue_J_3_5', 'clue_J_3_5_stuck', 'Pluto\&#x27;s son, he was punished for eternity by being set tantalizingly close to both food and water, but never able to reach it')"
+                    onclick="togglestick('clue_J_3_5_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_J_3_5_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$1000</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_J_3_5" class="clue_text">Pluto's son, he was punished for eternity by being set
+                  tantalizingly close to both food and water, but never able to reach it</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_J_4_5', 'clue_J_4_5_stuck', '&lt;em class=&quot;correct_response&quot;&gt;the Swaying One&lt;/em&gt;')"
+                    onmouseout="toggle('clue_J_4_5', 'clue_J_4_5_stuck', 'Odin\&#x27;s spear, Gungnir, has this meaning in English')"
+                    onclick="togglestick('clue_J_4_5_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_J_4_5_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$1000</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_J_4_5" class="clue_text">Odin's spear, Gungnir, has this meaning in English</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_J_5_5', 'clue_J_5_5_stuck', '&lt;em class=&quot;correct_response&quot;&gt;of God&lt;/em&gt;')"
+                    onmouseout="toggle('clue_J_5_5', 'clue_J_5_5_stuck', 'The suffix in each of the names, Gabriel, Michael, and Raphael, comes from Hebrew, meaning this')"
+                    onclick="togglestick('clue_J_5_5_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_J_5_5_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$1000</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_J_5_5" class="clue_text">The suffix in each of the names, Gabriel, Michael, and Raphael,
+                  comes from Hebrew meaning this</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_J_6_5', 'clue_J_6_5_stuck', '&lt;em class=&quot;correct_response&quot;&gt;The Beautiful Game&lt;/em&gt;')"
+                    onmouseout="toggle('clue_J_6_5', 'clue_J_6_5_stuck', 'Popularized by Brazilian star Pelé, this nickname for football, is also shared by an early 2000s Andrew Lloyd Webber musical.')"
+                    onclick="togglestick('clue_J_6_5_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_J_6_5_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$1000</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_J_6_5" class="clue_text">Popularized by Brazilian star Pelé, this nickname for football, is
+                  also
+                  shared by an early 2000s Andrew Lloyd Webber musical.</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <div id="double_jeopardy_round">
+      <h2>Double Jeopardy! Round</h2>
+
+      <table class="round">
+        <tr>
+          <td class="category">
+
+            <table>
+              <tr>
+                <td class="category_name">SCRUBS</td>
+              </tr>
+              <tr>
+                <td class="category_comments"></td>
+              </tr>
+            </table>
+          </td>
+          <td class="category">
+
+            <table>
+              <tr>
+                <td class="category_name">BUILDAPC</td>
+              </tr>
+              <tr>
+                <td class="category_comments"></td>
+              </tr>
+            </table>
+          </td>
+          <td class="category">
+
+            <table>
+              <tr>
+                <td class="category_name">BEER</td>
+              </tr>
+              <tr>
+                <td class="category_comments"></td>
+              </tr>
+            </table>
+          </td>
+          <td class="category">
+
+            <table>
+              <tr>
+                <td class="category_name">SWIFT</td>
+              </tr>
+              <tr>
+                <td class="category_comments"></td>
+              </tr>
+            </table>
+          </td>
+          <td class="category">
+
+            <table>
+              <tr>
+                <td class="category_name">SPACE</td>
+              </tr>
+              <tr>
+                <td class="category_comments"></td>
+              </tr>
+            </table>
+          </td>
+          <td class="category">
+
+            <table>
+              <tr>
+                <td class="category_name">LORD OF THE RINGS</td>
+              </tr>
+              <tr>
+                <td class="category_comments"></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_DJ_1_1', 'clue_DJ_1_1_stuck', '&lt;em class=&quot;correct_response&quot;&gt;John &quot;J.D.&quot; Dorian&lt;/em&gt;')"
+                    onmouseout="toggle('clue_DJ_1_1', 'clue_DJ_1_1_stuck', 'The central character, this young doctor frequently finds himself lost in his thoughts, much to the chagrin of his friends and mentor')"
+                    onclick="togglestick('clue_DJ_1_1_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_DJ_1_1_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$400</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_DJ_1_1" class="clue_text">The central character, this young doctor frequently finds himself
+                  lost in
+                  his thoughts, much to the chagrin of his friends and mentor</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_DJ_2_1', 'clue_DJ_2_1_stuck', '&lt;em class=&quot;correct_response&quot;&gt;CPU (Processor)&lt;/em&gt;')"
+                    onmouseout="toggle('clue_DJ_2_1', 'clue_DJ_2_1_stuck', 'The &quot;brains&quot; of a computer, these are typically made by Intel or AMD, and perform most calculations on a computer')"
+                    onclick="togglestick('clue_DJ_2_1_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_DJ_2_1_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$400</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_DJ_2_1" class="clue_text">The "brains" of a computer, these are typically made by Intel or
+                  AMD, and
+                  perform most calculations on a computer</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_DJ_3_1', 'clue_DJ_3_1_stuck', '&lt;em class=&quot;correct_response&quot;&gt;hops&lt;/em&gt;')"
+                    onmouseout="toggle('clue_DJ_3_1', 'clue_DJ_3_1_stuck', 'Technically a flower, this plant provides stability, flavoring, and most importantly, bitterness, to beers.')"
+                    onclick="togglestick('clue_DJ_3_1_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_DJ_3_1_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$400</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_DJ_3_1" class="clue_text">Technically a flower, this plant provides stability, flavoring,
+                  and most
+                  importantly, bitterness, to beers.</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_DJ_4_1', 'clue_DJ_4_1_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Apple&lt;/em&gt;')"
+                    onmouseout="toggle('clue_DJ_4_1', 'clue_DJ_4_1_stuck', 'Originally developed by this company, they open-sourced Swift in early December 2015.')"
+                    onclick="togglestick('clue_DJ_4_1_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_DJ_4_1_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$400</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_DJ_4_1" class="clue_text">Originally developed by this company, they open-sourced Swift in
+                  early
+                  December 2015.</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_DJ_5_1', 'clue_DJ_5_1_stuck', '&lt;em class=&quot;correct_response&quot;&gt;the Milky Way&lt;/em&gt;')"
+                    onmouseout="toggle('clue_DJ_5_1', 'clue_DJ_5_1_stuck', 'The actual name for the galaxy the Earth is in, this is also a chocolate bar which, in North America, is made of nougat topped with caramel and covered in milk chocolate.')"
+                    onclick="togglestick('clue_DJ_5_1_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_DJ_5_1_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$400</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_DJ_5_1" class="clue_text">The actual name for the galaxy the Earth is in, this is also a
+                  chocolate
+                  bar which, in North America, is made of nougat topped with caramel and covered in milk chocolate.</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_DJ_6_1', 'clue_DJ_6_1_stuck', '&lt;em class=&quot;correct_response&quot;&gt;The Hobbit&lt;/em&gt;')"
+                    onmouseout="toggle('clue_DJ_6_1', 'clue_DJ_6_1_stuck', 'The prequel, this novel tells the story of how Bilbo found the One Ring while seeking Smaug\&#x27;s treasure.')"
+                    onclick="togglestick('clue_DJ_6_1_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_DJ_6_1_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$400</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_DJ_6_1" class="clue_text">The prequel, this novel tells the story of how Bilbo found the
+                  One Ring
+                  while seeking Smaug's treasure.</td>
+              </tr>
+            </table>
+          </td>
+
+        </tr>
+        <tr>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_DJ_1_2', 'clue_DJ_1_2_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Joshua Radin&lt;/em&gt;')"
+                    onmouseout="toggle('clue_DJ_1_2', 'clue_DJ_1_2_stuck', 'This musician\&#x27;s big break came from his first song, Winter, performed at Ben Sullivan\&#x27;s funeral, through many, many, fans\&#x27; tears')"
+                    onclick="togglestick('clue_DJ_1_2_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_DJ_1_2_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$800</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_DJ_1_2" class="clue_text">This musician's big break came from his first song, Winter,
+                  performed at
+                  Ben Sullivan's funeral, through many, many, fan's tears</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_DJ_2_2', 'clue_DJ_2_2_stuck', '&lt;em class=&quot;correct_response&quot;&gt;AIO (All-In-One)&lt;/em&gt;')"
+                    onmouseout="toggle('clue_DJ_2_2', 'clue_DJ_2_2_stuck', 'This &quot;easy&quot; form of component cooling pprovides a single piece liquid-cooler and a radiator, without requiring running tubing or a pump')"
+                    onclick="togglestick('clue_DJ_2_2_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_DJ_2_2_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$800</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_DJ_2_2" class="clue_text">This "easy" form of component cooling pprovides a single piece
+                  liquid-cooler and a radiator, without requiring running tubing or a pump</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_DJ_3_2', 'clue_DJ_3_2_stuck', '&lt;em class=&quot;correct_response&quot;&gt;AB InBev&lt;/em&gt;')"
+                    onmouseout="toggle('clue_DJ_3_2', 'clue_DJ_3_2_stuck', 'With approximately 38% of the market share, this company is the largest brewing company in the world, owning brands like Busch, Labatt, and Stella Artois.')"
+                    onclick="togglestick('clue_DJ_3_2_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_DJ_3_2_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$800</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_DJ_3_2" class="clue_text">With approximately 38% of the market share, this company is the
+                  largest
+                  brewing company in the world, owning brands like Busch, Labatt, and Stella Artois.</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_DJ_4_2', 'clue_DJ_4_2_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Static&lt;/em&gt;')"
+                    onmouseout="toggle('clue_DJ_4_2', 'clue_DJ_4_2_stuck', 'Unlike the duck typing of Python, this typing discipline ensures variables have a defined type, that does not change e after compilation.')"
+                    onclick="togglestick('clue_DJ_4_2_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_DJ_4_2_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$800</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_DJ_4_2" class="clue_text">Unlike the duck typing of Python, this typing discipline ensures
+                  variables
+                  have a defined type, that does not change e after compilation.</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_DJ_5_2', 'clue_DJ_5_2_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Voyager 1&lt;/em&gt;')"
+                    onmouseout="toggle('clue_DJ_5_2', 'clue_DJ_5_2_stuck', 'Launched in 1977, this probe was the first man-made object to enter interstellar space in 2012.')"
+                    onclick="togglestick('clue_DJ_5_2_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_DJ_5_2_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$800</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_DJ_5_2" class="clue_text">Launched in 1977, this probe was the first man-made object to
+                  enter
+                  interstellar space in 2012.</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_DJ_6_2', 'clue_DJ_6_2_stuck', '&lt;em class=&quot;correct_response&quot;&gt;a palantir&lt;/em&gt;')"
+                    onmouseout="toggle('clue_DJ_6_2', 'clue_DJ_6_2_stuck', 'A set of seven, these seeing-stones, enabled communication throughout Middle-Earth.')"
+                    onclick="togglestick('clue_DJ_6_2_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_DJ_6_2_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$800</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_DJ_6_2" class="clue_text">A set of seven, these seeing-stones, enabled communication
+                  throughout
+                  Middle-Earth.</td>
+              </tr>
+            </table>
+          </td>
+
+        </tr>
+        <tr>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_DJ_1_3', 'clue_DJ_1_3_stuck', '&lt;em class=&quot;correct_response&quot;&gt;ABC &lt;/em&gt;')"
+                    onmouseout="toggle('clue_DJ_1_3', 'clue_DJ_1_3_stuck', 'Despite originally airing on NBC, Scrubs was produced by this channel\&#x27;s studio and started airing on it in Season 8.')"
+                    onclick="togglestick('clue_DJ_1_3_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_DJ_1_3_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$1200</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_DJ_1_3" class="clue_text">Despite originally airing on NBC, Scrubs was produced by this
+                  channel's
+                  studio and started airing on it in Season 8.</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_DJ_2_3', 'clue_DJ_2_3_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Mini-ITX&lt;/em&gt;')"
+                    onmouseout="toggle('clue_DJ_2_3', 'clue_DJ_2_3_stuck', 'This smallest &quot;real&quot; motherboard size compatible with ATX specification, this is usually used in HTPCs and Small Form Factor (SFF) PCs.')"
+                    onclick="togglestick('clue_DJ_2_3_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_DJ_2_3_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$1200</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_DJ_2_3" class="clue_text">This smallest "real" motherboard size compatible with ATX
+                  specification,
+                  this is usually used in HTPCs and Small Form Factor (SFF) PCs.</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_DJ_3_3', 'clue_DJ_3_3_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Trappist&lt;/em&gt;')"
+                    onmouseout="toggle('clue_DJ_3_3', 'clue_DJ_3_3_stuck', 'This type of beer, typically an ale, must be brewed in a monastery, with the involvement of monks, typically from Belgium.')"
+                    onclick="togglestick('clue_DJ_3_3_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_DJ_3_3_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$1200</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_DJ_3_3" class="clue_text">This type of beer, typically an ale, must be brewed in a
+                  monastery, with
+                  the involvement of monks, typically from Belgium.</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_DJ_4_3', 'clue_DJ_4_3_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Objective-C&lt;/em&gt;')"
+                    onmouseout="toggle('clue_DJ_4_3', 'clue_DJ_4_3_stuck', 'Providing a lot of interoperability with this language, Swift overtook its creator\&#x27;s earlier programming language in 2018.')"
+                    onclick="togglestick('clue_DJ_4_3_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_DJ_4_3_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$1200</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_DJ_4_3" class="clue_text">Providing a lot of interoperability with this language, Swift
+                  overtook its
+                  creator's earlier programming language in 2018.</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_DJ_5_3', 'clue_DJ_5_3_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Space Launch System&lt;/em&gt;')"
+                    onmouseout="toggle('clue_DJ_5_3', 'clue_DJ_5_3_stuck', 'Built using &quot;surplus&quot; Space Shuttle parts, this boondoggle of a launch system may eventually carry humans to space in the Orion capsule.')"
+                    onclick="togglestick('clue_DJ_5_3_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_DJ_5_3_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$1200</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_DJ_5_3" class="clue_text">Built using "surplus" Space Shuttle parts, this boondoggle of a
+                  launch
+                  system may eventually carry humans to space in the Orion capsule.</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_DJ_6_3', 'clue_DJ_6_3_stuck', '&lt;em class=&quot;correct_response&quot;&gt;the Vanyar&lt;/em&gt;')"
+                    onmouseout="toggle('clue_DJ_6_3', 'clue_DJ_6_3_stuck', 'In The Silmarillion, this group of elves, the fairest group, choose to stay in Valinor with the Valar.')"
+                    onclick="togglestick('clue_DJ_6_3_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_DJ_6_3_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$1200</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_DJ_6_3" class="clue_text">In The Silmarillion, this group of elves, the fairest group,
+                  choose to stay
+                  in Valinor with the Valar.</td>
+              </tr>
+            </table>
+          </td>
+
+        </tr>
+        <tr>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_DJ_1_4', 'clue_DJ_1_4_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Ulysses&lt;/em&gt;')"
+                    onmouseout="toggle('clue_DJ_1_4', 'clue_DJ_1_4_stuck', 'Said out loud exactly once by his sister, Dr. Perry Cox\&#x27; middle name')"
+                    onclick="togglestick('clue_DJ_1_4_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_DJ_1_4_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$1600</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_DJ_1_4" class="clue_text">Said out loud exactly once by his sister, Dr. Perry Cox' middle
+                  name</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_DJ_2_4', 'clue_DJ_2_4_stuck', '&lt;em class=&quot;correct_response&quot;&gt;M.2&lt;/em&gt;')"
+                    onmouseout="toggle('clue_DJ_2_4', 'clue_DJ_2_4_stuck', 'This connector, used primarily for storage devices, connects SSDs directly to the motherboard, and come in either B, M, or B&amp;M keyed configurations')"
+                    onclick="togglestick('clue_DJ_2_4_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_DJ_2_4_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$1600</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_DJ_2_4" class="clue_text">This connector, used primarily for storage devices, connects SSDs
+                  directly
+                  to the motherboard, and come in either B, M, or B&M keyed configurations</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_DJ_3_4', 'clue_DJ_3_4_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Ultraviolet Radiation&lt;/em&gt;')"
+                    onmouseout="toggle('clue_DJ_3_4', 'clue_DJ_3_4_stuck', 'Starting in 1912 by Schlitz, the use of brown bottles prevents this from destroying the quality of the beer.')"
+                    onclick="togglestick('clue_DJ_3_4_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_DJ_3_4_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$1600</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_DJ_3_4" class="clue_text">Starting in 1912 by Schlitz, the use of brown bottles prevents
+                  this from
+                  destroying the quality of the beer.</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_DJ_4_4', 'clue_DJ_4_4_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Square Brackets ([])&lt;/em&gt;')"
+                    onmouseout="toggle('clue_DJ_4_4', 'clue_DJ_4_4_stuck', 'Swift uses this character to wrap both arrays (lists), and dictionaries, despite curly braces existing...')"
+                    onclick="togglestick('clue_DJ_4_4_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_DJ_4_4_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$1600</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_DJ_4_4" class="clue_text">Swift uses this character to wrap both arrays (lists), and
+                  dictionaries,
+                  despite curly braces existing...</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_DJ_5_4', 'clue_DJ_5_4_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Vladimir Komarov&lt;/em&gt;')"
+                    onmouseout="toggle('clue_DJ_5_4', 'clue_DJ_5_4_stuck', 'A colleague of Yuri Gargarin, this astronaut tragically died on re-entry in his Soyuz capsule, making him the first human to die in space flight.')"
+                    onclick="togglestick('clue_DJ_5_4_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_DJ_5_4_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$1600</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_DJ_5_4" class="clue_text">A colleague of Yuri Gargarin, this astronaut tragically died on
+                  re-entry in
+                  his Soyuz capsule, making him the first human to die in space flight.</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_DJ_6_4', 'clue_DJ_6_4_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Melkor (or Morgoth)&lt;/em&gt;')"
+                    onmouseout="toggle('clue_DJ_6_4', 'clue_DJ_6_4_stuck', 'The First Dark Lord, this former Ainur was cast into the Void as punishment for his destruction of the Two Lamps and the Two Trees of Valinor.')"
+                    onclick="togglestick('clue_DJ_6_4_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_DJ_6_4_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$1600</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_DJ_6_4" class="clue_text">The First Dark Lord, this former Ainur was cast into the Void as
+                  punishment
+                  for his destruction of the Two Lamps and the Two Trees of Valinor.</td>
+              </tr>
+            </table>
+          </td>
+
+        </tr>
+        <tr>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_DJ_1_5', 'clue_DJ_1_5_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Turk and J.D.&lt;/em&gt;')"
+                    onmouseout="toggle('clue_DJ_1_5', 'clue_DJ_1_5_stuck', 'Closer than the average man and wife, Turk and J.D.\&#x27;s matching bracelets say this')"
+                    onclick="togglestick('clue_DJ_1_5_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_DJ_1_5_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$2000</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_DJ_1_5" class="clue_text">Closer than the average man and wife, Turk and J.D.'s matching
+                  bracelets
+                  say this</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_DJ_2_5', 'clue_DJ_2_5_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Turing (or RTX 20 Series)&lt;/em&gt;')"
+                    onmouseout="toggle('clue_DJ_2_5', 'clue_DJ_2_5_stuck', 'Announced in 2018 by Nvidia, this GPU microarchitecture delivered realtime hardware ray tracing to consumer retail for the first time.')"
+                    onclick="togglestick('clue_DJ_2_5_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_DJ_2_5_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$2000</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_DJ_2_5" class="clue_text">Announced in 2018 by Nvidia, this GPU microarchitecture delivered
+                  realtime
+                  hardware ray tracing to consumer retail for the first time.</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_DJ_3_5', 'clue_DJ_3_5_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Code of Hammurabi&lt;/em&gt;')"
+                    onmouseout="toggle('clue_DJ_3_5', 'clue_DJ_3_5_stuck', 'This Babylonian text, which is one of the oldest deciphered writings in history, includes laws regulating tbeer and bars.')"
+                    onclick="togglestick('clue_DJ_3_5_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_DJ_3_5_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$2000</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_DJ_3_5" class="clue_text">This Babylonian text, which is one of the oldest deciphered
+                  writings in
+                  history, includes laws regulating tbeer and bars.</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_DJ_4_5', 'clue_DJ_4_5_stuck', '&lt;em class=&quot;correct_response&quot;&gt;closures&lt;/em&gt;')"
+                    onmouseout="toggle('clue_DJ_4_5', 'clue_DJ_4_5_stuck', 'Called lambdas in some other languages, Swift offers these as an anonymous function')"
+                    onclick="togglestick('clue_DJ_4_5_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_DJ_4_5_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$2000</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_DJ_4_5" class="clue_text">Called lambdas in some other languages, Swift offers these as an
+                  anonymous
+                  function</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_DJ_5_5', 'clue_DJ_5_5_stuck', '&lt;em class=&quot;correct_response&quot;&gt;The Kármán Line&lt;/em&gt;')"
+                    onmouseout="toggle('clue_DJ_5_5', 'clue_DJ_5_5_stuck', 'This point, named after a Hungarian-American engineer, defines the &quot;official&quot; boundary from Earth\&#x27;s surface at which space begins.')"
+                    onclick="togglestick('clue_DJ_5_5_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_DJ_5_5_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$2000</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_DJ_5_5" class="clue_text">This point, named after a Hungarian-American engineer, defines
+                  the
+                  "official" boundary from Earth's surface at which space begins.</td>
+              </tr>
+            </table>
+          </td>
+          <td class="clue">
+            <table>
+              <tr>
+                <td>
+                  <div
+                    onmouseover="toggle('clue_DJ_6_5', 'clue_DJ_6_5_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Rose (Rosie) Cotton&lt;/em&gt;')"
+                    onmouseout="toggle('clue_DJ_6_5', 'clue_DJ_6_5_stuck', 'Wife of Samwise Gamgee, this character patiently waited for the year of the journey to Mordor for his return, and proposal.')"
+                    onclick="togglestick('clue_DJ_6_5_stuck')">
+                    <table class="clue_header">
+                      <tr>
+                        <td id="clue_DJ_6_5_stuck" class="clue_unstuck">&#160;&#160;&#160;</td>
+                        <td class="clue_value">$2000</td>
+                      </tr>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td id="clue_DJ_6_5" class="clue_text">Wife of Samwise Gamgee, this character patiently waited for the
+                  year of the
+                  journey to Mordor for his return, and proposal.</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+        </tr>
+      </table>
+    </div>
+    <div id="final_jeopardy_round">
+      <h2>Final Jeopardy! Round</h2>
+
+      <table class="final_round">
+        <tr>
+          <td class="category">
+
+            <div
+              onmouseover="toggle('clue_FJ', 'clue_FJ_stuck', '&lt;em class=\&quot;correct_response\&quot;&gt;Visa&lt;/em&gt;')"
+              onmouseout="toggle('clue_FJ', 'clue_FJ_stuck', 'Also a credit card company, this document is required, in many countries, for foreign citizens to legally enter, and work.')"
+              onclick="togglestick('clue_FJ_stuck')">
+              <table>
+                <tr>
+                  <td class="category_name">TRAVEL</td>
+                </tr>
+                <tr>
+                  <td class="category_comments"></td>
+                </tr>
+              </table>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td class="clue">
+            <table>
+              <tr>
+                <td id="clue_FJ" class="clue_text">Also a credit card company, this document is required, in many
+                  countries, for
+                  foreign citizens to legally enter, and work.</td>
+              </tr>
+            </table>
+            <var id="clue_FJ_stuck"></var>
+          </td>
+        </tr>
+      </table>
+
+    </div>
+  </div>
+</body>
+
+</html>

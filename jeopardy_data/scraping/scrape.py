@@ -428,6 +428,41 @@ def get_clue_data(clue: BeautifulSoup) -> dict:
         raise ParsingError(message=f"The clue number identifier was malformed. (It should look like 'clue_J_#_#')")
 
 
+def get_board(page: BeautifulSoup) -> dict:
+    show_and_date = get_show_and_date(page=page)
+    category_names = get_categories(page=page)
+    clues = [get_clue_data(clue=clue) for clue in get_clues(page=page)]
+
+    board = defaultdict(dict)
+
+    for category in category_names:
+        round_number, category_number = map(int, category.split("_"))
+
+        board[round_number][category_number] = list()
+
+    for clue in clues:
+        board[clue["round"]][clue["category"]].append(clue)
+
+    results = list()
+
+    for round_number, categories in board.items():
+        for category_number, question_sets in categories.items():
+            for question_number, item in enumerate(question_sets):
+                if len(question_sets) < 5 and round_number < 2:
+                    item["complete"] = False
+
+                else:
+                    item["complete"] = True
+
+                item["category"] = category_names[f"{item['round']}_{item['category']}"]
+                item.update(show_and_date)
+
+                results.append(item)
+
+    return results
+
+
+### HELPER FUNCTIONS
 def pjs(function: str) -> tuple:
     """ A simple wrapper function around the super useful pyjsparser library. This steps through all of the AST tree
     of the library to only return the HTML element in the function.

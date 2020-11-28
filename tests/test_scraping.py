@@ -2,6 +2,7 @@ import pathlib
 import json
 import os
 import random
+import operator
 
 import pytest
 import requests
@@ -53,8 +54,14 @@ def example_org(PatchedRequests):
 
 
 @pytest.fixture
-def loaded_file():
-    with open("json/sample.json", "r") as sample_file:
+def complete_file():
+    with open("tests/files/complete.json", "r") as sample_file:
+        return json.load(sample_file)
+
+
+@pytest.fixture
+def incomplete_file():
+    with open("tests/files/incomplete.json", "r") as sample_file:
         return json.load(sample_file)
 
 
@@ -297,11 +304,11 @@ def test_get_clues(PatchedRequests):
     assert len(results) == 61
 
 
-def test_get_game_title(PatchedRequests, loaded_file):
+def test_get_game_title(PatchedRequests, complete_file):
     _, game = scrape.Webpage(resource="showgame.php?game_id=1").get()
 
     results = scrape.get_show_and_date(page=game)
-    values = {"date": loaded_file[0]["date"], "show": loaded_file[0]["show"]}
+    values = {"date": complete_file[0]["date"], "show": complete_file[0]["show"]}
 
     assert results == values
 
@@ -321,12 +328,12 @@ def test_get_game_title(PatchedRequests, loaded_file):
         scrape.get_show_and_date(page=page)
 
 
-def test_get_categories(PatchedRequests, loaded_file):
+def test_get_categories(PatchedRequests, complete_file):
     _, game = scrape.Webpage(resource="showgame.php?game_id=1").get()
 
     results = scrape.get_categories(page=game)
 
-    values = {set["category"] for set in loaded_file}
+    values = {set["category"] for set in complete_file}
 
     assert len(results.items()) == 13
     assert set(results.values()) == values
@@ -341,4 +348,21 @@ def test_get_categories(PatchedRequests, loaded_file):
     with pytest.raises(scrape.ParsingError):
         scrape.get_categories(page=page)
 
+
+def test_get_board(PatchedRequests, complete_file, incomplete_file):
+    _, game = scrape.Webpage(resource="showgame.php?game_id=1").get()
+    results = scrape.get_board(page=game)
+
+    results = sorted(results, key=operator.itemgetter("round", "category", "value"))
+    complete_file = sorted(complete_file, key=operator.itemgetter("round", "category", "value"))
+
+    assert results == complete_file
+
+    _, game = scrape.Webpage(resource="showgame.php?game_id=2").get()
+    results = scrape.get_board(page=game)
+
+    results = sorted(results, key=operator.itemgetter("round", "category", "value"))
+    incomplete_file = sorted(incomplete_file, key=operator.itemgetter("round", "category", "value"))
+
+    assert results == incomplete_file
 
