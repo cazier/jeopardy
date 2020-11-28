@@ -6,7 +6,7 @@ import sys
 import click
 
 import api
-import scraping.scrape
+import scrape
 
 import batch
 
@@ -101,17 +101,20 @@ def import_(json_file: str, db_file: str, method: str, progress: bool, endpoint:
 def scrape():
     pass
 
+
 @scrape.command(name="seasons")
-@click.option("--out", "season_file", help="file to store season urls", type=str, default="seasons.json", show_default = True)
-@click.option("--cache/--no-cache", help="cache files to a local directory", default=False, show_default = True)
+@click.option(
+    "--out", "season_file", help="file to store season urls", type=str, default="seasons.json", show_default=True
+)
+@click.option("--cache/--no-cache", help="cache files to a local directory", default=False, show_default=True)
 @click.option("--cache-path", help="directory to store cached files", type=str)
 def seasons(season_file: str, cache: bool, cache_path: str):
     season_file = pathlib.Path(season_file).absolute()
 
-    if False:#season_file.exists():
-        with open(season_file, 'r') as input_file:
+    if False:  # season_file.exists():
+        with open(season_file, "r") as input_file:
             data = json.load(input_file)
-    
+
     else:
         data = list()
 
@@ -121,19 +124,28 @@ def seasons(season_file: str, cache: bool, cache_path: str):
             sys.exit(1)
 
         scraping.scrape.CACHE = True
-        scraping.scrape.CACHE_PATH = pathlib.Path(cache_path)
+        scraping.scrape.CACHE_PATH = pathlib.Path(cache_path).absolute()
 
         if not scraping.scrape.CACHE_PATH.exists():
             if click.confirm("The caching directory does not exist. Create it?", abort=True, default=True):
                 scraping.scrape.CACHE_PATH.mkdir(parents=True)
-            
+
             else:
                 sys.exit()
-    
-    data = scraping.scrape.get_seasons_game_ids(start=10, stop=11, include_special = True)
 
-    with open(season_file, 'w') as output_file:
-        json.dump(data, output_file, indent="\t", sort_keys=True)
+    seasons = scraping.scrape.get_seasons(start=10, stop=11, include_special=False)
+    games = scraping.scrape.get_games(identifier=seasons[0])
+
+    game = list(games["games"].keys())[0]
+
+    g = scraping.scrape.Game(identifier=game)
+
+    data = g.schema()
+
+    season_file.parent.mkdir(parents=True, exist_ok=True)
+    with open(season_file, "w") as output_file:
+        json.dump(data, output_file, indent="\t")
+
 
 if __name__ == "__main__":
     cli()

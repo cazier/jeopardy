@@ -8,7 +8,7 @@ import pytest
 import requests
 from bs4 import BeautifulSoup
 
-import jeopardy_data.scraping.scrape as scrape
+import jeopardy_data.scrape as scrape
 
 scrape.DELAY = 0
 
