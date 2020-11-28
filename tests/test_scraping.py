@@ -222,7 +222,14 @@ def test_get_clue_data():
         "lxml",
     )
 
-    expected_results = {"category": 0, "value": 0, "question": "B", "answer": "A", "external": False, "round": 0}
+    expected_results = {
+        "category": 0,
+        "value": 0,
+        "question": "B",
+        "answer": BeautifulSoup("A", "lxml"),
+        "external": False,
+        "round": 0,
+    }
 
     results = scrape.get_clue_data(clue=data)
 
@@ -233,7 +240,14 @@ def test_get_clue_data():
         "lxml",
     )
 
-    expected_results = {"category": 0, "value": 0, "question": "B", "answer": "A", "external": True, "round": 0}
+    expected_results = {
+        "category": 0,
+        "value": 0,
+        "question": "B",
+        "answer": BeautifulSoup('<a href="/">A</a>', "lxml"),
+        "external": True,
+        "round": 0,
+    }
 
     results = scrape.get_clue_data(clue=data)
 
@@ -244,7 +258,14 @@ def test_get_clue_data():
         "lxml",
     )
 
-    expected_results = {"category": 0, "value": 0, "question": "B", "answer": "A", "external": True, "round": 1}
+    expected_results = {
+        "category": 0,
+        "value": 0,
+        "question": "B",
+        "answer": BeautifulSoup('<a href="/">A</a>', "lxml"),
+        "external": True,
+        "round": 1,
+    }
 
     results = scrape.get_clue_data(clue=data)
 
@@ -255,7 +276,14 @@ def test_get_clue_data():
         "lxml",
     )
 
-    expected_results = {"category": 0, "value": 0, "question": "B", "answer": "A", "external": False, "round": 2}
+    expected_results = {
+        "category": 0,
+        "value": 0,
+        "question": "B",
+        "answer": BeautifulSoup("A", "lxml"),
+        "external": False,
+        "round": 2,
+    }
 
     results = scrape.get_clue_data(clue=data)
 

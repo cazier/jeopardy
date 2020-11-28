@@ -227,7 +227,7 @@ def get_clue_data(clue: BeautifulSoup) -> dict:
         return {
             "category": category,
             "value": value,
-            "answer": answer.text,
+            "answer": answer,
             "question": question.text,
             "external": external,
             "round": round_,
@@ -270,6 +270,9 @@ def get_board(page: BeautifulSoup) -> list:
 
                 item["show"] = show
                 item["date"] = date
+
+
+                item["answer"] = item["answer"].text
 
                 results.append(item)
 
