@@ -96,7 +96,7 @@ class ShowByNumber(Resource):
 
 class ShowsByDate(Resource):
     def get(self, year: int, month: int = -1, day: int = -1) -> dict:
-        results = date_query(model=Show, ordered=Show.number, year=year, month=month, day=day)
+        results = date_query(model=Show, year=year, month=month, day=day).order_by(Show.number)
 
         return paginate(model=results, schema=shows_schema.dump, indices=request.args)
 
@@ -113,12 +113,12 @@ class CategoryById(Resource):
 
 class CategoriesByDate(Resource):
     def get(self, year: int, month: int = -1, day: int = -1) -> dict:
-        results = date_query(model=Category, ordered=Category.name, year=year, month=month, day=day)
+        results = date_query(model=Category, year=year, month=month, day=day).order_by(Category.name)
 
         return paginate(model=results, schema=categories_schema.dump, indices=request.args)
 
 
-class CategoryByCompletion(Resource):
+class CategoriesByCompletion(Resource):
     def get(self, completion: str = None, completion_string: str = "") -> dict:
         if completion != None:
             if completion.lower() == "true":
@@ -137,8 +137,31 @@ class CategoryByCompletion(Resource):
             abort(400, message="completion status must be supplied either 'true' or 'false'")
 
         results = results.join(Date, Date.id == Category.date_id).join(Round, Round.id == Category.round_id)
-
         results = results.order_by(Date.date, Round.number, Category.name)
+
+        return paginate(model=results, schema=categories_schema.dump, indices=request.args)
+
+
+class CategoriesByName(Resource):
+    def get(self, name_string: int) -> dict:
+        results = Category.query.filter(Category.name.like(f"%{name_string}%"))
+
+        results = results.join(Date, Date.id == Category.date_id).join(Round, Round.id == Category.round_id)
+        results = results.order_by(Date.date, Round.number, Category.name)
+
+        return paginate(model=results, schema=categories_schema.dump, indices=request.args)
+
+
+class CategoriesByShowNumber(Resource):
+    def get(self, show_number: int) -> dict:
+        results = show_query(model=Category, identifier="number", value=show_number).order_by(Category.name)
+
+        return paginate(model=results, schema=categories_schema.dump, indices=request.args)
+
+
+class CategoriesByShowId(Resource):
+    def get(self, show_id: int) -> dict:
+        results = show_query(model=Category, identifier="id", value=show_id).order_by(Category.name)
 
         return paginate(model=results, schema=categories_schema.dump, indices=request.args)
 
@@ -239,7 +262,7 @@ def paginate(model, schema, indices) -> dict:
     return jsonify({"start": start, "number": number, "data": schema(data), "results": count,})
 
 
-def date_query(model, ordered, year: int, month: int, day: int):
+def date_query(model, year: int, month: int, day: int):
     try:
         date = datetime.datetime.strptime(f"{year:04d}/{abs(month):02d}/{abs(day):02d}", "%Y/%m/%d")
 
@@ -257,11 +280,25 @@ def date_query(model, ordered, year: int, month: int, day: int):
         if day != -1:
             results = results.filter(model.date.has(day=date.day))
 
-    return results.order_by(ordered)
+    return results
 
 
 def id_query(model, id_: int) -> dict:
     results = model.query.filter_by(id=id_).first()
+
+    if results == None:
+        return no_results()
+
+    else:
+        return results
+
+
+def show_query(model, identifier: str, value: int) -> dict:
+    if identifier == "number":
+        results = model.query.filter(model.show.has(number=value))
+
+    elif identifier == "id":
+        results = model.query.filter(model.show.has(id=value))
 
     if results == None:
         return no_results()
@@ -301,7 +338,10 @@ api.add_resource(
     "/category/date/<int:year>/<int:month>/<int:day>",
     "/categories/date/<int:year>/<int:month>/<int:day>",
 )
-api.add_resource(CategoryByCompletion, "/category/complete/<completion>", "/category/<completion_string>")
+api.add_resource(CategoriesByCompletion, "/category/complete/<completion>", "/category/<completion_string>")
+api.add_resource(CategoriesByName, "/category/name/<name_string>")
+api.add_resource(CategoriesByShowNumber, "/category/show/number/<int:show_number>")
+api.add_resource(CategoriesByShowId, "/category/show/id/<int:show_id>")
 
 # api.add_resource(CategoryResource, "/category/<int:category_id>")
 api.add_resource(DetailsResource, "/details")

@@ -252,6 +252,46 @@ def test_categories_by_completion(testclient, test_data):
     assert "completion status must be" in rv.get_json()["message"]
 
 
+def test_categories_by_name(testclient, test_data):
+    matching = {f"{i['category']}_{i['show']}" for i in test_data if "BEER" in i["category"]}
+
+    rv = testclient.get(f"/category/name/BEER")
+
+    assert rv.status_code == 200
+    assert len(rv.get_json()["data"]) == len(matching)
+
+    matching = {f"{i['category']}_{i['show']}" for i in test_data if "D" in i["category"]}
+
+    rv = testclient.get(f"/category/name/D")
+
+    assert rv.status_code == 200
+    assert len(rv.get_json()["data"]) == len(matching)
+
+
+def test_categories_by_show(testclient, test_data):
+    matching = {f"{i['category']}" for i in test_data if i["show"] == 1}
+
+    rv = testclient.get(f"/category/show/number/1")
+
+    assert rv.status_code == 200
+    assert len(rv.get_json()["data"]) == len(matching)
+
+    rv = testclient.get(f"/category/show/id/1")
+
+    assert rv.status_code == 200
+    assert len(rv.get_json()["data"]) == len(matching)
+
+    rv = testclient.get(f"/category/show/number/100")
+
+    assert rv.status_code == 404
+    assert rv.get_json() == {"message": "no items were found with that query"}
+
+    rv = testclient.get(f"/category/show/id/100")
+
+    assert rv.status_code == 404
+    assert rv.get_json() == {"message": "no items were found with that query"}
+
+
 def test_empty_db(emptyclient, test_data):
     question = test_data[0]
 
