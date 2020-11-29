@@ -8,13 +8,13 @@ from jeopardy_data import split
 
 
 def test_by_year(test_data):
-    results = split.by_year(data=data)
+    results = split.by_year(data=test_data)
 
-    assert results["1992"] == [i for i in data if i["date"].startswith("1992")]
+    assert results["1992"] == [i for i in test_data if i["date"].startswith("1992")]
 
     short_data = list()
 
-    for item in data:
+    for item in test_data:
         item["d"] = item["date"]
         del item["date"]
 
@@ -29,13 +29,13 @@ def test_by_year(test_data):
 
 
 def test_by_show(test_data):
-    results = split.by_show(data=data)
+    results = split.by_show(data=test_data)
 
-    assert results[1] == [i for i in data if i["show"] == 1]
+    assert results[1] == [i for i in test_data if i["show"] == 1]
 
     short_data = list()
 
-    for item in data:
+    for item in test_data:
         item["s"] = item["show"]
         del item["show"]
 
@@ -50,13 +50,13 @@ def test_by_show(test_data):
 
 
 def test_by_round(test_data):
-    results = split.by_round(data=data)
+    results = split.by_round(data=test_data)
 
-    assert results[1] == [i for i in data if i["round"] == 1]
+    assert results[1] == [i for i in test_data if i["round"] == 1]
 
     short_data = list()
 
-    for item in data:
+    for item in test_data:
         item["r"] = item["round"]
         del item["round"]
 
@@ -71,13 +71,13 @@ def test_by_round(test_data):
 
 
 def test_by_external(test_data):
-    results = split.by_external(data=data)
+    results = split.by_external(data=test_data)
 
-    assert results[1] == [i for i in data if i["external"] == 1]
+    assert results[1] == [i for i in test_data if i["external"] == 1]
 
     short_data = list()
 
-    for item in data:
+    for item in test_data:
         item["e"] = item["external"]
         del item["external"]
 
@@ -92,13 +92,13 @@ def test_by_external(test_data):
 
 
 def test_by_complete(test_data):
-    results = split.by_complete(data=data)
+    results = split.by_complete(data=test_data)
 
-    assert results[1] == [i for i in data if i["complete"] == 1]
+    assert results[1] == [i for i in test_data if i["complete"] == 1]
 
     short_data = list()
 
-    for item in data:
+    for item in test_data:
         item["f"] = item["complete"]
         del item["complete"]
 
@@ -113,12 +113,12 @@ def test_by_complete(test_data):
 
 
 def test_by_limit(test_data):
-    results = split.by_limit(data=data, limit=25)
+    results = split.by_limit(data=test_data, limit=25)
 
-    assert len(results.keys()) == math.ceil(len(data) / 25)
+    assert len(results.keys()) == math.ceil(len(test_data) / 25)
     assert len(results[0]) >= len(results[1])
     assert len(results[-2]) >= len(results[-1])
 
     with pytest.raises(TypeError, match=".*must be an.*"):
-        results = split.by_limit(data=data, limit="A")
+        results = split.by_limit(data=test_data, limit="A")
 
