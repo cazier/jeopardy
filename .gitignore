@@ -124,7 +124,7 @@ helpers/database/clues.json
 # *.json
 # !incomplete.json
 # !complete.json
-!testing.db
+!test-full.db
 downloads.txt
 tools/media/*
 storage/
