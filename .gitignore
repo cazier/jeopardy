@@ -121,6 +121,10 @@ helpers/database/clues.json
 .DS_Store
 
 *.db
+# *.json
+# !incomplete.json
+# !complete.json
+!testing.db
 downloads.txt
 tools/media/*
 storage/
