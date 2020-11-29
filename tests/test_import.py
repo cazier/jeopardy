@@ -3,23 +3,21 @@ import json
 
 import pytest
 
-import jeopardy_data.api as api
-
-import_file = pathlib.Path("import_test.json").absolute()
+from jeopardy_data import api
 
 
-def test_delete_db():
-    try:
-        api.db.drop_all()
-    except:
-        assert False, "database could not be deleted"
+@pytest.fixture(autouse=True, scope="module")
+def emptyclient():
+    jeopardy = api.app
+    jeopardy.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{pathlib.Path('tests/files/test-empty.db').absolute()}"
+    jeopardy.config["TESTING"] = True
 
+    api.db.create_all()
 
-def test_create_db():
-    try:
-        api.db.create_all()
-    except:
-        assert False, "database could not be deleted"
+    with jeopardy.test_client() as client:
+        yield client
+
+    api.db.drop_all()
 
 
 def test_add_one_long():
@@ -35,7 +33,7 @@ def test_add_one_long():
         "category": "test",
     }
     success, message = api.database.add(clue_data=clue, uses_shortnames=False)
-    assert success, message
+    assert success
 
 
 def test_add_one_long_missing():
@@ -50,7 +48,7 @@ def test_add_one_long_missing():
         "category": "test",
     }
     success, message = api.database.add(clue_data=clue, uses_shortnames=False)
-    assert not success, message
+    assert not success
 
 
 def test_add_one_short():
@@ -66,7 +64,7 @@ def test_add_one_short():
         "c": "test",
     }
     success, message = api.database.add(clue_data=clue, uses_shortnames=True)
-    assert success, message
+    assert success
 
 
 def test_add_one_short_missing():
@@ -81,7 +79,7 @@ def test_add_one_short_missing():
         "c": "test",
     }
     success, message = api.database.add(clue_data=clue, uses_shortnames=True)
-    assert not success, message
+    assert not success
 
 
 def test_add_multiple():

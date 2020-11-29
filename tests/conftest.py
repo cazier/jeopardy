@@ -20,7 +20,7 @@ def empty_cache_upon_completion():
         path.mkdir(parents=True)
 
 
-@pytest.fixture()
+@pytest.fixture
 def empty_cache_after_test():
     path = pathlib.Path(os.getcwd(), "tests/files/cache").absolute()
 

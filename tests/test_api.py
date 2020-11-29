@@ -39,10 +39,17 @@ def test_get_details(testclient, test_data):
     assert list(rv.json.keys()) == ["air_dates", "categories", "has_external", "is_complete", "sets", "shows"]
 
 
-def test_empty_db(emptyclient, test_data):
-    question = test_data[0]
+def test_get_details_empty(emptyclient, test_data):
+    rv = emptyclient.get("/details")
 
-    rv = emptyclient.post("/sets", json=question)
+    assert rv.status_code == 404
+    assert rv.json == {"message": "there are no items currently in the database"}
 
-    assert rv.data != None
+
+# def test_empty_db(emptyclient, test_data):
+#     question = test_data[0]
+
+#     rv = emptyclient.post("/sets", json=question)
+
+#     assert rv.data != None
 
