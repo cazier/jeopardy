@@ -78,18 +78,18 @@ def test_pagination(testclient, test_data):
     assert rv.get_json()["message"] == "start number too great"
 
 
-def test_sets(testclient, test_data):
+def test_sets_including_by_id(testclient, test_data):
     rv = testclient.get(f"/sets")
 
     assert rv.status_code == 200
     assert len(rv.get_json()["data"]) == 100
 
-    rv = testclient.get(f"/set/1")
+    rv = testclient.get(f"/set/id/1")
 
     assert rv.status_code == 200
     assert rv.get_json() == dict(test_data[0], **{"id": 1})
 
-    rv = testclient.get(f"/set/200")
+    rv = testclient.get(f"/set/id/200")
 
     assert rv.status_code == 404
     assert rv.get_json() == {"message": "no items were found with that query"}
@@ -98,11 +98,15 @@ def test_sets(testclient, test_data):
 def test_set_changes(testclient, test_data):
     set_ = test_data[-1]
 
-    rv = testclient.delete(f"/set/119")
+    rv = testclient.delete(f"/set/id/119")
     assert rv.status_code == 200
     assert rv.get_json() == {"deleted": 119}
 
     rv = testclient.post(f"/sets", json=set_)
+    assert rv.status_code == 200
+    assert rv.get_json() == dict(set_, **{"id": 119})
+
+    rv = testclient.get(f"/set/id/119")
     assert rv.status_code == 200
     assert rv.get_json() == dict(set_, **{"id": 119})
 
@@ -115,6 +119,64 @@ def test_set_changes(testclient, test_data):
     rv = testclient.post(f"/sets", json=set_)
     assert rv.status_code == 400
     assert rv.get_json() == {"message": "the posted data is missing some data"}
+
+
+def test_sets_by_show(testclient, test_data):
+    matching = [i for i in test_data if i["show"] == 1]
+
+    rv = testclient.get(f"/set/show/number/1")
+
+    assert rv.status_code == 200
+    assert len(rv.get_json()["data"]) == len(matching)
+
+    rv = testclient.get(f"/set/show/id/1")
+
+    assert rv.status_code == 200
+    assert len(rv.get_json()["data"]) == len(matching)
+
+    rv = testclient.get(f"/set/show/number/100")
+
+    assert rv.status_code == 404
+    assert rv.get_json() == {"message": "no items were found with that query"}
+
+    rv = testclient.get(f"/set/show/id/100")
+
+    assert rv.status_code == 404
+    assert rv.get_json() == {"message": "no items were found with that query"}
+
+
+def test_sets_by_date(testclient, test_data):
+    rv = testclient.get(f"/set/date/1992")
+    matching = [i for i in test_data if i["date"] == "1992-08-13"]
+
+    assert rv.status_code == 200
+    assert len(rv.get_json()["data"]) == len(matching)
+
+    rv = testclient.get(f"/set/date/2020/02/31")
+
+    assert rv.status_code == 400
+    assert "check that your date is valid" in rv.get_json()["message"]
+
+
+def test_sets_by_round(testclient, test_data):
+    matching = [i for i in test_data if i["round"] == 1]
+
+    rv = testclient.get(f"/set/round/1")
+
+    assert rv.status_code == 200
+    assert len(rv.get_json()["data"]) == len(matching)
+
+    rv = testclient.get(f"/set/round/4")
+
+    assert rv.status_code == 400
+    assert "round number must be" in rv.get_json()["message"]
+
+
+def test_sets_by_round_empty(emptyclient):
+    rv = emptyclient.get(f"/set/round/1")
+
+    assert rv.status_code == 404
+    assert rv.get_json() == {"message": "no items were found with that query"}
 
 
 def test_show(testclient):

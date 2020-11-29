@@ -48,6 +48,34 @@ class SetById(Resource):
         return jsonify({"deleted": set_id})
 
 
+class SetsByRound(Resource):
+    def get(self, round_number: int) -> dict:
+        results = round_query(model=Set, number=round_number).order_by(Set.id)
+
+        return paginate(model=results, schema=sets_schema.dump, indices=request.args)
+
+
+class SetsByShowNumber(Resource):
+    def get(self, show_number: int) -> dict:
+        results = show_query(model=Set, identifier="number", value=show_number).order_by(Set.id)
+
+        return paginate(model=results, schema=sets_schema.dump, indices=request.args)
+
+
+class SetsByShowId(Resource):
+    def get(self, show_id: int) -> dict:
+        results = show_query(model=Set, identifier="id", value=show_id).order_by(Set.id)
+
+        return paginate(model=results, schema=sets_schema.dump, indices=request.args)
+
+
+class SetsByDate(Resource):
+    def get(self, year: int, month: int = -1, day: int = -1) -> dict:
+        results = date_query(model=Set, year=year, month=month, day=day).order_by(Set.id)
+
+        return paginate(model=results, schema=sets_schema.dump, indices=request.args)
+
+
 class SetsMultiple(Resource):
     def get(self) -> dict:
         results = Set.query
@@ -161,9 +189,6 @@ class CategoriesByShowNumber(Resource):
 
 class CategoriesByRound(Resource):
     def get(self, round_number: int) -> dict:
-        if round_number > 2:
-            abort(400, message="round number must be between 0 (jeopardy) and 2 (final jeopardy/tiebreaker)")
-
         results = round_query(model=Category, number=round_number).order_by(Category.name)
 
         return paginate(model=results, schema=categories_schema.dump, indices=request.args)
@@ -314,6 +339,9 @@ def show_query(model, identifier: str, value: int) -> dict:
 
 
 def round_query(model, number: int) -> dict:
+    if number > 2:
+        abort(400, message="round number must be between 0 (jeopardy) and 2 (final jeopardy/tiebreaker)")
+
     return model.query.filter(model.round.has(number=number))
 
 
@@ -322,7 +350,20 @@ def no_results(message: str = "no items were found with that query"):
 
 
 api.add_resource(SetsMultiple, "/set", "/sets")
-api.add_resource(SetById, "/set/<int:set_id>", "/sets/<int:set_id>")
+api.add_resource(SetById, "/set/id/<int:set_id>", "/sets/id/<int:set_id>")
+api.add_resource(SetsByRound, "/set/round/<int:round_number>")
+api.add_resource(SetsByShowNumber, "/set/show/number/<int:show_number>")
+api.add_resource(SetsByShowId, "/set/show/id/<int:show_id>")
+api.add_resource(
+    SetsByDate,
+    "/set/date/<int:year>",
+    "/sets/date/<int:year>",
+    "/set/date/<int:year>/<int:month>",
+    "/sets/date/<int:year>/<int:month>",
+    "/set/date/<int:year>/<int:month>/<int:day>",
+    "/sets/date/<int:year>/<int:month>/<int:day>",
+)
+
 
 api.add_resource(ShowsMultiple, "/show", "/shows")
 api.add_resource(ShowByNumber, "/show/number/<int:show_number>", "/shows/number/<int:show_number>")
