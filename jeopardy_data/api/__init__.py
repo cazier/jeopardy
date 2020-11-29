@@ -11,5 +11,7 @@ db = SQLAlchemy(app=app)
 ma = Marshmallow(app=app)
 api = Api(app=app)
 
+KEYS = {"date", "show", "round", "complete", "category", "value", "external", "question", "answer"}
 
 from . import routes
+

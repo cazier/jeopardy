@@ -1,7 +1,7 @@
 from flask import jsonify, request
 from flask_restful import Resource, abort
 
-from . import api, db
+from . import api, db, KEYS
 from . import database
 from .models import *
 from .schemas import *
@@ -19,7 +19,7 @@ class DetailsResource(Resource):
         air_dates = Date.query.order_by(Date.date)
 
         if 0 in {categories, sets, shows, is_complete, has_external}:
-            abort(404, message="there are no items currently in the database")
+            no_results(message="there are no items currently in the database")
 
         return jsonify(
             {
@@ -35,12 +35,7 @@ class DetailsResource(Resource):
 
 class SetById(Resource):
     def get(self, set_id: int) -> dict:
-        set_ = Set.query.get(set_id)
-
-        if set_ == None:
-            return no_results()
-
-        return jsonify(set_schema.dump(set_))
+        return jsonify(set_schema.dump(id_query(model=Set, id_=set_id)))
 
     def delete(self, set_id: int) -> dict:
         set_ = Set.query.get(set_id)
@@ -48,7 +43,7 @@ class SetById(Resource):
         db.session.delete(set_)
         db.session.commit()
 
-        return jsonify({"delete": "success"})
+        return jsonify({"deleted": set_id})
 
 
 class SetsMultiple(Resource):
@@ -68,35 +63,27 @@ class SetsMultiple(Resource):
 
     def post(self) -> dict:
         payload = request.json
-        if set(payload.keys()) == set(
-            ("date", "show", "round", "complete", "category", "value", "external", "question", "answer",)
-        ) and all((len(str(v)) > 0 for k, v in payload.items())):
+        if (set(payload.keys()) == KEYS) and all((len(str(v)) > 0 for k, v in payload.items())):
             success, resp = database.add(clue_data=payload, uses_shortnames=False)
 
             if success:
                 return jsonify(set_schema.dump(resp))
 
             else:
-                return jsonify(resp)
+                abort(400, message="the supplied data is already in the database")
 
         else:
-            return jsonify({"missing": "key or value"})
+            abort(400, message="the posted data is missing some data")
 
 
 class ShowById(Resource):
-    def get(self, entry: int) -> dict:
-        show = Show.query.filter_by(id=entry).first()
-
-        if show == None:
-            return no_results()
-
-        else:
-            return jsonify(show_schema.dump(show))
+    def get(self, show_id: int) -> dict:
+        return jsonify(show_schema.dump(id_query(model=Show, id_=show_id)))
 
 
 class ShowByNumber(Resource):
-    def get(self, entry: int) -> dict:
-        show = Show.query.filter_by(number=entry).first()
+    def get(self, show_number: int) -> dict:
+        show = Show.query.filter_by(number=show_number).first()
 
         if show == None:
             return no_results()
@@ -105,32 +92,14 @@ class ShowByNumber(Resource):
             return jsonify(show_schema.dump(show))
 
 
-class ShowOrShowsByDate(Resource):
+class ShowsByDate(Resource):
     def get(self, year: int, month: int = -1, day: int = -1) -> dict:
-        try:
-            date = datetime.datetime.strptime(f"{year:04d}/{abs(month):02d}/{abs(day):02d}", "%Y/%m/%d")
-
-        except ValueError:
-            return jsonify(
-                {
-                    "error": "please check that your date is valid (i.e., year between 1000 and 9999, month between 1 and 12, and day between 1 and 31, as the month allows)"
-                }
-            )
-
-        results = Show.query.filter(Show.date.has(year=date.year))
-
-        if month != -1:
-            results = results.filter(Show.date.has(month=date.month))
-
-            if day != -1:
-                results = results.filter(Show.date.has(day=date.day))
-
-        results = results.order_by(Show.number)
+        results = date_query(model=Show, ordered=Show.number, year=year, month=month, day=day)
 
         return paginate(model=results, schema=shows_schema.dump, indices=request.args)
 
 
-class ShowResource(Resource):
+class ShowsMultiple(Resource):
     def get(self) -> dict:
         return paginate(model=Show.query, schema=shows_schema.dump, indices=request.args)
 
@@ -148,11 +117,44 @@ class ShowResource(Resource):
 #         db.session.commit()
 
 #         return jsonify({"delete": "success"})
+class CategoryById(Resource):
+    def get(self, category_id: int) -> dict:
+        return jsonify(category_schema.dump(id_query(model=Category, id_=category_id)))
 
 
-class CategoryListResource(Resource):
+class CategoriesByDate(Resource):
+    def get(self, year: int, month: int = -1, day: int = -1) -> dict:
+        results = date_query(model=Category, ordered=Category.name, year=year, month=month, day=day)
+
+        return paginate(model=results, schema=categories_schema.dump, indices=request.args)
+
+
+class CategoryByCompletion(Resource):
+    def get(self, completion: bool = None, completion_string: str = "") -> dict:
+        if completion == True or completion_string == "complete":
+            results = Category.query.filter(Category.complete.has(state=True))
+
+        elif completion == False or completion_string == "incomplete":
+            results = Category.query.filter(Category.complete.has(state=False))
+
+        else:
+            abort(400, message="completion status must be supplied")
+
+        results = results.join(Date, Date.id == Category.date_id).join(Round, Round.id == Category.round_id)
+
+        results = results.order_by(Date.date, Round.number, Category.name)
+
+        return paginate(model=results, schema=categories_schema.dump, indices=request.args)
+
+
+class CategoriesMultiple(Resource):
     def get(self) -> dict:
-        return paginate(model=Category, schema=categories_schema.dump, indices=request.args)
+        return paginate(model=Category.query, schema=categories_schema.dump, indices=request.args)
+
+
+class BlankResource(Resource):
+    def get(self) -> dict:
+        return {"message": "hello!"}
 
 
 class GameResource(Resource):
@@ -222,47 +224,91 @@ class GameResource(Resource):
         return jsonify(sets)
 
 
-def paginate(model, schema, indices):
-    if model.count() == 0:
+def paginate(model, schema, indices) -> dict:
+    if (count := model.count()) == 0:
         return no_results()
 
     start = int(indices.get("start", 0))
     number = min(int(indices.get("number", 100)), 200)
 
-    if start > model.count():
-        return {"error": "start number too great"}
+    if start > count:
+        abort(400, message="start number too great")
 
-    if start + number > model.count():
+    if start + number > count:
         data = model[start:]
 
     else:
         data = model[start : start + number]
 
-    return jsonify({"start": start, "number": number, "data": schema(data), "results": model.count(),})
+    return jsonify({"start": start, "number": number, "data": schema(data), "results": count,})
 
 
-def no_results():
-    return jsonify({"error": "no results found"})
+def date_query(model, ordered, year: int, month: int, day: int):
+    try:
+        date = datetime.datetime.strptime(f"{year:04d}/{abs(month):02d}/{abs(day):02d}", "%Y/%m/%d")
+
+    except ValueError:
+        abort(
+            400,
+            message="please check that your date is valid (year between 0001 and 9999, month between 1 and 12, and day between 1 and 31, as applicable)",
+        )
+
+    results = model.query.filter(model.date.has(year=date.year))
+
+    if month != -1:
+        results = results.filter(model.date.has(month=date.month))
+
+        if day != -1:
+            results = results.filter(model.date.has(day=date.day))
+
+    return results.order_by(ordered)
 
 
-api.add_resource(SetsMultiple, "/sets")
-api.add_resource(SetById, "/set/<int:set_id>")
+def id_query(model, id_: int) -> dict:
+    results = model.query.filter_by(id=id_).first()
 
-api.add_resource(ShowResource, "/show", "/shows")
-api.add_resource(ShowByNumber, "/show/number/<int:entry>", "/shows/number/<int:entry>")
-api.add_resource(ShowById, "/show/id/<int:entry>", "/shows/id/<int:entry>")
+    if results == None:
+        return no_results()
+
+    else:
+        return results
+
+
+def no_results(message: str = "no items were found with that query"):
+    abort(404, message=message)
+
+
+api.add_resource(SetsMultiple, "/set", "/sets")
+api.add_resource(SetById, "/set/<int:set_id>", "/sets/<int:set_id>")
+
+api.add_resource(ShowsMultiple, "/show", "/shows")
+api.add_resource(ShowByNumber, "/show/number/<int:show_number>", "/shows/number/<int:show_number>")
+api.add_resource(ShowById, "/show/id/<int:show_id>", "/shows/id/<int:show_id>")
 api.add_resource(
-    ShowOrShowsByDate,
-    "/show/date/<int:year>/",
-    "/shows/date/<int:year>/",
-    "/show/date/<int:year>/<int:month>/",
-    "/shows/date/<int:year>/<int:month>/",
-    "/show/date/<int:year>/<int:month>/<int:day>/",
-    "/shows/date/<int:year>/<int:month>/<int:day>/",
+    ShowsByDate,
+    "/show/date/<int:year>",
+    "/shows/date/<int:year>",
+    "/show/date/<int:year>/<int:month>",
+    "/shows/date/<int:year>/<int:month>",
+    "/show/date/<int:year>/<int:month>/<int:day>",
+    "/shows/date/<int:year>/<int:month>/<int:day>",
 )
 
-api.add_resource(CategoryListResource, "/categories")
+api.add_resource(CategoriesMultiple, "/category/", "/categories")
+api.add_resource(CategoryById, "/category/id/<int:category_id>", "/categories/id/<int:category_id>")
+api.add_resource(
+    CategoriesByDate,
+    "/category/date/<int:year>",
+    "/categories/date/<int:year>",
+    "/category/date/<int:year>/<int:month>",
+    "/categories/date/<int:year>/<int:month>",
+    "/category/date/<int:year>/<int:month>/<int:day>",
+    "/categories/date/<int:year>/<int:month>/<int:day>",
+)
+api.add_resource(CategoryByCompletion, "/category/complete/<completion>", "/category/<completion_string>")
+
 # api.add_resource(CategoryResource, "/category/<int:category_id>")
 api.add_resource(DetailsResource, "/details")
 api.add_resource(GameResource, "/game")
+api.add_resource(BlankResource, "/")
 # # api_base = ""  # /api/v1/"
