@@ -292,6 +292,27 @@ def test_categories_by_show(testclient, test_data):
     assert rv.get_json() == {"message": "no items were found with that query"}
 
 
+def test_categories_by_round(testclient, test_data):
+    matching = {f"{i['category']}_{i['show']}" for i in test_data if i["round"] == 1}
+
+    rv = testclient.get(f"/category/round/1")
+
+    assert rv.status_code == 200
+    assert len(rv.get_json()["data"]) == len(matching)
+
+    rv = testclient.get(f"/category/round/4")
+
+    assert rv.status_code == 400
+    assert "round number must be" in rv.get_json()["message"]
+
+
+def test_categories_by_round_empty(emptyclient):
+    rv = emptyclient.get(f"/category/round/1")
+
+    assert rv.status_code == 404
+    assert rv.get_json() == {"message": "no items were found with that query"}
+
+
 def test_empty_db(emptyclient, test_data):
     question = test_data[0]
 

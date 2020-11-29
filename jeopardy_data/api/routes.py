@@ -159,6 +159,16 @@ class CategoriesByShowNumber(Resource):
         return paginate(model=results, schema=categories_schema.dump, indices=request.args)
 
 
+class CategoriesByRound(Resource):
+    def get(self, round_number: int) -> dict:
+        if round_number > 2:
+            abort(400, message="round number must be between 0 (jeopardy) and 2 (final jeopardy/tiebreaker)")
+
+        results = round_query(model=Category, number=round_number).order_by(Category.name)
+
+        return paginate(model=results, schema=categories_schema.dump, indices=request.args)
+
+
 class CategoriesByShowId(Resource):
     def get(self, show_id: int) -> dict:
         results = show_query(model=Category, identifier="id", value=show_id).order_by(Category.name)
@@ -297,14 +307,14 @@ def show_query(model, identifier: str, value: int) -> dict:
     if identifier == "number":
         results = model.query.filter(model.show.has(number=value))
 
-    elif identifier == "id":
+    else:
         results = model.query.filter(model.show.has(id=value))
 
-    if results == None:
-        return no_results()
+    return results
 
-    else:
-        return results
+
+def round_query(model, number: int) -> dict:
+    return model.query.filter(model.round.has(number=number))
 
 
 def no_results(message: str = "no items were found with that query"):
@@ -340,6 +350,7 @@ api.add_resource(
 )
 api.add_resource(CategoriesByCompletion, "/category/complete/<completion>", "/category/<completion_string>")
 api.add_resource(CategoriesByName, "/category/name/<name_string>")
+api.add_resource(CategoriesByRound, "/category/round/<int:round_number>")
 api.add_resource(CategoriesByShowNumber, "/category/show/number/<int:show_number>")
 api.add_resource(CategoriesByShowId, "/category/show/id/<int:show_id>")
 
