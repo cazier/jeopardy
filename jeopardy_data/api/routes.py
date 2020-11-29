@@ -6,7 +6,9 @@ from . import database
 from .models import *
 from .schemas import *
 
-import datetime, zlib, random
+import zlib
+import random
+import datetime
 
 
 class DetailsResource(Resource):
@@ -104,19 +106,6 @@ class ShowsMultiple(Resource):
         return paginate(model=Show.query, schema=shows_schema.dump, indices=request.args)
 
 
-# class CategoryResource(Resource):
-#     def get(self, category_id: int) -> dict:
-#         show = Show.query.get_or_404(show_id)
-
-#         return jsonify(show_schema.dump(show))
-
-#     def delete(self, show_id: int) -> dict:
-#         show = Show.query.get(show_id)
-
-#         db.session.delete(show)
-#         db.session.commit()
-
-#         return jsonify({"delete": "success"})
 class CategoryById(Resource):
     def get(self, category_id: int) -> dict:
         return jsonify(category_schema.dump(id_query(model=Category, id_=category_id)))
@@ -130,7 +119,14 @@ class CategoriesByDate(Resource):
 
 
 class CategoryByCompletion(Resource):
-    def get(self, completion: bool = None, completion_string: str = "") -> dict:
+    def get(self, completion: str = None, completion_string: str = "") -> dict:
+        if completion != None:
+            if completion.lower() == "true":
+                completion = True
+
+            elif completion.lower() == "false":
+                completion = False
+
         if completion == True or completion_string == "complete":
             results = Category.query.filter(Category.complete.has(state=True))
 
@@ -138,7 +134,7 @@ class CategoryByCompletion(Resource):
             results = Category.query.filter(Category.complete.has(state=False))
 
         else:
-            abort(400, message="completion status must be supplied")
+            abort(400, message="completion status must be supplied either 'true' or 'false'")
 
         results = results.join(Date, Date.id == Category.date_id).join(Round, Round.id == Category.round_id)
 

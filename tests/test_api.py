@@ -31,90 +31,90 @@ def emptyclient():
     api.db.drop_all()
 
 
-# def test_get_details_methods(emptyclient):
-#     rv = {
-#         emptyclient.post("/details").status_code,
-#         emptyclient.delete("/details").status_code,
-#         emptyclient.put("/details").status_code,
-#         emptyclient.patch("/details").status_code,
-#     }
+def test_get_details_methods(emptyclient):
+    rv = {
+        emptyclient.post("/details").status_code,
+        emptyclient.delete("/details").status_code,
+        emptyclient.put("/details").status_code,
+        emptyclient.patch("/details").status_code,
+    }
 
-#     assert rv == {405}
-
-
-# def test_empty_client(emptyclient):
-#     for endpoint in ["/details", "/shows", "/show", "/set", "/sets"]:
-#         rv = emptyclient.get(endpoint)
-
-#         assert rv.status_code == 404
-#         assert "no items" in rv.get_json()["message"]
+    assert rv == {405}
 
 
-# def test_invalid_endpoint(emptyclient):
-#     rv = emptyclient.get("/alex")
+def test_empty_client(emptyclient):
+    for endpoint in ["/details", "/shows", "/show", "/set", "/sets"]:
+        rv = emptyclient.get(endpoint)
 
-#     assert rv.status_code == 404
-
-
-# def test_get_details(testclient, test_data):
-#     rv = testclient.get("/details")
-
-#     assert rv.status_code == 200
-#     assert rv.get_json()["sets"] == len(test_data)
-#     assert list(rv.get_json().keys()) == ["air_dates", "categories", "has_external", "is_complete", "sets", "shows"]
+        assert rv.status_code == 404
+        assert "no items" in rv.get_json()["message"]
 
 
-# def test_pagination(testclient, test_data):
-#     rv = testclient.get("/sets", query_string={"number": 13, "start": 4})
-#     assert rv.status_code == 200
-#     assert len(rv.get_json()["data"]) == 13
+def test_invalid_endpoint(emptyclient):
+    rv = emptyclient.get("/alex")
 
-#     rv = testclient.get("/sets", query_string={"start": 100})
-#     assert rv.status_code == 200
-#     assert len(rv.get_json()["data"]) == len(test_data) - 100
-
-#     rv = testclient.get("/sets", query_string={"start": 200})
-#     assert rv.status_code == 400
-#     assert rv.get_json()["message"] == "start number too great"
+    assert rv.status_code == 404
 
 
-# def test_sets(testclient, test_data):
-#     rv = testclient.get(f"/sets")
+def test_get_details(testclient, test_data):
+    rv = testclient.get("/details")
 
-#     assert rv.status_code == 200
-#     assert len(rv.get_json()["data"]) == 100
-
-#     rv = testclient.get(f"/set/1")
-
-#     assert rv.status_code == 200
-#     assert rv.get_json() == dict(test_data[0], **{"id": 1})
-
-#     rv = testclient.get(f"/set/200")
-
-#     assert rv.status_code == 404
-#     assert rv.get_json() == {"message": "no items were found with that query"}
+    assert rv.status_code == 200
+    assert rv.get_json()["sets"] == len(test_data)
+    assert list(rv.get_json().keys()) == ["air_dates", "categories", "has_external", "is_complete", "sets", "shows"]
 
 
-# def test_set_changes(testclient, test_data):
-#     set_ = test_data[-1]
+def test_pagination(testclient, test_data):
+    rv = testclient.get("/sets", query_string={"number": 13, "start": 4})
+    assert rv.status_code == 200
+    assert len(rv.get_json()["data"]) == 13
 
-#     rv = testclient.delete(f"/set/119")
-#     assert rv.status_code == 200
-#     assert rv.get_json() == {"deleted": 119}
+    rv = testclient.get("/sets", query_string={"start": 100})
+    assert rv.status_code == 200
+    assert len(rv.get_json()["data"]) == len(test_data) - 100
 
-#     rv = testclient.post(f"/sets", json=set_)
-#     assert rv.status_code == 200
-#     assert rv.get_json() == dict(set_, **{"id": 119})
+    rv = testclient.get("/sets", query_string={"start": 200})
+    assert rv.status_code == 400
+    assert rv.get_json()["message"] == "start number too great"
 
-#     rv = testclient.post(f"/sets", json=set_)
-#     assert rv.status_code == 400
-#     assert rv.get_json() == {"message": "the supplied data is already in the database"}
 
-#     set_.pop("show")
+def test_sets(testclient, test_data):
+    rv = testclient.get(f"/sets")
 
-#     rv = testclient.post(f"/sets", json=set_)
-#     assert rv.status_code == 400
-#     assert rv.get_json() == {"message": "the posted data is missing some data"}
+    assert rv.status_code == 200
+    assert len(rv.get_json()["data"]) == 100
+
+    rv = testclient.get(f"/set/1")
+
+    assert rv.status_code == 200
+    assert rv.get_json() == dict(test_data[0], **{"id": 1})
+
+    rv = testclient.get(f"/set/200")
+
+    assert rv.status_code == 404
+    assert rv.get_json() == {"message": "no items were found with that query"}
+
+
+def test_set_changes(testclient, test_data):
+    set_ = test_data[-1]
+
+    rv = testclient.delete(f"/set/119")
+    assert rv.status_code == 200
+    assert rv.get_json() == {"deleted": 119}
+
+    rv = testclient.post(f"/sets", json=set_)
+    assert rv.status_code == 200
+    assert rv.get_json() == dict(set_, **{"id": 119})
+
+    rv = testclient.post(f"/sets", json=set_)
+    assert rv.status_code == 400
+    assert rv.get_json() == {"message": "the supplied data is already in the database"}
+
+    set_.pop("show")
+
+    rv = testclient.post(f"/sets", json=set_)
+    assert rv.status_code == 400
+    assert rv.get_json() == {"message": "the posted data is missing some data"}
 
 
 def test_show(testclient):
@@ -223,17 +223,33 @@ def test_categories_by_date(testclient, test_data):
 
 
 def test_categories_by_completion(testclient, test_data):
-    rv = testclient.get(f"/category/complete")
     complete = {f"{i['category']}_{i['show']}" for i in test_data if i["complete"]}
-    incomplete = {f"{i['category']}_{i['show']}" for i in test_data if i["complete"]}
+    incomplete = {f"{i['category']}_{i['show']}" for i in test_data if not i["complete"]}
+
+    rv = testclient.get(f"/category/complete")
 
     assert rv.status_code == 200
     assert len(rv.get_json()["data"]) == len(complete)
 
-    rv = testclient.get(f"/category/complete")
+    rv = testclient.get(f"/category/complete/true")
+
+    assert rv.status_code == 200
+    assert len(rv.get_json()["data"]) == len(complete)
+
+    rv = testclient.get(f"/category/incomplete")
 
     assert rv.status_code == 200
     assert len(rv.get_json()["data"]) == len(incomplete)
+
+    rv = testclient.get(f"/category/complete/false")
+
+    assert rv.status_code == 200
+    assert len(rv.get_json()["data"]) == len(incomplete)
+
+    rv = testclient.get(f"/category/complete/alex")
+
+    assert rv.status_code == 400
+    assert "completion status must be" in rv.get_json()["message"]
 
 
 def test_empty_db(emptyclient, test_data):
