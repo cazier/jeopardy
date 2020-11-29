@@ -1,5 +1,5 @@
 from flask import jsonify, request
-from flask_restful import Resource
+from flask_restful import Resource, abort
 
 from . import api, db
 from . import database
@@ -17,6 +17,9 @@ class DetailsResource(Resource):
         is_complete = Set.query.filter(Set.complete.has(state=True)).count()
         has_external = Set.query.filter(Set.external.has(state=True)).count()
         air_dates = Date.query.order_by(Date.date)
+
+        if 0 in {categories, sets, shows, is_complete, has_external}:
+            abort(404, message="there are no items currently in the database")
 
         return jsonify(
             {
