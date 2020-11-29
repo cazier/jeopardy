@@ -7,18 +7,7 @@ import pytest
 from jeopardy_data import split
 
 
-@pytest.fixture
-def data():
-    with open("tests/files/complete.json", "r") as sample_file:
-        data = json.load(sample_file)
-
-    with open("tests/files/incomplete.json", "r") as sample_file:
-        data.extend(json.load(sample_file))
-
-    return data
-
-
-def test_by_year(data):
+def test_by_year(test_data):
     results = split.by_year(data=data)
 
     assert results["1992"] == [i for i in data if i["date"].startswith("1992")]
@@ -39,7 +28,7 @@ def test_by_year(data):
         split.by_year(data=[{}])
 
 
-def test_by_show(data):
+def test_by_show(test_data):
     results = split.by_show(data=data)
 
     assert results[1] == [i for i in data if i["show"] == 1]
@@ -60,7 +49,7 @@ def test_by_show(data):
         split.by_show(data=[{}])
 
 
-def test_by_round(data):
+def test_by_round(test_data):
     results = split.by_round(data=data)
 
     assert results[1] == [i for i in data if i["round"] == 1]
@@ -81,7 +70,7 @@ def test_by_round(data):
         split.by_round(data=[{}])
 
 
-def test_by_external(data):
+def test_by_external(test_data):
     results = split.by_external(data=data)
 
     assert results[1] == [i for i in data if i["external"] == 1]
@@ -102,7 +91,7 @@ def test_by_external(data):
         split.by_external(data=[{}])
 
 
-def test_by_complete(data):
+def test_by_complete(test_data):
     results = split.by_complete(data=data)
 
     assert results[1] == [i for i in data if i["complete"] == 1]
@@ -123,7 +112,7 @@ def test_by_complete(data):
         split.by_complete(data=[{}])
 
 
-def test_by_limit(data):
+def test_by_limit(test_data):
     results = split.by_limit(data=data, limit=25)
 
     assert len(results.keys()) == math.ceil(len(data) / 25)

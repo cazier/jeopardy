@@ -1,8 +1,10 @@
 import pytest
 
-import pathlib
+
 import os
+import json
 import shutil
+import pathlib
 
 
 @pytest.fixture(autouse=True, scope="session")
@@ -27,3 +29,14 @@ def empty_cache_after_test():
 
     else:
         path.mkdir(parents=True)
+
+
+@pytest.fixture
+def test_data():
+    with open("tests/files/complete.json", "r") as sample_file:
+        data = json.load(sample_file)
+
+    with open("tests/files/incomplete.json", "r") as sample_file:
+        data.extend(json.load(sample_file))
+
+    return data
