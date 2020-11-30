@@ -11,8 +11,8 @@ class Set(db.Model):
     show_id = db.Column(db.Integer, db.ForeignKey("show.id"), nullable=False)
     round_id = db.Column(db.Integer, db.ForeignKey("round.id"), nullable=False)
     value_id = db.Column(db.Integer, db.ForeignKey("value.id"), nullable=False)
-    external_id = db.Column(db.Integer, db.ForeignKey("external.id"), nullable=False)
-    complete_id = db.Column(db.Integer, db.ForeignKey("complete.id"), nullable=False)
+    external = db.Column(db.Boolean, nullable=False)
+    complete = db.Column(db.Boolean, nullable=False)
     hash = db.Column(db.Integer, nullable=False, unique=True)
 
     answer = db.Column(db.String(1000))
@@ -28,7 +28,7 @@ class Category(db.Model):
     show_id = db.Column(db.Integer, db.ForeignKey("show.id"), nullable=False)
     date_id = db.Column(db.Integer, db.ForeignKey("date.id"), nullable=False)
     round_id = db.Column(db.Integer, db.ForeignKey("round.id"), nullable=False)
-    complete_id = db.Column(db.Integer, db.ForeignKey("complete.id"), nullable=False)
+    complete = db.Column(db.Boolean, nullable=False)
     sets = db.relationship("Set", backref="category")
 
     def __repr__(self):
@@ -100,22 +100,3 @@ class Value(db.Model):
 
     def __repr__(self):
         return f"<Value {self.amount}>"
-
-
-class External(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    state = db.Column(db.Boolean)
-    sets = db.relationship("Set", backref="external")
-
-    def __repr__(self):
-        return f"<External {self.state}>"
-
-
-class Complete(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    state = db.Column(db.Boolean)
-    sets = db.relationship("Set", backref="complete")
-    categories = db.relationship("Category", backref="complete")
-
-    def __repr__(self):
-        return f"<Complete {self.state}>"

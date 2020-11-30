@@ -36,20 +36,7 @@ class ValueSchema(ma.SQLAlchemySchema):
         fields = ("amount",)
 
 
-class ExternalSchema(ma.SQLAlchemySchema):
-    class Meta:
-        model = External
-        fields = ("state",)
-
-
-class CompleteSchema(ma.SQLAlchemySchema):
-    class Meta:
-        model = Complete
-        fields = ("state",)
-
-
 class CategorySchema(ma.SQLAlchemySchema):
-    complete = fields.fields.Pluck("CompleteSchema", "state")
     date = fields.fields.Pluck("DateSchema", "date")
     show = fields.fields.Pluck("ShowSchema", "number")
     round = fields.fields.Pluck("RoundSchema", "number")
@@ -72,8 +59,6 @@ class SetSchema(ma.SQLAlchemySchema):
     show = fields.fields.Pluck("ShowSchema", "number")
     round = fields.fields.Pluck("RoundSchema", "number")
     value = fields.fields.Pluck("ValueSchema", "amount")
-    external = fields.fields.Pluck("ExternalSchema", "state")
-    complete = fields.fields.Pluck("CompleteSchema", "state")
 
     class Meta:
         model = Set

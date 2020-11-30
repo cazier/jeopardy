@@ -61,12 +61,8 @@ def add(clue_data: dict, uses_shortnames: bool) -> tuple:
     if (complete_format := key("complete")) not in (True, False):
         return False, {"message": "please ensure the complete tag is supplied with a boolean value"}
 
-    if (complete := Complete.query.filter_by(state=complete_format).first()) is None:
-        complete = Complete(state=complete_format)
-        db.session.add(complete)
-
     if (category := Category.query.filter_by(name=key("category")).filter_by(date=date).first()) is None:
-        category = Category(name=key("category"), show=show, round=round_, complete=complete, date=date)
+        category = Category(name=key("category"), show=show, round=round_, complete=complete_format, date=date)
         db.session.add(category)
 
     try:
@@ -84,10 +80,6 @@ def add(clue_data: dict, uses_shortnames: bool) -> tuple:
     if (external_format := key("external")) not in (True, False):
         return False, {"message": "please ensure the external tag is supplied with a boolean value"}
 
-    if (external := External.query.filter_by(state=external_format).first()) is None:
-        external = External(state=external_format)
-        db.session.add(external)
-
     hash = zlib.adler32(f'{key("question")}{key("answer")}{show.number}'.encode())
 
     if Set.query.filter_by(hash=hash).first() is None:
@@ -99,8 +91,8 @@ def add(clue_data: dict, uses_shortnames: bool) -> tuple:
             answer=key("answer"),
             question=key("question"),
             value=value,
-            external=external,
-            complete=complete,
+            external=external_format,
+            complete=complete_format,
             hash=hash,
         )
 

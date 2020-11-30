@@ -60,8 +60,8 @@ def test_get_details(testclient, test_data):
     rv = testclient.get("/details")
 
     assert rv.status_code == 200
-    assert rv.get_json()["sets"] == len(test_data)
-    assert list(rv.get_json().keys()) == ["air_dates", "categories", "has_external", "is_complete", "sets", "shows"]
+    assert rv.get_json()["sets"]["total"] == len(test_data)
+    assert list(rv.get_json().keys()) == ["air_dates", "categories", "sets", "shows"]
 
 
 def test_pagination(testclient, test_data):

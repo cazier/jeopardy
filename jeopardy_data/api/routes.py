@@ -13,14 +13,20 @@ import datetime
 
 class DetailsResource(Resource):
     def get(self) -> dict:
-        categories = Category.query.count()
-        sets = Set.query.count()
+        categories = {
+            "total": Category.query.count(),
+            "complete": Category.query.filter(Category.complete == True).count(),
+            "incomplete": Category.query.filter(Category.complete == False).count(),
+        }
+        sets = {
+            "total": Set.query.count(),
+            "has_external": Set.query.filter(Set.external == True).count(),
+            "no_external": Set.query.filter(Set.external == False).count(),
+        }
         shows = Show.query.count()
-        is_complete = Set.query.filter(Set.complete.has(state=True)).count()
-        has_external = Set.query.filter(Set.external.has(state=True)).count()
         air_dates = Date.query.order_by(Date.date)
 
-        if 0 in {categories, sets, shows, is_complete, has_external}:
+        if 0 in {categories["total"], sets["total"], shows}:
             no_results(message="there are no items currently in the database")
 
         return jsonify(
@@ -29,8 +35,6 @@ class DetailsResource(Resource):
                 "sets": sets,
                 "shows": shows,
                 "air_dates": {"oldest": air_dates[0].date, "most_recent": air_dates[-1].date,},
-                "is_complete": {True: is_complete, False: sets - is_complete},
-                "has_external": {True: has_external, False: sets - has_external},
             }
         )
 
@@ -157,10 +161,10 @@ class CategoriesByCompletion(Resource):
                 completion = False
 
         if completion == True or completion_string == "complete":
-            results = Category.query.filter(Category.complete.has(state=True))
+            results = Category.query.filter(Category.complete == True)
 
         elif completion == False or completion_string == "incomplete":
-            results = Category.query.filter(Category.complete.has(state=False))
+            results = Category.query.filter(Category.complete == False)
 
         else:
             abort(400, message="completion status must be supplied either 'true' or 'false'")
