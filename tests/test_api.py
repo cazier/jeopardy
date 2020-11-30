@@ -171,6 +171,11 @@ def test_sets_by_round(testclient, test_data):
     assert rv.status_code == 400
     assert "round number must be" in rv.get_json()["message"]
 
+    rv = testclient.get(f"/set/round/-1")
+
+    assert rv.status_code == 400
+    assert "round number must be" in rv.get_json()["message"]
+
 
 def test_sets_by_round_empty(emptyclient):
     rv = emptyclient.get(f"/set/round/1")
@@ -363,6 +368,11 @@ def test_categories_by_round(testclient, test_data):
     assert len(rv.get_json()["data"]) == len(matching)
 
     rv = testclient.get(f"/category/round/4")
+
+    assert rv.status_code == 400
+    assert "round number must be" in rv.get_json()["message"]
+
+    rv = testclient.get(f"/category/round/-1")
 
     assert rv.status_code == 400
     assert "round number must be" in rv.get_json()["message"]
