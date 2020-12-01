@@ -303,7 +303,7 @@ def paginate(model, schema, indices) -> dict:
     return jsonify({"start": start, "number": number, "data": schema(data), "results": count,})
 
 
-def date_query(model, year: int, month: int, day: int):
+def date_query(model, year: int, month: int, day: int, chained_results=None):
     try:
         date = datetime.datetime.strptime(f"{year:04d}/{abs(month):02d}/{abs(day):02d}", "%Y/%m/%d")
 
@@ -313,7 +313,11 @@ def date_query(model, year: int, month: int, day: int):
             message="please check that your date is valid (year between 0001 and 9999, month between 1 and 12, and day between 1 and 31, as applicable)",
         )
 
-    results = model.query.filter(model.date.has(year=date.year))
+    if chained_results != None:
+        results = chained_results.filter(model.date.has(year=date.year))
+
+    else:
+        results = model.query.filter(model.date.has(year=date.year))
 
     if month != -1:
         results = results.filter(model.date.has(month=date.month))
@@ -324,7 +328,7 @@ def date_query(model, year: int, month: int, day: int):
     return results
 
 
-def id_query(model, id_: int) -> dict:
+def id_query(model, id_: int) -> flask_sqlalchemy.BaseQuery:
     results = model.query.filter_by(id=id_).first()
 
     if results == None:
@@ -334,12 +338,18 @@ def id_query(model, id_: int) -> dict:
         return results
 
 
-def show_query(model, identifier: str, value: int) -> dict:
-    if identifier == "number":
-        results = model.query.filter(model.show.has(number=value))
+def show_query(model, identifier: str, value: int, chained_results=None) -> flask_sqlalchemy.BaseQuery:
+    if chained_results != None:
+        results = chained_results
 
     else:
-        results = model.query.filter(model.show.has(id=value))
+        results = model.query
+
+    if identifier == "number":
+        results = results.filter(model.show.has(number=value))
+
+    else:
+        results = results.filter(model.show.has(id=value))
 
     return results
 
