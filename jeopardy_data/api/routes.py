@@ -121,7 +121,7 @@ class ShowByNumber(Resource):
         show = Show.query.filter_by(number=show_number).first()
 
         if show == None:
-            return no_results()
+            no_results()
 
         else:
             return jsonify(show_schema.dump(show))
@@ -286,7 +286,7 @@ class GameResource(Resource):
 
 def paginate(model, schema, indices) -> dict:
     if (count := model.count()) == 0:
-        return no_results()
+        no_results()
 
     start = int(indices.get("start", 0))
     number = min(int(indices.get("number", 100)), 200)
@@ -328,7 +328,7 @@ def id_query(model, id_: int) -> dict:
     results = model.query.filter_by(id=id_).first()
 
     if results == None:
-        return no_results()
+        no_results()
 
     else:
         return results
