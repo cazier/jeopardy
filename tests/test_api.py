@@ -392,3 +392,93 @@ def test_empty_db(emptyclient, test_data):
 
     assert rv.data != None
 
+
+def test_game_resource(testclient, test_data):
+    rv = testclient.get("/game")
+
+    assert rv.status_code == 200
+    assert len(rv.get_json()) == 6
+
+    expected = [i for i in test_data if i["complete"]]
+    rv = testclient.get("/game", query_string={"round": 1})
+
+    assert rv.status_code == 200
+    assert len(rv.get_json()) == min(
+        6,
+        len(
+            {f'{i["category"]}_{i["show"]}' for i in expected if i["round"] == 1}.difference(
+                {f'{i["category"]}_{i["show"]}' for i in expected if i["external"]}
+            )
+        ),
+    )
+
+    expected = [i for i in test_data if (i["date"][:4] == "1992") & (i["complete"])]
+    rv = testclient.get("/game", query_string={"year": 1992})
+
+    assert rv.status_code == 200
+    assert len(rv.get_json()) == min(
+        6,
+        len(
+            {f'{i["category"]}_{i["show"]}' for i in expected if i["round"] != 2}.difference(
+                {f'{i["category"]}_{i["show"]}' for i in expected if i["external"]}
+            )
+        ),
+    )
+
+    expected = [i for i in test_data if (i["show"] == 2) & (i["complete"])]
+    rv = testclient.get("/game", query_string={"show_number": 2})
+
+    assert rv.status_code == 200
+    assert len(rv.get_json()) == min(
+        6,
+        len(
+            {f'{i["category"]}_{i["show"]}' for i in expected if i["round"] != 2}.difference(
+                {f'{i["category"]}_{i["show"]}' for i in expected if i["external"]}
+            )
+        ),
+    )
+
+    expected = [i for i in test_data if (i["show"] == 2) & (i["complete"])]
+    rv = testclient.get("/game", query_string={"show_id": 2})
+
+    assert rv.status_code == 200
+    assert len(rv.get_json()) == min(
+        6,
+        len(
+            {f'{i["category"]}_{i["show"]}' for i in expected if i["round"] != 2}.difference(
+                {f'{i["category"]}_{i["show"]}' for i in expected if i["external"]}
+            )
+        ),
+    )
+
+    rv = testclient.get("/game", query_string={"show_id": 2, "show_number": 2})
+
+    assert rv.status_code == 400
+    assert rv.get_json() == {"message": "only one of show_number and show_id may be supplied at a time"}
+
+    rv = testclient.get("/game", query_string={"show_number": 2, "round": 1, "allow_external": True})
+
+    assert rv.status_code == 200
+    assert any([j["external"] for i in rv.get_json().values() for j in i["sets"]])
+
+    rv = testclient.get("/game", query_string={"show_number": 2, "round": 0, "allow_incomplete": True})
+
+    assert rv.status_code == 200
+    assert any([not (i["category"]["complete"]) for i in rv.get_json().values()])
+
+    rv = testclient.get("/game", query_string={"round": 4})
+
+    assert rv.status_code == 400
+    assert rv.get_json() == {"message": "round number must be between 0 (jeopardy) and 2 (final jeopardy/tiebreaker)"}
+
+    rv = testclient.get("/game", query_string={"size": 30})
+
+    assert rv.status_code == 400
+    assert "requested too many categories; only " in rv.get_json()["message"]
+
+    # Due to omitting duplicated category names
+    rv = testclient.get("/game", query_string={"size": 18})
+
+    assert rv.status_code == 400
+    assert "requested too many categories; only " in rv.get_json()["message"]
+

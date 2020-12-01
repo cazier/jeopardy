@@ -1,5 +1,7 @@
+from sqlalchemy import or_
 from flask import jsonify, request
 from flask_restful import Resource, abort
+import flask_sqlalchemy
 
 from . import api, db, KEYS
 from . import database
@@ -221,67 +223,66 @@ class GameResource(Resource):
     def get(self) -> dict:
         size = int(request.args.get("size", 6))
         year = int(request.args.get("year", -1))
-        show = int(request.args.get("show", -1))
+        show_number = int(request.args.get("show_number", -1))
+        show_id = int(request.args.get("show_id", -1))
 
-        round_ = request.args.get("round", None)
+        round_ = int(request.args.get("round", -1))
 
-        if (round_ == None) or (round_ not in ["0", "1", "2", "jeopardy", "doublejeopardy", "finaljeopardy"]):
-            return jsonify(
-                {
-                    "error": "round number must be one of: "
-                    '(0, 1, or 2) OR ("jeopardy", "doublejeopardy", or "finaljeopardy")'
-                }
-            )
+        allow_external = bool(request.args.get("allow_external", False))
+        allow_incomplete = bool(request.args.get("allow_incomplete", False))
 
-        if not round_.isnumeric():
-            round_ = {"jeopardy": "0", "doublejeopardy": "1", "finaljeopardy": "2"}[round_]
+        if round_ == -1:
+            categories = Category.query.filter(or_(Category.round.has(number=0), Category.round.has(number=1)))
 
-        rounds = [r.id for r in Round.query.filter(Round.number == int(round_))]
+        elif 0 <= round_ <= 2:
+            categories = Category.query.filter(Category.round.has(number=round_))
+
+        else:
+            abort(400, message="round number must be between 0 (jeopardy) and 2 (final jeopardy/tiebreaker)")
 
         if year != -1:
-            year = int(year)
-            start = datetime.datetime.strptime(str(year), "%Y")
-            stop = datetime.datetime.strptime(str(year + 1), "%Y")
+            categories = date_query(model=Category, year=year, month=-1, day=-1, chained_results=categories)
 
-            year_ = Date.query.filter(Date.date > start, Date.date < stop)
-        else:
-            year_ = Date.query.filter()
+        if show_number != -1 and show_id != -1:
+            abort(400, message="only one of show_number and show_id may be supplied at a time")
 
-        years = [y.id for y in year_.all()]
+        elif show_number != -1:
+            categories = show_query(model=Category, identifier="number", value=show_number, chained_results=categories)
 
-        if show != -1:
-            shows = Show.query.filter_by(number=show)
-            categories = (
-                Category.query.filter(Category.show == shows.first()).filter(Category.round_id.in_(rounds)).all()
-            )
+        elif show_id != -1:
+            categories = show_query(model=Category, identifier="id", value=show_id, chained_results=categories)
 
-        else:
-            categories = (
-                Category.query.filter(Category.round_id.in_(rounds))
-                .filter(Category.date_id.in_(years))
-                .filter(Category.complete.has(state=True))
-                .all()
-            )
-            random.shuffle(categories)
+        if not allow_incomplete:
+            categories = categories.filter(Category.complete == True)
 
-        column = 0
-        sets = dict()
+        if not allow_external:
+            external_sets = Set.query.filter(Set.external == True).group_by(Set.category_id).subquery()
 
-        while column < size:
-            category = categories.pop()
-            sets_ = sets_schema.dump(category.sets)
+            categories = categories.outerjoin(external_sets).filter(external_sets.c.id == None)
 
-            if any([v["external"] for v in sets_]) and show == -1:
-                continue
+        categories = categories.order_by(Category.id)
 
-            elif len(sets_) > 5:
-                continue
+        if (number_results := categories.count()) < size:
+            abort(400, message=f"requested too many categories; only {number_results} were found")
 
-            else:
-                sets[category.name] = sets_
-                column += 1
+        numbers = random.sample(range(0, number_results), min(number_results, size * 2))
 
-        return jsonify(sets)
+        game = dict()
+
+        while len(game.keys()) < size:
+            try:
+                category = categories[numbers.pop(0)]
+
+            except IndexError:
+                abort(400, message=f"requested too many categories; only {len(game.keys())} were found")
+
+            if category.name not in game.keys():
+                sets = Set.query.filter(Set.category_id == category.id)
+                sets = sets.join(Value, Value.id == Set.value_id).order_by(Set.value)
+
+                game[category.name] = {"category": category_schema.dump(category), "sets": sets_schema.dump(sets)}
+
+        return jsonify(game)
 
 
 def paginate(model, schema, indices) -> dict:
@@ -411,7 +412,6 @@ api.add_resource(CategoriesByRound, "/category/round/<round_number>")
 api.add_resource(CategoriesByShowNumber, "/category/show/number/<int:show_number>")
 api.add_resource(CategoriesByShowId, "/category/show/id/<int:show_id>")
 
-# api.add_resource(CategoryResource, "/category/<int:category_id>")
 api.add_resource(DetailsResource, "/details")
 api.add_resource(GameResource, "/game")
 api.add_resource(BlankResource, "/")
