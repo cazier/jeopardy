@@ -106,6 +106,8 @@ def get_seasons(page: BeautifulSoup, start: int, stop: int, include_special: boo
         if len(results) < 1:
             raise NoItemsFoundError()
 
+        results.sort(key=lambda k: int(k) if k.isdigit() else float("inf"))
+
         return results
 
     except AttributeError:
