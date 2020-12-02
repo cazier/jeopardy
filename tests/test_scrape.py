@@ -387,7 +387,7 @@ def test_get_board(PatchedRequests, complete_file, incomplete_file):
     results = scrape.get_board(page=game)
 
     _, game = scrape.Webpage(resource="showgame.php?game_id=2").get()
-    results = scrape.get_board(page=game, store_external=True)
+    results = scrape.get_board(page=game)
 
     results = sorted(results, key=operator.itemgetter("round", "category", "value"))
     incomplete_file = sorted(incomplete_file, key=operator.itemgetter("round", "category", "value"))

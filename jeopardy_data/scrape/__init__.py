@@ -244,7 +244,7 @@ def get_clue_data(clue: BeautifulSoup) -> dict:
         raise ParsingError(message=f"The clue number identifier was malformed. (It should look like 'clue_J_#_#')")
 
 
-def get_board(page: BeautifulSoup, store_external: bool = False) -> list:
+def get_board(page: BeautifulSoup) -> list:
     show, date = get_game_title(page=page)
     category_names = get_categories(page=page)
     clues = [get_clue_data(clue=clue) for clue in get_clues(page=page)]
@@ -275,8 +275,7 @@ def get_board(page: BeautifulSoup, store_external: bool = False) -> list:
                 item["show"] = show
                 item["date"] = date
 
-                if store_external and item["external"]:
-                    get_external_media(item=item, category=category_number)
+                get_external_media(item=item, category=category_number)
 
                 item["answer"] = str(item["answer"])
 
@@ -317,8 +316,6 @@ def generate_headers(length: int) -> list:
 
 
 def get_external_media(item: dict, category: int) -> None:
-    global EXTERNAL_LINKS
-
     files = item["answer"].find_all("a")
 
     base = "{show:05d}_{round}_{category}_{value}".format(
