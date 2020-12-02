@@ -4,7 +4,7 @@ import operator
 
 import pytest
 
-from jeopardy_data import split
+from jeopardy_data.batch import split
 
 
 def test_by_year(test_data):
