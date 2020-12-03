@@ -482,3 +482,21 @@ def test_game_resource(testclient, test_data):
     assert rv.status_code == 400
     assert "requested too many categories; only " in rv.get_json()["message"]
 
+
+"""
+| ROUTE               |       |                   |        |       |          |      |          |                 |        |
+| ------------------- | ----- | ----------------- | ------ | ----- | -------- | ---- | -------- | --------------- | ------ |
+| CATEGORY (MULTIPLE) | N     | Y                 | N      | Y     | N        | Y    | Y        | Y (NAME and ID) |        |
+| COMPLETE            | N/A   | N/A               | N/A    | N/A   | N/A      | N/A  | N/A      | N/A             |        |
+| DATE                | N/A   | N/A               | N/A    | N/A   | N/A      | N/A  | N/A      | N/A             |        |
+| EXTERNAL            | N/A   | N/A               | N/A    | N/A   | N/A      | N/A  | N/A      | N/A             |        |
+| ROUND               | N/A   | N/A               | N/A    | N/A   | N/A      | N/A  | N/A      | N/A             |        |
+| SET (MULTIPLE)      | Y     | Y                 | Y (ID) | Y     | Y        | Y    | Y        | Y               |        |
+| SHOW (MULTIPLE)     | N     | Y (NUMBER and ID) | N      | N     | N        | Y    | N        | N               |        |
+| VALUE               | N/A   | N/A               | N/A    | N/A   | N/A      | N/A  | N/A      | N/A             |        |
+|                     | VALUE | SHOW              | SET    | ROUND | EXTERNAL | DATE | COMPLETE | CATEGORY        | FILTER |
+
+https://restfulapi.net/http-status-codes/
+https://restfulapi.net/http-methods/#summary
+
+"""

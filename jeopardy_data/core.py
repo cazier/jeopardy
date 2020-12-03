@@ -5,10 +5,11 @@ import sys
 
 import click
 
-import api
-import scrape
+# import api
+# import scrape
+# import batch
 
-import batch
+import tools
 
 
 @click.group()
@@ -103,50 +104,58 @@ def scrape():
 
 
 @scrape.command(name="seasons")
-@click.option(
-    "--out", "season_file", help="file to store season urls", type=str, default="seasons.json", show_default=True
-)
+# @click.option(
+#     "--out", "season_file", help="file to store season urls", type=str, default="seasons.json", show_default=True
+# )
 @click.option("--cache/--no-cache", help="cache files to a local directory", default=False, show_default=True)
 @click.option("--cache-path", help="directory to store cached files", type=str)
-def seasons(season_file: str, cache: bool, cache_path: str):
-    season_file = pathlib.Path(season_file).absolute()
+def seasons(cache: bool, cache_path: str):
+    seasons_list = batch.get_list_of_seasons()
+    # get_list_of_seasons()
 
-    if False:  # season_file.exists():
-        with open(season_file, "r") as input_file:
-            data = json.load(input_file)
+    click.echo(", ".join(seasons_list))
 
-    else:
-        data = list()
 
-    if cache:
-        if cache_path == None:
-            click.echo("Error: A caching path must be supplied when --cache is used", err=True)
-            sys.exit(1)
+# def seasons(season_file: str, cache: bool, cache_path: str):
+#     season_file = pathlib.Path(season_file).absolute()
 
-        scraping.scrape.CACHE = True
-        scraping.scrape.CACHE_PATH = pathlib.Path(cache_path).absolute()
+#     if False:  # season_file.exists():
+#         with open(season_file, "r") as input_file:
+#             data = json.load(input_file)
 
-        if not scraping.scrape.CACHE_PATH.exists():
-            if click.confirm("The caching directory does not exist. Create it?", abort=True, default=True):
-                scraping.scrape.CACHE_PATH.mkdir(parents=True)
+#     else:
+#         data = list()
 
-            else:
-                sys.exit()
+#     if cache:
+#         if cache_path == None:
+#             click.echo("Error: A caching path must be supplied when --cache is used", err=True)
+#             sys.exit(1)
 
-    seasons = scraping.scrape.get_seasons(start=10, stop=11, include_special=False)
-    games = scraping.scrape.get_games(identifier=seasons[0])
+#         scraping.scrape.CACHE = True
+#         scraping.scrape.CACHE_PATH = pathlib.Path(cache_path).absolute()
 
-    game = list(games["games"].keys())[0]
+#         if not scraping.scrape.CACHE_PATH.exists():
+#             if click.confirm("The caching directory does not exist. Create it?", abort=True, default=True):
+#                 scraping.scrape.CACHE_PATH.mkdir(parents=True)
 
-    g = scraping.scrape.Game(identifier=game)
+#             else:
+#                 sys.exit()
 
-    data = g.schema()
+#     seasons = scraping.scrape.get_seasons(start=10, stop=11, include_special=False)
+#     games = scraping.scrape.get_games(identifier=seasons[0])
 
-    season_file.parent.mkdir(parents=True, exist_ok=True)
-    with open(season_file, "w") as output_file:
-        json.dump(data, output_file, indent="\t")
+#     game = list(games["games"].keys())[0]
+
+#     g = scraping.scrape.Game(identifier=game)
+
+#     data = g.schema()
+
+#     season_file.parent.mkdir(parents=True, exist_ok=True)
+#     with open(season_file, "w") as output_file:
+#         json.dump(data, output_file, indent="\t")
 
 
 if __name__ == "__main__":
-    cli()
+    # cli()
+    print(tools.batch.get_list_of_seasons())
     # api(host="0.0.0.0", port=5001, file="sample.db", debug=True)
