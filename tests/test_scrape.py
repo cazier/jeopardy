@@ -108,15 +108,13 @@ def test_storage(example_org):
 
 
 def test_get_download(example_org):
-    success, bs = example_org.get()
-    assert (success) & (bs.body.text == "Page Definitely Absolutely Found")
+    bs = example_org.get()
+    assert bs.body.text == "Page Definitely Absolutely Found"
 
 
 def test_get_download_404(example_org):
-    page = scrape.Webpage(resource="404")
-
-    success, message = page.get()
-    assert (not success) & (message == {"message": "failed to receive webpage data"})
+    with pytest.raises(scrape.NetworkError):
+        page = scrape.Webpage(resource="404").get()
 
 
 def test_empty_resource():
@@ -152,7 +150,7 @@ def test_cache_load(TestFiles, empty_cache_after_test):
     with open(pathlib.Path(scrape.CACHE_PATH, "test"), "w") as test_file:
         test_file.write("<html><head></head><body>Page Loaded From Cache</body></html>")
 
-    success, message = page.get()
+    message = page.get()
 
     assert message.text == "Page Loaded From Cache"
 
@@ -160,7 +158,7 @@ def test_cache_load(TestFiles, empty_cache_after_test):
 def test_get_seasons(TestFiles):
     page = scrape.Webpage(resource="listseasons.php")
 
-    _, data = page.get()
+    data = page.get()
 
     message = scrape.get_seasons(page=data)
 
@@ -200,7 +198,7 @@ def test_get_seasons_start_stop():
 def test_get_games(TestFiles):
     page = scrape.Webpage(resource="showseason.php?season=1")
 
-    _, data = page.get()
+    data = page.get()
 
     message = scrape.get_games(page=data)
 
@@ -313,7 +311,7 @@ def test_get_clue_data_failures():
 
 
 def test_get_clues(PatchedRequests):
-    _, game = scrape.Webpage(resource="showgame.php?game_id=1").get()
+    game = scrape.Webpage(resource="showgame.php?game_id=1").get()
 
     results = scrape.get_clues(page=game)
 
@@ -321,7 +319,7 @@ def test_get_clues(PatchedRequests):
 
 
 def test_get_game_title(PatchedRequests, complete_file):
-    _, game = scrape.Webpage(resource="showgame.php?game_id=1").get()
+    game = scrape.Webpage(resource="showgame.php?game_id=1").get()
 
     show, date = scrape.get_game_title(page=game)
     values = (complete_file[0]["show"], complete_file[0]["date"])
@@ -345,7 +343,7 @@ def test_get_game_title(PatchedRequests, complete_file):
 
 
 def test_get_categories(PatchedRequests, complete_file):
-    _, game = scrape.Webpage(resource="showgame.php?game_id=1").get()
+    game = scrape.Webpage(resource="showgame.php?game_id=1").get()
 
     results = scrape.get_categories(page=game)
 
@@ -366,7 +364,7 @@ def test_get_categories(PatchedRequests, complete_file):
 
 
 def test_get_board(PatchedRequests, complete_file, incomplete_file):
-    _, game = scrape.Webpage(resource="showgame.php?game_id=1").get()
+    game = scrape.Webpage(resource="showgame.php?game_id=1").get()
     results = scrape.get_board(page=game)
 
     results = sorted(results, key=operator.itemgetter("round", "category", "value"))
@@ -374,10 +372,10 @@ def test_get_board(PatchedRequests, complete_file, incomplete_file):
 
     assert results == complete_file
 
-    _, game = scrape.Webpage(resource="showgame.php?game_id=2").get()
+    game = scrape.Webpage(resource="showgame.php?game_id=2").get()
     results = scrape.get_board(page=game)
 
-    _, game = scrape.Webpage(resource="showgame.php?game_id=2").get()
+    game = scrape.Webpage(resource="showgame.php?game_id=2").get()
     results = scrape.get_board(page=game)
 
     results = sorted(results, key=operator.itemgetter("round", "category", "value"))

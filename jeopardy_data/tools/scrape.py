@@ -50,7 +50,7 @@ class Webpage(object):
             page = requests.get(self.url)
 
             if page.status_code != 200:
-                return False, {"message": f"failed to receive webpage data"}
+                raise NetworkError(code=page.status_code)
 
             page = page.text
 
@@ -60,7 +60,7 @@ class Webpage(object):
                 with open(self.storage, "w") as store_file:
                     store_file.write(page)
 
-        return True, BeautifulSoup(page, "lxml")
+        return BeautifulSoup(page, "lxml")
 
 
 class NoItemsFoundError(Exception):
@@ -80,6 +80,13 @@ class ParsingError(Exception):
 class NoInputSuppliedError(Exception):
     def __init__(self, message="The BeautifulSoup object was empty. Check the HTML to ensure data is supplied."):
         self.message = message
+
+        super().__init__(self.message)
+
+
+class NetworkError(Exception):
+    def __init__(self, code=int):
+        self.message = f"The page returned an error status code ({code}). Confirm your identifier, or try again later?"
 
         super().__init__(self.message)
 
