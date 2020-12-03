@@ -1,7 +1,6 @@
 import pathlib
 import json
 import os
-import random
 import operator
 
 import pytest
@@ -161,25 +160,18 @@ def test_cache_load(TestFiles, empty_cache_after_test):
 def test_get_seasons(TestFiles):
     page = scrape.Webpage(resource="listseasons.php")
 
-    start = random.randint(1, 15)
-    stop = random.randint(start + 1, 16)
-
     _, data = page.get()
 
-    message = scrape.get_seasons(page=data, start=start, stop=stop, include_special=False)
+    message = scrape.get_seasons(page=data)
 
-    assert len(message) == stop - start
-
-    message = scrape.get_seasons(page=data, start=start, stop=stop, include_special=True)
-
-    assert len(message) == 3 + stop - start
+    assert len(message) == 19
 
 
 def test_empty_pages():
     page = BeautifulSoup('<html><head></head><body id="content">Empty Page</body></html>', "lxml")
 
     with pytest.raises(scrape.NoItemsFoundError):
-        scrape.get_seasons(page=page, start=0, stop=1, include_special=False)
+        scrape.get_seasons(page=page)
 
     with pytest.raises(scrape.NoItemsFoundError):
         scrape.get_games(page=page)
@@ -192,7 +184,7 @@ def test_parse_error_pages():
     page = BeautifulSoup('<html><head></head><body>No `id="content"`</body></html>', "lxml")
 
     with pytest.raises(scrape.ParsingError):
-        scrape.get_seasons(page=page, start=0, stop=1, include_special=True)
+        scrape.get_seasons(page=page)
 
     with pytest.raises(scrape.ParsingError):
         scrape.get_games(page=page)
@@ -201,9 +193,8 @@ def test_parse_error_pages():
 def test_get_seasons_start_stop():
     page = BeautifulSoup('<html><head></head><body id="content">Empty Seasons</body></html>', "lxml")
 
-    with pytest.raises(SyntaxError):
-        scrape.get_seasons(page=page, start=0, stop=0, include_special=True)
-        scrape.get_seasons(page=page, start=1, stop=0, include_special=True)
+    with pytest.raises(scrape.NoItemsFoundError):
+        scrape.get_seasons(page=page)
 
 
 def test_get_games(TestFiles):

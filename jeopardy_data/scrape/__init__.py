@@ -84,24 +84,12 @@ class NoInputSuppliedError(Exception):
         super().__init__(self.message)
 
 
-def get_seasons(page: BeautifulSoup, start: int, stop: int, include_special: bool) -> list:
-    if stop <= start:
-        raise SyntaxError("The stop season must be greater than the start season")
-
+def get_seasons(page: BeautifulSoup):
     try:
         all_seasons = page.find(id="content").find_all("a")
         all_seasons = [season.get("href") for season in all_seasons]
 
-        season_ids = (resource_id(url=season) for season in all_seasons)
-
-        results = list()
-
-        for num in season_ids:
-            if num.isnumeric() and (start <= int(num) < stop):
-                results.append(num)
-
-            elif (not num.isnumeric()) and include_special:
-                results.append(num)
+        results = [resource_id(url=season) for season in all_seasons]
 
         if len(results) < 1:
             raise NoItemsFoundError()
@@ -114,20 +102,17 @@ def get_seasons(page: BeautifulSoup, start: int, stop: int, include_special: boo
         raise ParsingError()
 
 
-def get_games(page: BeautifulSoup) -> dict:
+def get_games(page: BeautifulSoup) -> list:
     try:
         all_games = page.find(id="content").find_all("a")
+        all_games = [game.get("href") for game in all_games]
 
-        results = dict()
+        results = [resource_id(url=game) for game in all_games]
 
-        for game in all_games:
-            url = game.get("href")
-
-            if "game_id" in url:
-                results[resource_id(url=url)] = False
-
-        if len(results.keys()) < 1:
+        if len(results) < 1:
             raise NoItemsFoundError()
+
+        results.sort(key=lambda k: int(k) if k.isdigit() else float("inf"))
 
         return results
 
