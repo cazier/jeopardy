@@ -62,7 +62,7 @@ def download_external_files(filename: str, output: str = "media", delay: float =
 def add(filename: str, method: str, progress: bool, url: str = "", shortnames: bool = True):
     if progress:
         from tqdm import tqdm
-    
+
     else:
         tqdm = lambda k: k
 
@@ -80,6 +80,7 @@ def add(filename: str, method: str, progress: bool, url: str = "", shortnames: b
 
             if method == "db":
                 from api.database import add
+
                 add(clue_data=set_, uses_shortnames=shortnames)
 
             elif method == "web":
