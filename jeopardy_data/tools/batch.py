@@ -63,7 +63,8 @@ def scrape_season(season_id: str, progress: bool) -> tuple:
 
 
 def add_database(items: list, progress: bool, shortnames: bool) -> tuple:
-    results, errors = 0, list()
+    results, repeats = 0, 0
+    errors = list()
 
     for clue in display(progress=progress)(items):
         try:
@@ -74,7 +75,7 @@ def add_database(items: list, progress: bool, shortnames: bool) -> tuple:
             errors.append({"message": e.message, "clue": clue})
 
         except database.SetAlreadyExistsError:
-            pass
+            repeats += 1
 
-    return results, errors
+    return results, repeats, errors
 
