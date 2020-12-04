@@ -5,10 +5,7 @@ import sys
 
 import click
 
-# import api
-# import scrape
-# import batch
-
+import api
 import tools
 
 
@@ -52,16 +49,9 @@ def run(host: str, port: int, file: str, debug: bool, create=bool):
 
 @cli.command(name="import")
 @click.option(
-    "-i",
-    "--in",
-    "json_file",
-    required=True,
-    help="the path to the input file or directory to be imported",
-    type=click.Path(),
+    "--in", "json_path", required=True, help="path to the imported json file", type=click.Path(exists=True),
 )
-@click.option(
-    "-o", "--out", "db_file", help="the name for the output file", type=str, default="questions.db", show_default=True
-)
+@click.option("--out", "db_path", help="output file", type=str, default="questions.db", show_default=True)
 @click.option(
     "--method",
     type=click.Choice(["db", "api"], case_sensitive=False),
@@ -69,7 +59,8 @@ def run(host: str, port: int, file: str, debug: bool, create=bool):
     default="db",
     show_default=True,
 )
-@click.option("--progress", is_flag=True, help="show a progress bar", default=False, show_default=True)
+@click.option("--shortnames", help="json file uses short length keys", type=bool, default=False, show_default=True)
+@click.option("--progress/--no-progress", help="show execution progress", type=bool, default=False, show_default=True)
 @click.option("--url", "endpoint", help="the url for the api import endpoint", type=str)
 @click.option(
     "--create/--no-create",
@@ -78,9 +69,10 @@ def run(host: str, port: int, file: str, debug: bool, create=bool):
     default=True,
     show_default=True,
 )
-def import_(json_file: str, db_file: str, method: str, progress: bool, endpoint: str, create: bool):
-    json_file = pathlib.Path(json_file).absolute()
-    db_file = pathlib.Path(os.getcwd(), db_file).absolute()
+def import_(json_path: str, db_path: str, shortnames: bool, method: str, progress: bool, endpoint: str, create: bool):
+    json_file = pathlib.Path(json_path).absolute()
+    db_file = pathlib.Path(db_path).absolute()
+
     api.app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_file}"
 
     if not db_file.exists() and create:
@@ -95,7 +87,21 @@ def import_(json_file: str, db_file: str, method: str, progress: bool, endpoint:
         click.echo("Error: Missing option '--url' for the url endpoint when using api import.", err=True)
         sys.exit(1)
 
-    batch.add(filename=str(json_file.absolute()), method=method, url=endpoint, shortnames=True, progress=progress)
+    with open(json_file, "r") as file:
+        clues = json.load(file)
+
+    results, errors = tools.batch.add_database(items=clues, progress=progress, shortnames=shortnames)
+
+    click.echo(f"Added {results} clues to sqlite database at {db_file}")
+
+    if len(errors) != 0:
+        if click.confirm(
+            f"Errors occurred adding {len(errors)} to the database. Store the clues that had errors?", default=True
+        ):
+            with open(pathlib.Path(json_file.parent, "errors.json").absolute(), "w") as file:
+                json.dump(errors, file, indent="\t")
+
+            click.echo(f"File saved to {pathlib.Path(json_file.parent, 'errors.json').absolute()}")
 
 
 @cli.group()
@@ -103,59 +109,74 @@ def scrape():
     pass
 
 
-@scrape.command(name="seasons")
-# @click.option(
-#     "--out", "season_file", help="file to store season urls", type=str, default="seasons.json", show_default=True
-# )
-@click.option("--cache/--no-cache", help="cache files to a local directory", default=False, show_default=True)
-@click.option("--cache-path", help="directory to store cached files", type=str)
-def seasons(cache: bool, cache_path: str):
-    seasons_list = batch.get_list_of_seasons()
-    # get_list_of_seasons()
+@scrape.command(name="list")
+@click.argument("item")
+@click.option("--season", type=str, help="the season for which to display games")
+def list_(item: str, season: str):
+    """
+    List the identifiers that can be scraped using the j-archive.com dataset.
 
-    click.echo(", ".join(seasons_list))
+    Can list by either <game> or <season>, but if season is used, the option <--season> must be supplied
+    """
+    if item == "seasons":
+        click.echo(", ".join(tools.batch.get_list_of_seasons()))
+
+    elif item == "games":
+        if season == None:
+            click.echo("Error: Missing option '--season' when displaying games.", err=True)
+            sys.exit(1)
+
+        else:
+            click.echo(", ".join(tools.batch.get_list_of_games(season=season)))
 
 
-# def seasons(season_file: str, cache: bool, cache_path: str):
-#     season_file = pathlib.Path(season_file).absolute()
+@scrape.command(name="fetch")
+@click.argument("item")
+@click.option("--identifier", type=str, required=True, help="the identifier (from the url) for the kind to scrape")
+@click.option("--cache/--no-cache", help="cache files to a local directory", default=True, show_default=True)
+@click.option("--cache-path", help="directory to store cached files", type=str, default=".", show_default=True)
+@click.option(
+    "--output", help="filename to store output", type=str, default="jeopardy.json", show_default=True, required=True
+)
+@click.option("--progress/--no-progress", help="show execution progress", type=bool, default=False, show_default=True)
+def fetch(item: str, identifier: str, cache: bool, cache_path: str, output: str, progress: bool):
+    """
+    Scrape Jeopardy clue data from the j-archive.com and save as a JSON file.
 
-#     if False:  # season_file.exists():
-#         with open(season_file, "r") as input_file:
-#             data = json.load(input_file)
+    This argument must be either <season> or <game>, and requires at least one <identifier>, which can be found from
+    the end of the j-archive.com URL, or by using some of the other commands in this tool (see `list` for some examples)
 
-#     else:
-#         data = list()
+    Multiple scraping passes can be performed by passing a comma-separated list of identifiers.
+    
+    """
+    output = pathlib.Path(".", output).absolute()
 
-#     if cache:
-#         if cache_path == None:
-#             click.echo("Error: A caching path must be supplied when --cache is used", err=True)
-#             sys.exit(1)
+    if output.exists():
+        click.confirm("A file already exists with this name. Overwrite?", abort=True)
 
-#         scraping.scrape.CACHE = True
-#         scraping.scrape.CACHE_PATH = pathlib.Path(cache_path).absolute()
+    if cache:
+        cache_path = pathlib.Path(cache_path, "fetch_cache").absolute()
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
 
-#         if not scraping.scrape.CACHE_PATH.exists():
-#             if click.confirm("The caching directory does not exist. Create it?", abort=True, default=True):
-#                 scraping.scrape.CACHE_PATH.mkdir(parents=True)
+        tools.scrape.CACHE = True
+        tools.scrape.CACHE_PATH = str(cache_path)
 
-#             else:
-#                 sys.exit()
+    if item == "season":
+        clues, errors = tools.batch.scrape_season(season_id=identifier, progress=progress)
 
-#     seasons = scraping.scrape.get_seasons(start=10, stop=11, include_special=False)
-#     games = scraping.scrape.get_games(identifier=seasons[0])
+    elif item == "game":
+        clues, errors = tools.batch.scrape_multiple_games(game_ids=identifier.split(","), progress=progress)
 
-#     game = list(games["games"].keys())[0]
+    else:
+        click.echo("Must fetch either a game or season. Ensure argument is one of those two options.")
 
-#     g = scraping.scrape.Game(identifier=game)
+    with open(output, "w") as json_file:
+        json.dump(clues, json_file, indent="\t")
 
-#     data = g.schema()
-
-#     season_file.parent.mkdir(parents=True, exist_ok=True)
-#     with open(season_file, "w") as output_file:
-#         json.dump(data, output_file, indent="\t")
+    click.echo(f"Successfully parsed out {len(clues)} clue(s), with {len(errors)} error(s)")
+    if len(errors) != 0:
+        click.echo(f'The following game ids had errors: {", ".join(errors)}')
 
 
 if __name__ == "__main__":
-    # cli()
-    print(tools.batch.get_list_of_seasons())
-    # api(host="0.0.0.0", port=5001, file="sample.db", debug=True)
+    cli()

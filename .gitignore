@@ -121,9 +121,9 @@ helpers/database/clues.json
 .DS_Store
 
 *.db
-# *.json
-# !incomplete.json
-# !complete.json
+*.json
+!incomplete.json
+!complete.json
 !test-full.db
 downloads.txt
 tools/media/*

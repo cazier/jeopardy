@@ -2,6 +2,11 @@ import tqdm
 
 from . import scrape
 
+try:
+    from api import database
+except ModuleNotFoundError:
+    from jeopardy_data.api import database
+
 
 def get_list_of_seasons() -> str:
     seasons = scrape.Webpage(resource=f"listseasons.php").get()
@@ -27,20 +32,14 @@ def scrape_game(game_id: str) -> tuple:
     return results
 
 
-def scrape_multiple_games(game_ids: list, progress: bool = False) -> tuple:
+def scrape_multiple_games(game_ids: list, progress: bool) -> tuple:
     results, errors = list(), list()
 
-    if progress:
-        display = tqdm.tqdm
-
-    else:
-        display = lambda k: k
-
-    for game in display(game_ids):
+    for game in display(progress=progress)(game_ids):
         try:
             data = scrape_game(game_id=game)
 
-            results.append(data)
+            results.extend(data)
 
         except (scrape.ParsingError, scrape.NetworkError, scrape.NoItemsFoundError):
             errors.append(game)
@@ -48,8 +47,33 @@ def scrape_multiple_games(game_ids: list, progress: bool = False) -> tuple:
     return results, errors
 
 
-def scrape_season(season_id: str, progress: bool = False) -> tuple:
+def display(progress: bool):
+    if progress:
+        return tqdm.tqdm
+
+    else:
+        return lambda k: k
+
+
+def scrape_season(season_id: str, progress: bool) -> tuple:
     game_ids = get_list_of_games(season=season_id)
 
     return scrape_multiple_games(game_ids=game_ids, progress=progress)
+
+
+def add_database(items: list, progress: bool, shortnames: bool) -> tuple:
+    results, errors = 0, list()
+
+    for clue in display(progress=progress)(items):
+        try:
+            database.add(clue_data=clue, uses_shortnames=shortnames)
+            results += 1
+
+        except (database.MissingDataError, database.BadDataError) as e:
+            errors.append({"message": e.message, "clue": clue})
+
+        except database.SetAlreadyExistsError:
+            pass
+
+    return results, errors
 
