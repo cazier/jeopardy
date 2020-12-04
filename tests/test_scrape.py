@@ -124,7 +124,7 @@ def test_get_seasons(TestFiles):
 
 
 def test_empty_pages():
-    page = BeautifulSoup('<html><head></head><body id="content">Empty Page</body></html>', "lxml")
+    page = BeautifulSoup('<html><head></head><body id="content"><table>Empty Page</table></body></html>', "lxml")
 
     with pytest.raises(scrape.NoItemsFoundError):
         scrape.get_seasons(page=page)
