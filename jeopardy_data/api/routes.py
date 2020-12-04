@@ -101,12 +101,12 @@ class SetsMultiple(Resource):
     def post(self) -> dict:
         payload = request.json
         if (set(payload.keys()) == KEYS) and all((len(str(v)) > 0 for k, v in payload.items())):
-            success, resp = database.add(clue_data=payload, uses_shortnames=False)
+            try:
+                resp = database.add(clue_data=payload, uses_shortnames=False)
 
-            if success:
                 return jsonify(set_schema.dump(resp))
 
-            else:
+            except database.SetAlreadyExistsError:
                 abort(400, message="the supplied data is already in the database")
 
         else:

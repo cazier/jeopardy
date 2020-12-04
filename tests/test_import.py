@@ -32,8 +32,8 @@ def test_add_one_long():
         "value": 1,
         "category": "test",
     }
-    success, message = api.database.add(clue_data=clue, uses_shortnames=False)
-    assert success
+    message = api.database.add(clue_data=clue, uses_shortnames=False)
+    assert message is not None
 
 
 def test_add_one_long_missing():
@@ -47,8 +47,8 @@ def test_add_one_long_missing():
         "value": 1,
         "category": "test",
     }
-    success, message = api.database.add(clue_data=clue, uses_shortnames=False)
-    assert not success
+    with pytest.raises(api.database.MissingDataError, match=".*following keys.*"):
+        api.database.add(clue_data=clue, uses_shortnames=False)
 
 
 def test_add_one_short():
@@ -63,8 +63,8 @@ def test_add_one_short():
         "v": 1,
         "c": "test",
     }
-    success, message = api.database.add(clue_data=clue, uses_shortnames=True)
-    assert success
+    message = api.database.add(clue_data=clue, uses_shortnames=True)
+    assert message is not None
 
 
 def test_add_one_short_missing():
@@ -78,8 +78,9 @@ def test_add_one_short_missing():
         "v": 1,
         "c": "test",
     }
-    success, message = api.database.add(clue_data=clue, uses_shortnames=True)
-    assert not success
+
+    with pytest.raises(api.database.MissingDataError, match=".*following keys.*"):
+        api.database.add(clue_data=clue, uses_shortnames=True)
 
 
 def test_add_multiple():
@@ -109,7 +110,7 @@ def test_add_multiple():
     ]
     results = [api.database.add(clue_data=clue, uses_shortnames=True) for clue in clues]
 
-    assert all((response[0] for response in results))
+    assert all((response is not None for response in results))
 
 
 def test_add_one_empty():
@@ -125,29 +126,11 @@ def test_add_one_empty():
         "c": "test",
     }
 
-    results = list()
-
     for key in clue.keys():
         data = {k: v if k != key else "" for k, v in clue.items()}
-        results.append(api.database.add(clue_data=data, uses_shortnames=True))
 
-    assert all((not response[0] for response in results))
-
-
-def test_add_one_repeat():
-    clue = {
-        "d": "2020-01-01",
-        "s": 2,
-        "r": 0,
-        "f": True,
-        "a": "answer",
-        "q": "question",
-        "e": True,
-        "v": 1,
-        "c": "test",
-    }
-    success, message = api.database.add(clue_data=clue, uses_shortnames=True)
-    assert not success & (message == {"message": "this set already exists"})
+        with pytest.raises(api.database.MissingDataError, match=".*has an empty.*"):
+            api.database.add(clue_data=data, uses_shortnames=True)
 
 
 def test_add_one_repeat():
@@ -162,8 +145,9 @@ def test_add_one_repeat():
         "v": 1,
         "c": "test",
     }
-    success, message = api.database.add(clue_data=clue, uses_shortnames=True)
-    assert not success & (message == {"message": "this set already exists"})
+
+    with pytest.raises(api.database.SetAlreadyExistsError):
+        api.database.add(clue_data=clue, uses_shortnames=True)
 
 
 def test_add_bad_date():
@@ -178,8 +162,8 @@ def test_add_bad_date():
         "v": 1,
         "c": "test",
     }
-    success, message = api.database.add(clue_data=clue, uses_shortnames=True)
-    assert not success & (message == {"message": "please format the date in the isoformat: YYY-MM-DD"})
+    with pytest.raises(api.database.BadDataError, match=".*date is in the isoformat.*"):
+        api.database.add(clue_data=clue, uses_shortnames=True)
 
 
 def test_add_bad_show():
@@ -194,8 +178,9 @@ def test_add_bad_show():
         "v": 1,
         "c": "test",
     }
-    success, message = api.database.add(clue_data=clue, uses_shortnames=True)
-    assert not success & (message == {"message": "please format the date in the isoformat: YYY-MM-DD"})
+
+    with pytest.raises(api.database.BadDataError, match=".*show number is an integer.*"):
+        api.database.add(clue_data=clue, uses_shortnames=True)
 
 
 def test_add_bad_round_not_integer():
@@ -210,10 +195,9 @@ def test_add_bad_round_not_integer():
         "v": 1,
         "c": "test",
     }
-    success, message = api.database.add(clue_data=clue, uses_shortnames=True)
-    assert not success & (
-        message == {"message": "please ensure the round number is one of the following integers: (0, 1, 2, 4)"}
-    )
+
+    with pytest.raises(api.database.BadDataError, match=".*round number is one of the.*"):
+        api.database.add(clue_data=clue, uses_shortnames=True)
 
 
 def test_add_bad_round_not_valid():
@@ -228,10 +212,9 @@ def test_add_bad_round_not_valid():
         "v": 1,
         "c": "test",
     }
-    success, message = api.database.add(clue_data=clue, uses_shortnames=True)
-    assert not success & (
-        message == {"message": "please ensure the round number is one of the following integers: (0, 1, 2, 4)"}
-    )
+
+    with pytest.raises(api.database.BadDataError, match=".*round number is one of the.*"):
+        api.database.add(clue_data=clue, uses_shortnames=True)
 
 
 def test_add_bad_complete():
@@ -246,8 +229,9 @@ def test_add_bad_complete():
         "v": 1,
         "c": "test",
     }
-    success, message = api.database.add(clue_data=clue, uses_shortnames=True)
-    assert not success & (message == {"message": "please ensure the complete tag is supplied with a boolean value"})
+
+    with pytest.raises(api.database.BadDataError, match=".*complete tag is supplied.*"):
+        api.database.add(clue_data=clue, uses_shortnames=True)
 
 
 def test_add_bad_value_not_integer():
@@ -262,10 +246,9 @@ def test_add_bad_value_not_integer():
         "v": "alex",
         "c": "test",
     }
-    success, message = api.database.add(clue_data=clue, uses_shortnames=True)
-    assert not success & (
-        message == {"message": 'please ensure the value is a positive number, with or without, a "$"'}
-    )
+
+    with pytest.raises(api.database.BadDataError, match=".*value is a positive number.*"):
+        api.database.add(clue_data=clue, uses_shortnames=True)
 
 
 def test_add_bad_value_not_positive():
@@ -280,10 +263,9 @@ def test_add_bad_value_not_positive():
         "v": -1,
         "c": "test",
     }
-    success, message = api.database.add(clue_data=clue, uses_shortnames=True)
-    assert not success & (
-        message == {"message": 'please ensure the value is a positive number, with or without, a "$"'}
-    )
+
+    with pytest.raises(api.database.BadDataError, match=".*value is a positive number.*"):
+        api.database.add(clue_data=clue, uses_shortnames=True)
 
 
 def test_add_bad_external():
@@ -298,5 +280,7 @@ def test_add_bad_external():
         "v": 1,
         "c": "test",
     }
-    success, message = api.database.add(clue_data=clue, uses_shortnames=True)
-    assert not success & (message == {"message": "please ensure the external tag is supplied with a boolean value"})
+
+    with pytest.raises(api.database.BadDataError, match=".*external tag is supplied.*"):
+        api.database.add(clue_data=clue, uses_shortnames=True)
+
