@@ -159,10 +159,12 @@ def get_game_title(page: BeautifulSoup) -> tuple:
 def get_categories(page: BeautifulSoup) -> dict:
     categories = page.find_all("td", class_="category_name")
 
+    has_tiebreaker = "Tiebreaker Round" in (i.text for i in page.find_all("h2"))
+    
     if (num := len(categories)) < 1:
         raise NoItemsFoundError()
 
-    elif num not in [13, 14]:
+    elif (has_tiebreaker and num != 14) or (not has_tiebreaker and num != 13):
         raise ParsingError("An incorrect number of categories was found.")
 
     names = [category.text for category in categories]
