@@ -267,7 +267,7 @@ class GameResource(Resource):
 
         numbers = random.sample(range(0, number_results), min(number_results, size * 2))
 
-        game = dict()
+        game: dict = dict()
 
         while len(game.keys()) < size:
             try:

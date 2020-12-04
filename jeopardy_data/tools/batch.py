@@ -4,11 +4,12 @@ from . import scrape
 
 try:
     from api import database
+
 except ModuleNotFoundError:
     from jeopardy_data.api import database
 
 
-def get_list_of_seasons() -> str:
+def get_list_of_seasons() -> list:
     seasons = scrape.Webpage(resource=f"listseasons.php").get()
 
     results = scrape.get_seasons(page=seasons)
@@ -16,7 +17,7 @@ def get_list_of_seasons() -> str:
     return results
 
 
-def get_list_of_games(season: str) -> str:
+def get_list_of_games(season: str) -> list:
     games = scrape.Webpage(resource=f"showseason.php?season={season}").get()
 
     results = scrape.get_games(page=games)
@@ -24,7 +25,7 @@ def get_list_of_games(season: str) -> str:
     return results
 
 
-def scrape_game(game_id: str) -> tuple:
+def scrape_game(game_id: str) -> list:
     game = scrape.Webpage(resource=f"showgame.php?game_id={game_id}").get()
 
     results = scrape.get_board(page=game)

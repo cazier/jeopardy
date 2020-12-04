@@ -136,10 +136,16 @@ def list_(item: str, season: str):
 @click.option("--cache/--no-cache", help="cache files to a local directory", default=True, show_default=True)
 @click.option("--cache-path", help="directory to store cached files", type=str, default=".", show_default=True)
 @click.option(
-    "--output", help="filename to store output", type=str, default="jeopardy.json", show_default=True, required=True
+    "--output",
+    "output_path",
+    help="filename to store output",
+    type=str,
+    default="jeopardy.json",
+    show_default=True,
+    required=True,
 )
 @click.option("--progress/--no-progress", help="show execution progress", type=bool, default=False, show_default=True)
-def fetch(item: str, identifier: str, cache: bool, cache_path: str, output: str, progress: bool):
+def fetch(item: str, identifier: str, cache: bool, cache_path: str, output_path: str, progress: bool):
     """
     Scrape Jeopardy clue data from the j-archive.com and save as a JSON file.
 
@@ -149,17 +155,17 @@ def fetch(item: str, identifier: str, cache: bool, cache_path: str, output: str,
     Multiple scraping passes can be performed by passing a comma-separated list of identifiers.
     
     """
-    output = pathlib.Path(".", output).absolute()
+    output_file = pathlib.Path(".", output_path).absolute()
 
-    if output.exists():
+    if output_file.exists():
         click.confirm("A file already exists with this name. Overwrite?", abort=True)
 
     if cache:
-        cache_path = pathlib.Path(cache_path, "fetch_cache").absolute()
-        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        cache_file = pathlib.Path(cache_path, "fetch_cache").absolute()
+        cache_file.parent.mkdir(parents=True, exist_ok=True)
 
         tools.scrape.CACHE = True
-        tools.scrape.CACHE_PATH = str(cache_path)
+        tools.scrape.CACHE_PATH = str(cache_file)
 
     if item == "season":
         clues, errors = tools.batch.scrape_season(season_id=identifier, progress=progress)
@@ -170,8 +176,8 @@ def fetch(item: str, identifier: str, cache: bool, cache_path: str, output: str,
     else:
         click.echo("Must fetch either a game or season. Ensure argument is one of those two options.")
 
-    with open(output, "w") as json_file:
-        json.dump(clues, json_file, indent="\t")
+    with open(output_file, "w") as file:
+        json.dump(clues, file, indent="\t")
 
     click.echo(f"Successfully parsed out {len(clues)} clue(s), with {len(errors)} error(s)")
     if len(errors) != 0:
