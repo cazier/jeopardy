@@ -111,7 +111,7 @@ def get_seasons(page: BeautifulSoup):
 
 def get_games(page: BeautifulSoup) -> list:
     try:
-        all_games = page.find(id="content").find_all("a")
+        all_games = page.find(id="content").table.find_all("a")
         all_games = [game.get("href") for game in all_games]
 
         results = [resource_id(url=game) for game in all_games]
@@ -160,7 +160,7 @@ def get_categories(page: BeautifulSoup) -> dict:
     categories = page.find_all("td", class_="category_name")
 
     has_tiebreaker = "Tiebreaker Round" in (i.text for i in page.find_all("h2"))
-    
+
     if (num := len(categories)) < 1:
         raise NoItemsFoundError()
 
