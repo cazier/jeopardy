@@ -5,8 +5,18 @@ import sys
 
 import click
 
-import api
-import tools
+
+try:
+    import api
+
+except ModuleNotFoundError:
+    from jeopardy_data import api
+
+try:
+    import tools
+
+except ModuleNotFoundError:
+    from jeopardy_data import tools
 
 
 @click.group()
@@ -42,7 +52,6 @@ def run(host: str, port: int, file: str, debug: bool, create=bool):
 
     elif not db_file.exists() and not create:
         click.echo("Error: No database file was found or could be created.", err=True)
-        sys.exit(1)
 
     api.app.run(debug=debug, host=host, port=port)
 
@@ -81,11 +90,11 @@ def import_(json_path: str, db_path: str, shortnames: bool, method: str, progres
 
     elif not db_file.exists() and not create:
         click.echo("Error: No database file was found or could be created.", err=True)
-        sys.exit(1)
+        sys.exit(2)
 
     if (method == "api") and (endpoint == None):
         click.echo("Error: Missing option '--url' for the url endpoint when using api import.", err=True)
-        sys.exit(1)
+        sys.exit(2)
 
     with open(json_file, "r") as file:
         clues = json.load(file)
@@ -124,7 +133,7 @@ def list_(item: str, season: str):
     elif item == "games":
         if season == None:
             click.echo("Error: Missing option '--season' when displaying games.", err=True)
-            sys.exit(1)
+            sys.exit(2)
 
         else:
             click.echo(", ".join(tools.batch.get_list_of_games(season=season)))
