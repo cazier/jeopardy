@@ -6,21 +6,7 @@ import pytest
 from jeopardy_data import api
 
 
-@pytest.fixture(autouse=True, scope="module")
-def emptyclient():
-    jeopardy = api.app
-    jeopardy.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{pathlib.Path('tests/files/test-empty.db').absolute()}"
-    jeopardy.config["TESTING"] = True
-
-    api.db.create_all()
-
-    with jeopardy.test_client() as client:
-        yield client
-
-    api.db.drop_all()
-
-
-def test_add_one_long():
+def test_add_one_long(emptyclient):
     clue = {
         "date": "2020-01-01",
         "show": 1,
@@ -36,7 +22,7 @@ def test_add_one_long():
     assert message is not None
 
 
-def test_add_one_long_missing():
+def test_add_one_long_missing(emptyclient):
     clue = {
         "date": "2020-01-01",
         "show": 1,
@@ -51,7 +37,7 @@ def test_add_one_long_missing():
         api.database.add(clue_data=clue, uses_shortnames=False)
 
 
-def test_add_one_short():
+def test_add_one_short(emptyclient):
     clue = {
         "d": "2020-01-01",
         "s": 2,
@@ -67,7 +53,7 @@ def test_add_one_short():
     assert message is not None
 
 
-def test_add_one_short_missing():
+def test_add_one_short_missing(emptyclient):
     clue = {
         "d": "2020-01-01",
         "s": 2,
@@ -83,7 +69,7 @@ def test_add_one_short_missing():
         api.database.add(clue_data=clue, uses_shortnames=True)
 
 
-def test_add_multiple():
+def test_add_multiple(emptyclient):
     clues = [
         {
             "d": "2020-01-01",
@@ -113,7 +99,7 @@ def test_add_multiple():
     assert all((response is not None for response in results))
 
 
-def test_add_one_empty():
+def test_add_one_empty(emptyclient):
     clue = {
         "d": "2020-01-01",
         "s": 2,
@@ -133,7 +119,7 @@ def test_add_one_empty():
             api.database.add(clue_data=data, uses_shortnames=True)
 
 
-def test_add_one_repeat():
+def test_add_one_repeat(emptyclient):
     clue = {
         "d": "2020-01-01",
         "s": 2,
@@ -150,7 +136,7 @@ def test_add_one_repeat():
         api.database.add(clue_data=clue, uses_shortnames=True)
 
 
-def test_add_bad_date():
+def test_add_bad_date(emptyclient):
     clue = {
         "d": "20210-01-01",
         "s": 2,
@@ -166,7 +152,7 @@ def test_add_bad_date():
         api.database.add(clue_data=clue, uses_shortnames=True)
 
 
-def test_add_bad_show():
+def test_add_bad_show(emptyclient):
     clue = {
         "d": "2020-01-01",
         "s": "alex",
@@ -183,7 +169,7 @@ def test_add_bad_show():
         api.database.add(clue_data=clue, uses_shortnames=True)
 
 
-def test_add_bad_round_not_integer():
+def test_add_bad_round_not_integer(emptyclient):
     clue = {
         "d": "2020-01-01",
         "s": 2,
@@ -200,7 +186,7 @@ def test_add_bad_round_not_integer():
         api.database.add(clue_data=clue, uses_shortnames=True)
 
 
-def test_add_bad_round_not_valid():
+def test_add_bad_round_not_valid(emptyclient):
     clue = {
         "d": "2020-01-01",
         "s": 2,
@@ -217,7 +203,7 @@ def test_add_bad_round_not_valid():
         api.database.add(clue_data=clue, uses_shortnames=True)
 
 
-def test_add_bad_complete():
+def test_add_bad_complete(emptyclient):
     clue = {
         "d": "2020-01-01",
         "s": 2,
@@ -234,7 +220,7 @@ def test_add_bad_complete():
         api.database.add(clue_data=clue, uses_shortnames=True)
 
 
-def test_add_bad_value_not_integer():
+def test_add_bad_value_not_integer(emptyclient):
     clue = {
         "d": "2020-01-01",
         "s": 2,
@@ -251,7 +237,7 @@ def test_add_bad_value_not_integer():
         api.database.add(clue_data=clue, uses_shortnames=True)
 
 
-def test_add_bad_value_not_positive():
+def test_add_bad_value_not_positive(emptyclient):
     clue = {
         "d": "2020-01-01",
         "s": 2,
@@ -268,7 +254,7 @@ def test_add_bad_value_not_positive():
         api.database.add(clue_data=clue, uses_shortnames=True)
 
 
-def test_add_bad_external():
+def test_add_bad_external(emptyclient):
     clue = {
         "d": "2020-01-01",
         "s": 2,

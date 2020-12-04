@@ -18,7 +18,7 @@ def testclient():
 
 
 @pytest.fixture
-def emptyclient():
+def api_emptyclient():
     jeopardy = api.app
     jeopardy.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{pathlib.Path('tests/files/test-empty.db').absolute()}"
     jeopardy.config["TESTING"] = True
@@ -31,27 +31,27 @@ def emptyclient():
     api.db.drop_all()
 
 
-def test_get_details_methods(emptyclient):
+def test_get_details_methods(api_emptyclient):
     rv = {
-        emptyclient.post("/details").status_code,
-        emptyclient.delete("/details").status_code,
-        emptyclient.put("/details").status_code,
-        emptyclient.patch("/details").status_code,
+        api_emptyclient.post("/details").status_code,
+        api_emptyclient.delete("/details").status_code,
+        api_emptyclient.put("/details").status_code,
+        api_emptyclient.patch("/details").status_code,
     }
 
     assert rv == {405}
 
 
-def test_empty_client(emptyclient):
+def test_empty_client(api_emptyclient):
     for endpoint in ["/details", "/shows", "/show", "/set", "/sets"]:
-        rv = emptyclient.get(endpoint)
+        rv = api_emptyclient.get(endpoint)
 
         assert rv.status_code == 404
         assert "no items" in rv.get_json()["message"]
 
 
-def test_invalid_endpoint(emptyclient):
-    rv = emptyclient.get("/alex")
+def test_invalid_endpoint(api_emptyclient):
+    rv = api_emptyclient.get("/alex")
 
     assert rv.status_code == 404
 
@@ -177,8 +177,8 @@ def test_sets_by_round(testclient, test_data):
     assert "round number must be" in rv.get_json()["message"]
 
 
-def test_sets_by_round_empty(emptyclient):
-    rv = emptyclient.get(f"/set/round/1")
+def test_sets_by_round_empty(api_emptyclient):
+    rv = api_emptyclient.get(f"/set/round/1")
 
     assert rv.status_code == 404
     assert rv.get_json() == {"message": "no items were found with that query"}
@@ -378,17 +378,17 @@ def test_categories_by_round(testclient, test_data):
     assert "round number must be" in rv.get_json()["message"]
 
 
-def test_categories_by_round_empty(emptyclient):
-    rv = emptyclient.get(f"/category/round/1")
+def test_categories_by_round_empty(api_emptyclient):
+    rv = api_emptyclient.get(f"/category/round/1")
 
     assert rv.status_code == 404
     assert rv.get_json() == {"message": "no items were found with that query"}
 
 
-def test_empty_db(emptyclient, test_data):
+def test_empty_db(api_emptyclient, test_data):
     question = test_data[0]
 
-    rv = emptyclient.post("/sets", json=question)
+    rv = api_emptyclient.post("/sets", json=question)
 
     assert rv.data != None
 

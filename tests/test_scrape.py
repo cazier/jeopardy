@@ -4,39 +4,9 @@ import os
 import operator
 
 import pytest
-import requests
 from bs4 import BeautifulSoup
 
 from jeopardy_data.tools import scrape
-
-scrape.DELAY = 0
-
-
-@pytest.fixture
-def PatchedRequests(monkeypatch):
-    def localGet(uri, *args, **kwargs):
-        file = uri.split("/")[-1].replace("?", "_")
-
-        path = pathlib.Path(os.getcwd(), "tests/files/mock_get", file).absolute()
-
-        if path.exists():
-            status_code = 200
-
-            with open(path, "r") as local_file:
-                text = local_file.read()
-
-        else:
-            status_code = 404
-
-            text = "<html><head></head><body>404 Page Not Found</body></html>"
-
-        mock = type("PatchedRequests", (), {})()
-        mock.status_code = status_code
-        mock.text = text
-
-        return mock
-
-    monkeypatch.setattr(requests, "get", localGet)
 
 
 @pytest.fixture
@@ -50,18 +20,6 @@ def example_org(PatchedRequests):
     scrape.BASE_URL = "https://example.org"
 
     return scrape.Webpage(resource="test")
-
-
-@pytest.fixture
-def complete_file():
-    with open("tests/files/complete.json", "r") as sample_file:
-        return json.load(sample_file)
-
-
-@pytest.fixture
-def incomplete_file():
-    with open("tests/files/incomplete.json", "r") as sample_file:
-        return json.load(sample_file)
 
 
 def test_pjs():
