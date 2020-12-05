@@ -113,6 +113,7 @@ def get_games(page: BeautifulSoup) -> list:
     try:
         all_games = page.find(id="content").table.find_all("a")
         all_games = [game.get("href") for game in all_games]
+        all_games = [game for game in all_games if "showgame.php?game_id" in game]
 
         results = [resource_id(url=game) for game in all_games]
 
