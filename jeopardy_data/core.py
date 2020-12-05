@@ -181,7 +181,10 @@ def fetch(item: str, identifier: str, cache: bool, cache_path: str, output_path:
         tools.scrape.CACHE_PATH = str(cache_file)
 
     if item == "season":
-        clues, errors = tools.batch.scrape_season(season_id=identifier, progress=progress)
+        if identifier == "all":
+            identifier = ",".join(tools.batch.get_list_of_seasons())
+
+        clues, errors = tools.batch.scrape_multiple_seasons(season_ids=identifier.split(","), progress=progress)
 
     elif item == "game":
         clues, errors = tools.batch.scrape_multiple_games(game_ids=identifier.split(","), progress=progress)

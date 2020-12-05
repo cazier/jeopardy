@@ -23,12 +23,13 @@ def get_list_of_games(season: str) -> list:
     return results
 
 
-def scrape_game(game_id: str) -> list:
-    game = scrape.Webpage(resource=f"showgame.php?game_id={game_id}").get()
+def scrape_multiple_seasons(season_ids: list, progress: bool) -> tuple:
+    game_ids = list()
 
-    results = scrape.get_board(page=game)
+    for season in season_ids:
+        game_ids.extend(get_list_of_games(season=season))
 
-    return results
+    return scrape_multiple_games(game_ids=game_ids, progress=progress)
 
 
 def scrape_multiple_games(game_ids: list, progress: bool) -> tuple:
@@ -46,6 +47,14 @@ def scrape_multiple_games(game_ids: list, progress: bool) -> tuple:
     return results, errors
 
 
+def scrape_game(game_id: str) -> list:
+    game = scrape.Webpage(resource=f"showgame.php?game_id={game_id}").get()
+
+    results = scrape.get_board(page=game)
+
+    return results
+
+
 def display(progress: bool):
     if progress:
         import tqdm
@@ -54,12 +63,6 @@ def display(progress: bool):
 
     else:
         return lambda k: k
-
-
-def scrape_season(season_id: str, progress: bool) -> tuple:
-    game_ids = get_list_of_games(season=season_id)
-
-    return scrape_multiple_games(game_ids=game_ids, progress=progress)
 
 
 def add_database(items: list, progress: bool, shortnames: bool) -> tuple:

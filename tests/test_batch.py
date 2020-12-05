@@ -35,11 +35,9 @@ def test_scrape_multiple_games(PatchedRequests, complete_file, incomplete_file):
     assert errors == ["3"]
 
 
-def test_scrape_season(PatchedRequests, complete_file, incomplete_file):
-    results, errors = batch.scrape_season(season_id=2, progress=False)
-
+def test_scrape_multiple_seasons(PatchedRequests, complete_file, incomplete_file):
+    results, errors = batch.scrape_multiple_seasons(season_ids=["2"], progress=False)
     assert results == complete_file + incomplete_file
-    assert errors == ["3"]
 
 
 def test_add_database(emptyclient, complete_file):
