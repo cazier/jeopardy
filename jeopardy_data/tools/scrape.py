@@ -282,7 +282,7 @@ def get_board(page: BeautifulSoup) -> list:
 
 ### HELPER FUNCTIONS
 def pjs(function: str) -> tuple:
-    """ A simple wrapper function around the super useful pyjsparser library. This steps through all of the AST tree
+    """A simple wrapper function around the super useful pyjsparser library. This steps through all of the AST tree
     of the library to only return the HTML element in the function.
     """
     if function == "":

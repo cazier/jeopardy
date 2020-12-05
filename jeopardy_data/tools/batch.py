@@ -1,5 +1,3 @@
-import tqdm
-
 from . import scrape
 
 try:
@@ -50,6 +48,8 @@ def scrape_multiple_games(game_ids: list, progress: bool) -> tuple:
 
 def display(progress: bool):
     if progress:
+        import tqdm
+
         return tqdm.tqdm
 
     else:
@@ -78,4 +78,3 @@ def add_database(items: list, progress: bool, shortnames: bool) -> tuple:
             repeats += 1
 
     return results, repeats, errors
-

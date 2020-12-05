@@ -117,7 +117,7 @@
                 <td>
                   <div
                     onmouseover="toggle('clue_J_2_1', 'clue_J_2_1_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Wright Brothers&lt;/em&gt;')"
-                    onmouseout="toggle('clue_J_2_1', 'clue_J_2_1_stuck', 'These two brothers, named Orville and Wilbur, wmade the first controlled, powered, heavier-than-air, flight in North Carolina.')"
+                    onmouseout="toggle('clue_J_2_1', 'clue_J_2_1_stuck', 'These two brothers, named Orville and Wilbur, made the first controlled, powered, heavier-than-air, flight in North Carolina.')"
                     onclick="togglestick('clue_J_2_1_stuck')">
                     <table class="clue_header">
                       <tr>
@@ -129,7 +129,7 @@
                 </td>
               </tr>
               <tr>
-                <td id="clue_J_2_1" class="clue_text">These two brothers, named Orville and Wilbur, wmade the first
+                <td id="clue_J_2_1" class="clue_text">These two brothers, named Orville and Wilbur, made the first
                   controlled,
                   powered, heavier-than-air, flight in North Carolina.</td>
               </tr>

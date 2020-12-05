@@ -58,7 +58,11 @@ def run(host: str, port: int, file: str, debug: bool, create=bool):
 
 @cli.command(name="import")
 @click.option(
-    "--in", "json_path", required=True, help="path to the imported json file", type=click.Path(exists=True),
+    "--in",
+    "json_path",
+    required=True,
+    help="path to the imported json file",
+    type=click.Path(exists=True),
 )
 @click.option("--out", "db_path", help="output file", type=str, default="questions.db", show_default=True)
 @click.option(
@@ -162,7 +166,7 @@ def fetch(item: str, identifier: str, cache: bool, cache_path: str, output_path:
     the end of the j-archive.com URL, or by using some of the other commands in this tool (see `list` for some examples)
 
     Multiple scraping passes can be performed by passing a comma-separated list of identifiers.
-    
+
     """
     output_file = pathlib.Path(".", output_path).absolute()
 
