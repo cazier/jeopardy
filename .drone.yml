@@ -1,8 +1,0 @@
-kind: pipeline
-name: CI
-steps:
-    - name: testing
-      image: cazier/jd_test:latest
-      commands:
-        - pytest
-
