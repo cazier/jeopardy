@@ -68,7 +68,7 @@ class Game(object):
         elif reset_score:
             self.score.reset(type_="score")
 
-        self.round = 1
+        self.round = 0
 
     def round_text(self, upcoming: bool = False) -> str:
         """Return the text describing the title of the, by default, current round.
@@ -80,16 +80,16 @@ class Game(object):
         """
         display_round = self.round + 1 if upcoming else self.round
 
-        if display_round == 1:
+        if display_round == 0:
             return "{copyright}!".format(copyright=self.game_name)
 
-        elif display_round == 2:
+        elif display_round == 1:
             return "Double {copyright}!".format(copyright=self.game_name)
 
-        elif display_round == 3:
+        elif display_round == 2:
             return "Final {copyright}!".format(copyright=self.game_name)
 
-        elif display_round == 4:
+        elif display_round == 3:
             return "Tiebreaker {copyright}!".format(copyright=self.game_name)
 
         else:
@@ -182,10 +182,7 @@ class Scoreboard(object):
         return list(self.players.keys())
 
     def sort(self, **kwargs) -> list:
-        return [
-            i[0]
-            for i in sorted(self.players.items(), key=lambda k: k[1]["score"], **kwargs)
-        ]
+        return [i[0] for i in sorted(self.players.items(), key=lambda k: k[1]["score"], **kwargs)]
 
     def wager(self, player: str) -> dict:
         return {
@@ -231,7 +228,7 @@ class Board(object):
 
     def get_content(self) -> None:
         """Create a datastructure storing the categories and content associated with each round of gameplay.
-        This function should perform a number of steps to prevent the appearance of incomplete categories, or 
+        This function should perform a number of steps to prevent the appearance of incomplete categories, or
         external content.
         """
         conn = sqlite3.connect(self.db)
@@ -259,9 +256,7 @@ class Board(object):
             # Loop over the list of categories to generate a new dataset of answers/questions for each. The while loop
             # will repeat in the event external media is still found, or an incomplete category is found.
             qs: list = list()
-            while sum([q[8] for q in qs]) > 0 or sum([q[7] for q in qs]) < len(
-                categories
-            ):
+            while sum([q[8] for q in qs]) > 0 or sum([q[7] for q in qs]) < len(categories):
 
                 # Technically, this can error out, if all of the categories in the game are incomplete... However,
                 # the included database should already include enough protection against this... 😬
@@ -278,9 +273,7 @@ class Board(object):
 
     def add_wagers(self) -> None:
         """Randomly assign the "Daily Double" to the correct number of sets per round."""
-        doubles = itertools.product(
-            range(len(self.categories)), range(len(self.categories[0].content))
-        )
+        doubles = itertools.product(range(len(self.categories)), range(len(self.categories[0].content)))
 
         for daily_double in random.sample(list(doubles), [0, 1, 2, 0, 0][self.round]):
             if config.debug:
@@ -298,9 +291,7 @@ class Category(object):
         self.content: list = list()
 
         for content_index, content_info in enumerate(content):
-            self.add_content(
-                content_info=content_info, content_index=content_index
-            )
+            self.add_content(content_info=content_info, content_index=content_index)
 
         self.content.sort()
 

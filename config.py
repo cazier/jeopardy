@@ -11,4 +11,4 @@ app_secret = u"secret!"
 
 debug = True
 sets = 2
-round_ = 1
+round_ = 0
