@@ -28,8 +28,7 @@
                     <h2>
                         Let's Play {{ game.round_text() }}
                     </h2>
-                    {% if game.round <= 2 %}
-                    <table class="table">
+                    {% if game.round <= 2 %} <table class="table">
                         <tr>
                             {% for name in game.board.categories %}
                             <th style="width: {{ 100 // game.size }}%; text-align: center;">
@@ -51,96 +50,96 @@
                             {% endfor %}
                         </tr>
                         {% endfor %}
-                    </table>
-                    <br>
-                    {% elif game.round > 2 %}
-                    <div>
+                        </table>
+                        <br>
+                        {% elif game.round > 2 %}
+                        <div>
+                            <hr>
+                            <h3>
+                                The category is:
+                            </h3>
+                            <h4 style="padding-left: 25px">{{ game.board.categories[0].category }}</h4>
+                        </div>
+                        {% endif %}
                         <hr>
-                        <h3>
-                            The category is:
-                        </h3>
-                        <h4 style="padding-left: 25px">{{ game.board.categories[0].category }}</h4>
-                    </div>
-                    {% endif %}
-                    <hr>
-                    <table class="table" style="width: 100%;" id="score_board">
-                        <h4>
-                            Scores!
-                        </h4>
-                        <tr id='players'>
-                            {% for name in game.score.keys() %}
-                            <th style="text-align: center;">
-                                {{ name }}
-                            </th>
-                            {% endfor %}
-                        </tr>
-                        <tr id='scores'>
-                            {% for name in game.score.keys() %}
-                            <td style="text-align: center;">
-                                <span>{{ currency }}</span>
-                                <span id="{{ name }}_score">{{ game.score[name] }}</span>
-                            </td>
-                            {% endfor %}
-                        </tr>
-                    </table>
-                    <div class="modal fade" id="master-modal" tabindex="-1" role="dialog"
-                        aria-labelledby="master-modal-holder" aria-hidden="true" data-keyboard="false"
-                        data-backdrop="static">
-                        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-                            <div class="modal-content" id="standard_set" style="display: none;">
-                                <div class="modal-custom">Answer:</div>
-                                <div class="modal-body" id="answer"></div>
-                            </div>
-                            <div class="modal-content" id="wager_round" style="display: none;">
-                                <div class="modal-header">
-                                    <h2 class="modal-title centered">{{ game.heading() }}</h2>
+                        <table class="table" style="width: 100%;" id="score_board">
+                            <h4>
+                                Scores!
+                            </h4>
+                            <tr id='players'>
+                                {% for name in game.score.keys() %}
+                                <th style="text-align: center;">
+                                    {{ name }}
+                                </th>
+                                {% endfor %}
+                            </tr>
+                            <tr id='scores'>
+                                {% for name in game.score.keys() %}
+                                <td style="text-align: center;">
+                                    <span>{{ currency }}</span>
+                                    <span id="{{ name }}_score">{{ game.score[name] }}</span>
+                                </td>
+                                {% endfor %}
+                            </tr>
+                        </table>
+                        <div class="modal fade" id="master-modal" tabindex="-1" role="dialog"
+                            aria-labelledby="master-modal-holder" aria-hidden="true" data-keyboard="false"
+                            data-backdrop="static">
+                            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                                <div class="modal-content" id="standard_set" style="display: none;">
+                                    <div class="modal-custom">Answer:</div>
+                                    <div class="modal-body" id="answer"></div>
                                 </div>
-                                <div class="modal-body">
-                                    <div class="card-group">
-                                        <div class="card" id="wager_2" style="display: none;">
-                                            <div class="card-body">
-                                                <div class="card-title d-flex justify-content-between">
-                                                    <h3><span>Answer:</span></h3>
-                                                    <h3></h3>
+                                <div class="modal-content" id="wager_round" style="display: none;">
+                                    <div class="modal-header">
+                                        <h2 class="modal-title centered">{{ game.heading() }}</h2>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="card-group">
+                                            <div class="card" id="wager_2" style="display: none;">
+                                                <div class="card-body">
+                                                    <div class="card-title d-flex justify-content-between">
+                                                        <h3><span>Answer:</span></h3>
+                                                        <h3></h3>
+                                                    </div>
+                                                    <hr>
+                                                    <div id="wager_answer" class="card-text smaller"></div>
                                                 </div>
-                                                <hr>
-                                                <div id="wager_answer" class="card-text smaller"></div>
                                             </div>
-                                        </div>
-                                        <div class="card" id="final_reveal" style="display: none;">
-                                            <div class="card-body">
-                                                <div class="card-title d-flex justify-content-between">
-                                                    <h3 id="player"></h3>
-                                                    <h3>{{ currency }}<span id="score"></span></h3>
-                                                </div>
-                                                <hr>
-                                                <div class="card-text">Their response:</div>
-                                                <div class="card-text" id="question" style="font-weight: bold;">
-                                                </div>
-                                                <div style="display: none;" id="wagering">
+                                            <div class="card" id="final_reveal" style="display: none;">
+                                                <div class="card-body">
+                                                    <div class="card-title d-flex justify-content-between">
+                                                        <h3 id="player"></h3>
+                                                        <h3>{{ currency }}<span id="score"></span></h3>
+                                                    </div>
                                                     <hr>
-                                                    <div class="card-text">They wagered <span
-                                                            style="font-weight: bold;">{{ currency }}<span
-                                                                id="amount"></span></span></div>
-                                                    <hr>
-                                                    <div class="card-text">Leaving them with a final score of:</div>
-                                                    <div class="card-text" style="font-weight: bold;">
-                                                        {{ currency }}<span id="final_score"></span></div>
+                                                    <div class="card-text">Their response:</div>
+                                                    <div class="card-text" id="question" style="font-weight: bold;">
+                                                    </div>
+                                                    <div style="display: none;" id="wagering">
+                                                        <hr>
+                                                        <div class="card-text">They wagered <span
+                                                                style="font-weight: bold;">{{ currency }}<span
+                                                                    id="amount"></span></span></div>
+                                                        <hr>
+                                                        <div class="card-text">Leaving them with a final score of:</div>
+                                                        <div class="card-text" style="font-weight: bold;">
+                                                            {{ currency }}<span id="final_score"></span></div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="modal-content" id="round_transition" style="display: none;">
-                                <div class="modal-custom">Round Complete!</div>
-                                <div class="modal-body">
-                                    Congratulations on finishing <span id="current_round"></span> Are you ready to
-                                    start <span id="next_round"></span>?
+                                <div class="modal-content" id="round_transition" style="display: none;">
+                                    <div class="modal-custom">Round Complete!</div>
+                                    <div class="modal-body">
+                                        Congratulations on finishing <span id="current_round"></span> Are you ready to
+                                        start <span id="next_round"></span>?
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
                 </div>
             </div>
             <script type="text/javascript">
@@ -184,7 +183,7 @@
                 socket.on("reset_wagers_modals-s>bh", function (message) {
                     $('#wager_2').hide();
 
-                    manageModal({ action: 'hide', updates: message['updates']});
+                    manageModal({ action: 'hide', updates: message['updates'] });
                 });
 
 

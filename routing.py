@@ -24,7 +24,7 @@ routing = Blueprint(name="routing", import_name=__name__)
 @routing.route("/", methods=["GET"])
 def route_index():
     """Display the home (index) page, with two buttons to start or join a game
-    
+
     Only allows GET requests.
     """
     return render_template(template_name_or_list="index.html")
@@ -34,33 +34,32 @@ def route_index():
 def route_new():
     """Display the option(s) available to start a new game. As of now, this only supports selecting the
     number of categories with which to play. Conceivably "infinte" number of players can join.
-    
+
     Only allows GET requests.
     """
     return render_template(template_name_or_list="new.html")
+
 
 @routing.route("/join/<room>", methods=["GET"])
 @routing.route("/join/", methods=["GET"])
 def route_join(room: str = ""):
     """Display the page to join a game. This does include some error handling, but largely is messy...
-    
+
     - Players will enter their name, and the room code created by the host. No two players can have the same name
     - The "Board" will just enter a room code.
     - If the host gets disconnected, they can rejoin here too.
-    - Whoever starts the game can also create a "magic link" that will allow people to direcly join without typing in 
+    - Whoever starts the game can also create a "magic link" that will allow people to direcly join without typing in
       the room code.
-    
+
     Only allows GET requests.
     """
     if room != "" and room in storage.rooms():
         room = room
-    
+
     else:
         room = ""
 
-    return render_template(
-        template_name_or_list="join.html", errors=get_flashed_messages(), room_code = room.upper()
-    )
+    return render_template(template_name_or_list="join.html", errors=get_flashed_messages(), room_code=room.upper())
 
 
 @routing.route("/host/", methods=["GET", "POST"])
@@ -84,7 +83,8 @@ def route_host():
             room = generate_room_code()
 
             storage.push(
-                room=room, value=alex.Game(room=room, size=int(category)),
+                room=room,
+                value=alex.Game(room=room, size=int(category)),
             )
 
             storage.pull(room=room).make_board()
@@ -97,7 +97,7 @@ def route_host():
 
     elif request.method == "GET":
         if (room := request.args.get(key="room", default=False)) :
-            if "/test/" in request.headers['Referer']:
+            if "/test/" in request.headers["Referer"]:
                 session["name"] = "Host"
                 session["room"] = room
 
@@ -170,14 +170,16 @@ def route_player():
             session["room"] = room
 
     elif request.method == "GET" and session is not None:
-        if "/test/" in request.headers['Referer']:
+        if "/test/" in request.headers["Referer"]:
             session["name"] = request.args.get(key="name")
             session["room"] = request.args.get(key="room")
 
         room = session["room"]
 
     return render_template(
-        template_name_or_list="play.html", session=session, game=storage.pull(room),
+        template_name_or_list="play.html",
+        session=session,
+        game=storage.pull(room),
     )
 
 
@@ -200,19 +202,17 @@ def route_board():
             return redirect(url_for("routing.route_join"))
 
     elif request.method == "GET":
-        if "/test/" in request.headers['Referer']:
+        if "/test/" in request.headers["Referer"]:
             session["room"] = request.args.get(key="room")
 
         room = session["room"]
 
-    return render_template(
-        template_name_or_list="board.html", game=storage.pull(room=room)
-    )
+    return render_template(template_name_or_list="board.html", game=storage.pull(room=room))
 
 
 @routing.route("/results/", methods=["POST", "GET"])
 def route_results():
-    """Displays a final results page, ranking the players from first to last. There are also a number of 
+    """Displays a final results page, ranking the players from first to last. There are also a number of
     buttons to allow the host to choose to restart the game with the same, or new, players.
 
     Allows only POST requests.
@@ -225,9 +225,7 @@ def route_results():
         game = storage.pull(room=room)
         results = [[name, game.score[name]] for name in game.score.sort(reverse=True)]
 
-        return render_template(
-            template_name_or_list="results.html", results=results, you=player
-        )
+        return render_template(template_name_or_list="results.html", results=results, you=player)
 
     else:
         session = "A"
@@ -239,9 +237,7 @@ def route_results():
             ["Dani", 100],
             ["Erik", 50],
         ]
-        return render_template(
-            template_name_or_list="results.html", results=results, you="Alex"
-        )
+        return render_template(template_name_or_list="results.html", results=results, you="Alex")
 
         # return redirect(url_for("routing.route_join"))
 
@@ -259,7 +255,8 @@ def route_test():
     storage.push(
         room=room,
         value=alex.Game(
-            room=room, size=int(request.form.get("categories", default=6)),
+            room=room,
+            size=int(request.form.get("categories", default=6)),
         ),
     )
 
@@ -268,7 +265,6 @@ def route_test():
     game.add_player("Alex")
     game.add_player("Brad")
     game.add_player("Carl")
-
 
     return render_template(template_name_or_list="testing.html", room=room)
 
