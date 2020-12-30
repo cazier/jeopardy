@@ -45,7 +45,7 @@
                             <td>
                                 <button class="btn btn-block btn-primary {% if answer.shown %}disabled{% endif %}"
                                     id="q_{{ answer.id() }}">
-                                    {{ currency }}{{ answer.value }}
+                                    {{ currency }}{{ (answer.value + 1) * (game.round + 1) * 200 }}
                                 </button>
                             </td>
                             {% endfor %}

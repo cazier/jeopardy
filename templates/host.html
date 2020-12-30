@@ -46,49 +46,10 @@
                                 aria-labelledby="category_{{ loop.index0 }}" data-parent="#categories">
                                 <div class="btn-group" role="group" aria-label="values"
                                     style="padding-top: 6px; padding-bottom: 6px;">
-                                    {% for answer in name.content %}
-                                    <button class="btn btn-primary show-answer {% if answer.shown %}disabled{% endif %}"
-                                        type="button" id="q_{{ answer.id() }}">
-                                        {{ currency }}{{ answer.value }}
-                                    </button>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    <div class="modal fade" id="master-modal" tabindex="-1" role="dialog"
-                        aria-labelledby="master-modal-holder" aria-hidden="true" data-keyboard="false"
-                        data-backdrop="static">
-                        <div class="modal-dialog modal-dialog-centered" role="document">
-                            <div class="modal-content" id="standard_set" style="display: none;">
-                                <div id="modal-text">
-                                    <div class="modal-custom">Answer:</div>
-                                    <div class="modal-body" id="answer"></div>
-                                    <div class="modal-custom">Question:</div>
-                                    <div class="modal-body" id="question"></div>
-                                </div>
-                                <div class="modal-footer">
-                                    <div class="btn-toolbar" role="toolbar">
-                                        <div class="btn-group" role="group">
-                                            <button class="btn btn-light disabled mr-auto"
-                                                id="player">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</button>
-                                            <button class="btn btn-success disabled mr-auto"
-                                                id="correct_response">Correct!</button>
-                                            <button class="btn btn-danger disabled mr-auto"
-                                                id="incorrect_response">Incorrect</button>
-                                            <button class="btn btn-dark mr-auto" id="finished_reading">Finished
-                                                Reading!</button>
-                                            <button class="btn btn-info mr-auto" id="dismiss"
-                                                style="display: none;">Dismiss</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="modal-content" id="round_transition" style="display: none;">
-                                <div id="modal-text">
-                                    <div class="modal-custom">Round Complete!</div>
-                                    <div class="modal-body">
+                                        {% for answer in name.sets %}
+                                        <button
+                                            {{ currency }}{{ (answer.value + 1) * (game.round + 1) * 200 }}
+                                        </button>
                                         Congratulations on finishing <span id="current_round"></span> Are you ready to
                                         start <span id="next_round"></span>?
                                     </div>
@@ -158,10 +119,8 @@
                                 <h4>
                                     ANSWER:
                                 </h4>
-                                <h5 style="padding-left: 25px">{{ game.board.categories[0].content[0].answer }}</h5>
-                                <hr>
-                                <div class="btn-toolbar" role="toolbar" id="hide_1">
-                                    <div class="btn-group mr-2" role="group">
+                                    <h5 style="padding-left: 25px">{{ game.board.categories[0].sets[0].answer }}</h5>
+                                    <hr>
                                         <button class="btn btn-success" id="get_questions">Prompt for Questions</button>
                                     </div>
                                 </div>
@@ -195,21 +154,8 @@
                                                         id="question"></span></div>
                                                 <hr>
                                                 <div>The <em>correct</em> response is:<br>
-                                                    <button class="btn btn-primary"
-                                                        disabled>({{ game.board.categories[0].content[0].question }})</button>
-                                                </div>
-                                                <hr>
-                                                <div>Did they get it right?</div>
-                                                <div class="btn-toolbar" style="margin-left:auto;" role="toolbar">
-                                                    <div class="btn-group" role="group">
-                                                        <button class="btn btn-success mr-auto"
-                                                            id="correct_fj">Correct!</button>
-                                                        <button class="btn btn-danger mr-auto"
-                                                            id="incorrect_fj">Incorrect</button>
+                                                            game.board.categories[0].sets[0].question }})</button>
                                                     </div>
-                                                </div>
-                                                <hr>
-                                                <div id="wagering" style="display: none;">
                                                     They wagered <span style="font-weight: bold;">{{ currency }}<span
                                                             id="amount"></span></span>
                                                     <hr>

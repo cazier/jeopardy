@@ -1,6 +1,9 @@
 import sqlite3
 import random
 import itertools
+import datetime
+
+import requests
 
 import config
 
@@ -103,7 +106,7 @@ class Game(object):
 
     def html_board(self):
         """Using `zip()` return the game board, transposed, as needed to make the HTML representation"""
-        return zip(*[category.content for category in self.board.categories])
+        return zip(*[category.sets for category in self.board.categories])
 
     def get(self, identifier: str):
         """Returns the `Content` object referred to by a specific identifier. Additionally ensures the remaining
@@ -117,7 +120,8 @@ class Game(object):
         entry, category, value = identifier.split("_")
 
         if entry == "q":
-            response = self.board.categories[int(category)].content[int(value)]
+            print(self.board.categories[0].sets, value)
+            response = self.board.categories[int(category)].sets[int(value)]
             self.current_set = response.get_content()
             return response.get()
 
@@ -203,7 +207,8 @@ class Scoreboard(object):
     def update(self, game, correct: int) -> None:
         if self.wagerer is None:
             player = game.buzz_order[-1]
-            value = game.current_set.value * (-1 + (2 * correct))
+
+            value = ((game.current_set.value + 1) * (game.round + 1) * 200) * (-1 + (2 * correct))
 
         else:
             player = self.wagerer
@@ -219,81 +224,41 @@ class Board(object):
     """Class to hold the Jeopardy game board. Contains methods to get categories and content."""
 
     def __init__(self, segment: int, size: int):
-        self.db: str = config.database
         self.size: int = size if segment < 3 else 1
         self.round: int = segment
         self.categories: list = list()
 
-        self.get_content()
+        self.new_content()
 
-    def get_content(self) -> None:
-        """Create a datastructure storing the categories and content associated with each round of gameplay.
-        This function should perform a number of steps to prevent the appearance of incomplete categories, or
-        external content.
-        """
-        conn = sqlite3.connect(self.db)
-        t = conn.cursor()
+    def new_content(self, **kwargs) -> None:
+        game = requests.get(config.api_endpoint, data=kwargs).json()
 
-        # Pull a list of all the show numbers in the content database, and randomly select one show for each category
-        # of gameplay. As such, in game, each category will be representing a different actually show number.
-        selected_shows = random.sample(
-            sqlite_cleaned(t.execute("SELECT show FROM show_data").fetchall()),
-            self.size,
-        )
-
-        # For each aired show/episode, get a list containing all of the category titles. By design this should
-        # only choose categories that are complete (i.e., have 5 answers/questions in the database) and have no external
-        # media (i.e., links/hrefs/images)
-        for index, show in enumerate(selected_shows):
-            categories = t.execute(
-                "SELECT category FROM show_data WHERE \
-                segment=? AND show=? AND complete_category=? AND external_media=?",
-                (self.round, show, True, False),
-            ).fetchall()
-
-            categories = sqlite_cleaned(categories)
-
-            # Loop over the list of categories to generate a new dataset of answers/questions for each. The while loop
-            # will repeat in the event external media is still found, or an incomplete category is found.
-            qs: list = list()
-            while sum([q[8] for q in qs]) > 0 or sum([q[7] for q in qs]) < len(categories):
-
-                # Technically, this can error out, if all of the categories in the game are incomplete... However,
-                # the included database should already include enough protection against this... 😬
-                category = categories.pop(random.randrange(len(categories)))
-
-                # Finally, fetch all of the content associated with the specifically checked category and show
-                qs = t.execute(
-                    "SELECT * FROM show_data WHERE segment=? AND show=? and category=?",
-                    (self.round, show, category),
-                ).fetchall()
-
-            # If the while loop has been successfully broken out of, add that content to the game storage.
-            self.categories.append(Category(qs, index))
+        for index, details in enumerate(game):
+            self.categories.append(Category(index=index, name=details["category"]["name"], sets=details["sets"]))
 
     def add_wagers(self) -> None:
         """Randomly assign the "Daily Double" to the correct number of sets per round."""
-        doubles = itertools.product(range(len(self.categories)), range(len(self.categories[0].content)))
+        doubles = itertools.product(range(len(self.categories)), range(len(self.categories[0].sets)))
 
         for daily_double in random.sample(list(doubles), [0, 1, 2, 0, 0][self.round]):
             if config.debug:
                 daily_double = (0, 0)
 
-            self.categories[daily_double[0]].content[daily_double[1]].wager = True
+            self.categories[daily_double[0]].sets[daily_double[1]].wager = True
 
 
 class Category(object):
     """Class to hold one of the categories (ostensibly columns) on a Jeopardy game board."""
 
-    def __init__(self, content: list, index: int):
-        self.category = content[0][1]
+    def __init__(self, name: str, index: int, sets: list):
+        self.category = name
         self.index = index
-        self.content: list = list()
+        self.sets: list = list()
 
-        for content_index, content_info in enumerate(content):
-            self.add_content(content_info=content_info, content_index=content_index)
+        for set_ in sets:
+            self.sets.append(Content(details=set_, category_index=index))
 
-        self.content.sort()
+        self.sets.sort()
 
     def __str__(self):
         """Creates a string representation of the category, returning just the title"""
@@ -303,52 +268,35 @@ class Category(object):
         """Duplicates `__str__`"""
         return str(self)
 
-    def add_content(self, content_info: tuple, content_index: int):
-        """Add an answer/question set to the category, making use of the `Content` class.
-
-        Required Arguments:
-
-        `content_info` (tuple) -- Details about the content (answer, question, value, etc.)
-        `content_index` (int) -- The number of the content in terms of the game.
-        """
-        self.content.append(
-            Content(
-                content_info=content_info,
-                content_index=content_index,
-                category_index=self.index,
-            )
-        )
-
 
 class Content(object):
     """Class to hold a single answer/question set"""
 
-    def __init__(self, content_info: tuple, content_index: int, category_index: int):
+    def __init__(self, details: dict, category_index: int):
         self.category_index = category_index
-        self.content_index = content_index
         self.shown = False
 
         self.wager = False
 
-        self.answer = content_info[3].strip("'")
-        self.question = content_info[4].strip("'")
-        self.value = content_info[5]
-        self.year = content_info[6]
+        self.answer = details["answer"]
+        self.question = details["question"]
+        self.value = details["value"]
+        self.year = datetime.datetime.fromisoformat(details["date"]).strftime("%Y")
 
     def __lt__(self, other):
         return self.value < other.value
 
-    def __str__(self):
-        """Creates a string representation of the set's value"""
-        return str(self.value)
+    # def __str__(self):
+    #     """Creates a string representation of the set's value"""
+    #     return str(self.value)
 
-    def __repr__(self):
-        """Duplicates `__str__`"""
-        return str(self)
+    # def __repr__(self):
+    #     """Duplicates `__str__`"""
+    #     return str(self)
 
     def id(self):
         """Returns the unique identifier of the set"""
-        return f"{self.category_index}_{self.content_index}"
+        return f"{self.category_index}_{self.value}"
 
     def get(self):
         """Gets the set, as done within the Jinja loading of the webpage"""
@@ -363,13 +311,3 @@ class Content(object):
     def get_content(self):
         """Gets the set, as done within the Jinja loading of the webpage"""
         return self
-
-
-def sqlite_cleaned(items: list) -> list:
-    """A helper function to clean up data pulled from the sqlite database.
-
-    - Required Arguments:
-
-    `items` (list) -- A list with rows from a sqlite database
-    """
-    return list(set([item[0] for item in items]))
