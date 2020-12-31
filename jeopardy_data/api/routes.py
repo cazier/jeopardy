@@ -25,10 +25,21 @@ class DetailsResource(Resource):
             "has_external": Set.query.filter(Set.external == True).count(),
             "no_external": Set.query.filter(Set.external == False).count(),
         }
-        shows = Show.query.count()
-        air_dates = Date.query.order_by(Date.date)
 
-        if 0 in {categories["total"], sets["total"], shows}:
+        shows = {
+            "total": Show.query.count(),
+            "first_id": Show.query.order_by(Show.id)[0].id,
+            "last_id": Show.query.order_by(Show.id)[-1].id,
+            "first_number": Show.query.order_by(Show.number)[0].number,
+            "last_number": Show.query.order_by(Show.number)[-1].number
+        }
+
+        air_dates = {
+            "oldest": Date.query.order_by(Date.date)[0].date,
+            "most_recent": Date.query.order_by(Date.date)[-1].date
+        }
+
+        if 0 in {categories["total"], sets["total"], shows['total']}:
             no_results(message="there are no items currently in the database")
 
         return jsonify(
@@ -36,7 +47,7 @@ class DetailsResource(Resource):
                 "categories": categories,
                 "sets": sets,
                 "shows": shows,
-                "air_dates": {"oldest": air_dates[0].date, "most_recent": air_dates[-1].date,},
+                "air_dates": air_dates
             }
         )
 
@@ -267,20 +278,20 @@ class GameResource(Resource):
 
         numbers = random.sample(range(0, number_results), min(number_results, size * 2))
 
-        game: dict = dict()
+        game: list = list()
 
-        while len(game.keys()) < size:
+        while len(game) < size:
             try:
                 category = categories[numbers.pop(0)]
 
             except IndexError:
-                abort(400, message=f"requested too many categories; only {len(game.keys())} were found")
+                abort(400, message=f"requested too many categories; only {len(game)} were found")
 
-            if category.name not in game.keys():
+            if category.name not in (i["category"]["name"] for i in game):
                 sets = Set.query.filter(Set.category_id == category.id)
                 sets = sets.join(Value, Value.id == Set.value_id).order_by(Set.value)
 
-                game[category.name] = {"category": category_schema.dump(category), "sets": sets_schema.dump(sets)}
+                game.append({"category": category_schema.dump(category), "sets": sets_schema.dump(sets)})
 
         return jsonify(game)
 
@@ -301,7 +312,14 @@ def paginate(model, schema, indices) -> dict:
     else:
         data = model[start : start + number]
 
-    return jsonify({"start": start, "number": number, "data": schema(data), "results": count,})
+    return jsonify(
+        {
+            "start": start,
+            "number": number,
+            "data": schema(data),
+            "results": count,
+        }
+    )
 
 
 def date_query(model, year: int, month: int, day: int, chained_results=None):
