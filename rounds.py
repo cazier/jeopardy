@@ -12,9 +12,9 @@ rounds = Blueprint(name="rounds", import_name=__name__)
 def host_clicked_answer(data):
     """The host has selected an answer from their device.
 
-    Required Arguments: 
+    Required Arguments:
 
-    - `data` (dict) - A dictionary containing the information associated with the selected 
+    - `data` (dict) - A dictionary containing the information associated with the selected
     set; the identifier of the set, and the room it was selected from.
     """
     game = storage.pull(data["room"])
@@ -25,7 +25,7 @@ def host_clicked_answer(data):
         {
             "room": data["room"],
             "identifier": f'#{data[u"identifier"]}',
-        }
+        },
     )
 
     # If the set is not a Daily Double or Final Round (which would require a wager!)
@@ -55,15 +55,12 @@ def enable_buzzers(data, incorrect_players: list = list()):
     This takes an optional argument `incorrect_players` prohiting players who have already guessed
     incorrectly to try to do so again.
     """
-    socketio.emit(
-        "enable_buzzers-s>p", {"room": data["room"], "players": incorrect_players}
-    )
+    socketio.emit("enable_buzzers-s>p", {"room": data["room"], "players": incorrect_players})
 
 
 @socketio.on("dismiss-h>s")
 def dismiss(data):
-    """After receiving the `socket.on` that the host has determined no one wants to buzz in, `socket.emit` the signal to dismiss the set and return to the game board.
-    """
+    """After receiving the `socket.on` that the host has determined no one wants to buzz in, `socket.emit` the signal to dismiss the set and return to the game board."""
 
     socketio.emit("reset_buzzers-s>p", {"room": data["room"]})
 
@@ -81,7 +78,11 @@ def player_buzzed_in(data):
     socketio.emit("reset_buzzers-s>p", {"room": data["room"]})
 
     socketio.emit(
-        "player_buzzed-s>h", {"room": data["room"], "name": game.buzz_order[-1],},
+        "player_buzzed-s>h",
+        {
+            "room": data["room"],
+            "name": game.buzz_order[-1],
+        },
     )
 
 
@@ -97,9 +98,7 @@ def response_given(data):
 
     game.score.update(game=game, correct=int(data["correct"]))
 
-    socketio.emit(
-        "update_scores-s>bph", {"room": data["room"], "scores": game.score.emit()}
-    )
+    socketio.emit("update_scores-s>bph", {"room": data["room"], "scores": game.score.emit()})
 
     if data["correct"] or len(game.score) == len(game.buzz_order):
         end_set(data)
@@ -136,7 +135,7 @@ def end_set(data):
 
     socketio.sleep(0.5)
 
-    if (game.remaining_content <= 0) and (game.round < 3):
+    if (game.remaining_content <= 0) and (game.round < 2):
         socketio.emit(
             "round_complete-s>bh",
             {
@@ -148,5 +147,5 @@ def end_set(data):
             },
         )
 
-    elif game.round == 3:
+    elif game.round >= 2:
         socketio.emit("results-page-s>bph")

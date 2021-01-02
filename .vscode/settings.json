@@ -3,5 +3,8 @@
     "python.linting.mypyEnabled": true,
     "python.linting.enabled": true,
     "python.formatting.provider": "black",
-    "python.pythonPath": "venv/bin/python3.8"
+    "python.pythonPath": "venv/bin/python",
+    "python.formatting.blackArgs": [
+        "line-length=119"
+    ]
 }

@@ -27,198 +27,105 @@
                         Time to be a Host!
                     </h2>
                     <hr>
-                    {% if game.round <= 2 %}
-                    <!-- Section loaded for the first two rounds. (Regular and Double) -->
-                    <div class="accordion" id="categories">
-                        {% for name in game.board.categories %}
-                        <div class="card">
-                            <div class="card-header" id="category_{{ loop.index0 }}">
-                                <h3 class="mb-0">
-                                    <button class="btn btn-link btn-block text-left" type="button"
-                                        data-toggle="collapse" data-target="#content_{{ loop.index0 }}"
-                                        aria-expanded="false" aria-controls="content_{{ loop.index0 }}"
-                                        style="white-space: normal;">
-                                        {{ name }}
-                                    </button>
-                                </h3>
-                            </div>
-                            <div id="content_{{ loop.index0 }}" class="collapse text-center"
-                                aria-labelledby="category_{{ loop.index0 }}" data-parent="#categories">
-                                <div class="btn-group" role="group" aria-label="values"
-                                    style="padding-top: 6px; padding-bottom: 6px;">
-                                    {% for answer in name.content %}
-                                    <button class="btn btn-primary show-answer {% if answer.shown %}disabled{% endif %}"
-                                        type="button" id="q_{{ answer.id() }}">
-                                        {{ currency }}{{ answer.value }}
-                                    </button>
-                                    {% endfor %}
+                    {% if game.round < 2 %} <!-- Section loaded for the first two rounds. (Regular and Double) -->
+                        <div class="accordion" id="categories">
+                            {% for name in game.board.categories %}
+                            <div class="card">
+                                <div class="card-header" id="category_{{ loop.index0 }}">
+                                    <h3 class="mb-0">
+                                        <button class="btn btn-link btn-block text-left" type="button"
+                                            data-toggle="collapse" data-target="#content_{{ loop.index0 }}"
+                                            aria-expanded="false" aria-controls="content_{{ loop.index0 }}"
+                                            style="white-space: normal;">
+                                            {{ name }}
+                                        </button>
+                                    </h3>
                                 </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    <div class="modal fade" id="master-modal" tabindex="-1" role="dialog"
-                        aria-labelledby="master-modal-holder" aria-hidden="true" data-keyboard="false"
-                        data-backdrop="static">
-                        <div class="modal-dialog modal-dialog-centered" role="document">
-                            <div class="modal-content" id="standard_set" style="display: none;">
-                                <div id="modal-text">
-                                    <div class="modal-custom">Answer:</div>
-                                    <div class="modal-body" id="answer"></div>
-                                    <div class="modal-custom">Question:</div>
-                                    <div class="modal-body" id="question"></div>
-                                </div>
-                                <div class="modal-footer">
-                                    <div class="btn-toolbar" role="toolbar">
-                                        <div class="btn-group" role="group">
-                                            <button class="btn btn-light disabled mr-auto"
-                                                id="player">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</button>
-                                            <button class="btn btn-success disabled mr-auto"
-                                                id="correct_response">Correct!</button>
-                                            <button class="btn btn-danger disabled mr-auto"
-                                                id="incorrect_response">Incorrect</button>
-                                            <button class="btn btn-dark mr-auto" id="finished_reading">Finished
-                                                Reading!</button>
-                                            <button class="btn btn-info mr-auto" id="dismiss"
-                                                style="display: none;">Dismiss</button>
-                                        </div>
+                                <div id="content_{{ loop.index0 }}" class="collapse text-center"
+                                    aria-labelledby="category_{{ loop.index0 }}" data-parent="#categories">
+                                    <div class="btn-group" role="group" aria-label="values"
+                                        style="padding-top: 6px; padding-bottom: 6px;">
+                                        {% for answer in name.sets %}
+                                        <button
+                                            class="btn btn-primary show-answer {% if answer.shown %}disabled{% endif %}"
+                                            type="button" id="q_{{ answer.id() }}">
+                                            {{ currency }}{{ (answer.value + 1) * (game.round + 1) * 200 }}
+                                        </button>
+                                        {% endfor %}
                                     </div>
                                 </div>
                             </div>
-                            <div class="modal-content" id="round_transition" style="display: none;">
-                                <div id="modal-text">
-                                    <div class="modal-custom">Round Complete!</div>
-                                    <div class="modal-body">
-                                        Congratulations on finishing <span id="current_round"></span> Are you ready to
-                                        start <span id="next_round"></span>?
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button class="btn btn-success mr-auto" id="start_next_round">Start the next
-                                        round!</button>
-                                </div>
-                            </div>
-                            <div class="modal-content" id="wager_round" style="display: none;">
-                                <div class="modal-text">
-                                    <div class="modal-custom centered">{{ game.heading() }}</div>
-                                    <div id="show_-1">
-                                        <div class="modal-custom small">Who chose the category?</div>
-                                        <div class="btn-toolbar" role="toolbar" style="padding: 16px;">
-                                            <div class="btn-group" role="group" id="players">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div id="show_0" style="display: none;">
-                                        <div class="modal-custom">
-                                            <div>Answer:</div>
-                                            <div id="wager_answer" class="smaller"></div>
-                                        </div>
-                                        <div class="modal-custom">
-                                            <div>Question:</div>
-                                            <div id="wager_question" class="smaller"></div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <div class="btn-toolbar" role="toolbar">
-                                                <div class="btn-group" role="group" id='wager_footer'>
-                                                    <button class="btn btn-success mr-auto"
-                                                        id="correct_wager">Correct</button>
-                                                    <button class="btn btn-danger mr-auto"
-                                                        id="incorrect_wager">Incorrect</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% else %}
-                    <!-- Section loaded for the wagering rounds. (Final and Tiebreaker) -->
-                    <div>
-                        <div class="btn-toolbar" role="toolbar">
-                            <div class="btn-group" role="group" id="wagerers">
-                                {% for name in game.score.keys() %}
-                                <button class="btn btn-danger wager_names" id="{{ name }}_wagered">{{ name }}</button>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        <div>
-                            <hr>
-                            <h4>
-                                CATEGORY:
-                            </h4>
-                            <h5 style="padding-left: 25px">{{ game.board.categories[0].category }}</h5>
-                            <hr>
-                            <div class="btn-toolbar" role="toolbar" id="hide_0">
-                                <div class="btn-group mr-2" role="group">
-                                    <button class="btn btn-success" id="get_wager">Prompt for Wagers</button>
-                                </div>
-                            </div>
-                            <div id="show_0" style="display: none;">
-                                <h4>
-                                    ANSWER:
-                                </h4>
-                                <h5 style="padding-left: 25px">{{ game.board.categories[0].content[0].answer }}</h5>
-                                <hr>
-                                <div class="btn-toolbar" role="toolbar" id="hide_1">
-                                    <div class="btn-group mr-2" role="group">
-                                        <button class="btn btn-success" id="get_questions">Prompt for Questions</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div id="show_1" style="display: none;">
-                                <div class="btn-toolbar" role="toolbar" id="hide_2">
-                                    <div class="btn-group mr-2" role="group">
-                                        <button class="btn btn-success" id="show_responses">Show Players'
-                                            Responses!</button>
-                                    </div>
-                                </div>
-                            </div>
+                            {% endfor %}
                         </div>
                         <div class="modal fade" id="master-modal" tabindex="-1" role="dialog"
                             aria-labelledby="master-modal-holder" aria-hidden="true" data-keyboard="false"
                             data-backdrop="static">
                             <div class="modal-dialog modal-dialog-centered" role="document">
-                                <div class="modal-content" id="final_reveal" style="display: none;">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h3 id="player"></h3>
+                                <div class="modal-content" id="standard_set" style="display: none;">
+                                    <div id="modal-text">
+                                        <div class="modal-custom">Answer:</div>
+                                        <div class="modal-body" id="answer"></div>
+                                        <div class="modal-custom">Question:</div>
+                                        <div class="modal-body" id="question"></div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <div class="btn-toolbar" role="toolbar">
+                                            <div class="btn-group" role="group">
+                                                <button class="btn btn-light disabled mr-auto"
+                                                    id="player">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</button>
+                                                <button class="btn btn-success disabled mr-auto"
+                                                    id="correct_response">Correct!</button>
+                                                <button class="btn btn-danger disabled mr-auto"
+                                                    id="incorrect_response">Incorrect</button>
+                                                <button class="btn btn-dark mr-auto" id="finished_reading">Finished
+                                                    Reading!</button>
+                                                <button class="btn btn-info mr-auto" id="dismiss"
+                                                    style="display: none;">Dismiss</button>
+                                            </div>
                                         </div>
-                                        <div class="card-body">
-                                            <div>
-                                                <div>The player currently has <span
-                                                        style="font-weight: bold;">{{ currency }}<span
-                                                            id="score"></span></span>.
+                                    </div>
+                                </div>
+                                <div class="modal-content" id="round_transition" style="display: none;">
+                                    <div id="modal-text">
+                                        <div class="modal-custom">Round Complete!</div>
+                                        <div class="modal-body">
+                                            Congratulations on finishing <span id="current_round"></span> Are you ready
+                                            to
+                                            start <span id="next_round"></span>?
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button class="btn btn-success mr-auto" id="start_next_round">Start the next
+                                            round!</button>
+                                    </div>
+                                </div>
+                                <div class="modal-content" id="wager_round" style="display: none;">
+                                    <div class="modal-text">
+                                        <div class="modal-custom centered">{{ game.heading() }}</div>
+                                        <div id="show_-1">
+                                            <div class="modal-custom small">Who chose the category?</div>
+                                            <div class="btn-toolbar" role="toolbar" style="padding: 16px;">
+                                                <div class="btn-group" role="group" id="players">
                                                 </div>
-                                                <hr>
-                                                <div>Their response:<br><span style="font-weight: bold;"
-                                                        id="question"></span></div>
-                                                <hr>
-                                                <div>The <em>correct</em> response is:<br>
-                                                    <button class="btn btn-primary"
-                                                        disabled>({{ game.board.categories[0].content[0].question }})</button>
-                                                </div>
-                                                <hr>
-                                                <div>Did they get it right?</div>
-                                                <div class="btn-toolbar" style="margin-left:auto;" role="toolbar">
-                                                    <div class="btn-group" role="group">
+                                            </div>
+                                        </div>
+                                        <div id="show_0" style="display: none;">
+                                            <div class="modal-custom">
+                                                <div>Answer:</div>
+                                                <div id="wager_answer" class="smaller"></div>
+                                            </div>
+                                            <div class="modal-custom">
+                                                <div>Question:</div>
+                                                <div id="wager_question" class="smaller"></div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <div class="btn-toolbar" role="toolbar">
+                                                    <div class="btn-group" role="group" id='wager_footer'>
                                                         <button class="btn btn-success mr-auto"
-                                                            id="correct_fj">Correct!</button>
+                                                            id="correct_wager">Correct</button>
                                                         <button class="btn btn-danger mr-auto"
-                                                            id="incorrect_fj">Incorrect</button>
+                                                            id="incorrect_wager">Incorrect</button>
                                                     </div>
-                                                </div>
-                                                <hr>
-                                                <div id="wagering" style="display: none;">
-                                                    They wagered <span style="font-weight: bold;">{{ currency }}<span
-                                                            id="amount"></span></span>
-                                                    <hr>
-                                                    Leaving them with a final score of:
-                                                    <br>
-                                                    <span style="font-weight: bold;">{{ currency }}<span
-                                                            id="final_score"></span></span>
-                                                    <hr>
-                                                    <button class="btn btn-info mr-auto" id="next">Next!</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -226,7 +133,102 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                        {% else %}
+                        <!-- Section loaded for the wagering rounds. (Final and Tiebreaker) -->
+                        <div>
+                            <div class="btn-toolbar" role="toolbar">
+                                <div class="btn-group" role="group" id="wagerers">
+                                    {% for name in game.score.keys() %}
+                                    <button class="btn btn-danger wager_names" id="{{ name }}_wagered">{{ name
+                                        }}</button>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div>
+                                <hr>
+                                <h4>
+                                    CATEGORY:
+                                </h4>
+                                <h5 style="padding-left: 25px">{{ game.board.categories[0].category }}</h5>
+                                <hr>
+                                <div class="btn-toolbar" role="toolbar" id="hide_0">
+                                    <div class="btn-group mr-2" role="group">
+                                        <button class="btn btn-success" id="get_wager">Prompt for Wagers</button>
+                                    </div>
+                                </div>
+                                <div id="show_0" style="display: none;">
+                                    <h4>
+                                        ANSWER:
+                                    </h4>
+                                    <h5 style="padding-left: 25px">{{ game.board.categories[0].sets[0].answer }}</h5>
+                                    <hr>
+                                    <div class="btn-toolbar" role="toolbar" id="hide_1">
+                                        <div class="btn-group mr-2" role="group">
+                                            <button class="btn btn-success" id="get_questions">Prompt for
+                                                Questions</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="show_1" style="display: none;">
+                                    <div class="btn-toolbar" role="toolbar" id="hide_2">
+                                        <div class="btn-group mr-2" role="group">
+                                            <button class="btn btn-success" id="show_responses">Show Players'
+                                                Responses!</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal fade" id="master-modal" tabindex="-1" role="dialog"
+                                aria-labelledby="master-modal-holder" aria-hidden="true" data-keyboard="false"
+                                data-backdrop="static">
+                                <div class="modal-dialog modal-dialog-centered" role="document">
+                                    <div class="modal-content" id="final_reveal" style="display: none;">
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h3 id="player"></h3>
+                                            </div>
+                                            <div class="card-body">
+                                                <div>
+                                                    <div>The player currently has <span style="font-weight: bold;">{{
+                                                            currency }}<span id="score"></span></span>.
+                                                    </div>
+                                                    <hr>
+                                                    <div>Their response:<br><span style="font-weight: bold;"
+                                                            id="question"></span></div>
+                                                    <hr>
+                                                    <div>The <em>correct</em> response is:<br>
+                                                        <button class="btn btn-primary" disabled>({{
+                                                            game.board.categories[0].sets[0].question }})</button>
+                                                    </div>
+                                                    <hr>
+                                                    <div>Did they get it right?</div>
+                                                    <div class="btn-toolbar" style="margin-left:auto;" role="toolbar">
+                                                        <div class="btn-group" role="group">
+                                                            <button class="btn btn-success mr-auto"
+                                                                id="correct_fj">Correct!</button>
+                                                            <button class="btn btn-danger mr-auto"
+                                                                id="incorrect_fj">Incorrect</button>
+                                                        </div>
+                                                    </div>
+                                                    <hr>
+                                                    <div id="wagering" style="display: none;">
+                                                        They wagered <span style="font-weight: bold;">{{ currency
+                                                            }}<span id="amount"></span></span>
+                                                        <hr>
+                                                        Leaving them with a final score of:
+                                                        <br>
+                                                        <span style="font-weight: bold;">{{ currency }}<span
+                                                                id="final_score"></span></span>
+                                                        <hr>
+                                                        <button class="btn btn-info mr-auto" id="next">Next!</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                 </div>
             </div>
         </div>
@@ -395,7 +397,7 @@
             manageModal({ action: 'show' });
         });
         socket.on('reveal_wager-s>bh', function (message) {
-            {% if game.round <= 2 %}
+            {% if game.round < 2 %}
             manageModal({ action: 'none', updates: message['updates'] });
             {% endif %}
 
@@ -428,7 +430,7 @@
             $('#show_-1').show();
             $('#show_0').hide()
 
-            manageModal({ action: 'hide', updates: message['updates']});
+            manageModal({ action: 'hide', updates: message['updates'] });
 
         });
 
