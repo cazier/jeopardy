@@ -14,12 +14,15 @@ if config.debug:
 class Game(object):
     """Class definining the game itself, containing each player and the board itself. """
 
-    def __init__(self, size: int, room: str):
-        self.size: int = size
+    def __init__(self, game_settings: dict):
         self.game_name: str = config.game_name
-        self.room = room
 
-        self.round: int = config.round_
+        self.game_settings: dict = game_settings
+
+        self.size: int = self.game_settings["size"]
+        self.room: str = self.game_settings["room"]
+
+        self.round: int = config.start_round
 
         self.score = Scoreboard()
 
@@ -53,7 +56,7 @@ class Game(object):
         """
         self.remaining_content = config.sets if config.debug else self.size * 5
 
-        self.board = Board(segment=self.round, size=self.size)
+        self.board = Board(round_=self.round, settings=self.game_settings)
 
         self.board.add_wagers()
 
@@ -141,7 +144,7 @@ class Game(object):
             self.buzz_order.append(name)
 
     def heading(self) -> str:
-        if self.round <= 2:
+        if self.round < 2:
             return "Daily Double!"
 
         else:
@@ -223,15 +226,16 @@ class Scoreboard(object):
 class Board(object):
     """Class to hold the Jeopardy game board. Contains methods to get categories and content."""
 
-    def __init__(self, segment: int, size: int):
-        self.size: int = size if segment < 3 else 1
-        self.round: int = segment
+    def __init__(self, round_: int, settings: dict):
+        self.round: int = round_
         self.categories: list = list()
 
-        self.new_content()
+        settings["round"] = self.round
 
-    def new_content(self, **kwargs) -> None:
-        game = requests.get(config.api_endpoint, data=kwargs).json()
+        if self.round == 2:
+            settings["size"] = 1
+
+        game = requests.get(config.api_endpoint, params=settings).json()
 
         for index, details in enumerate(game):
             self.categories.append(Category(index=index, name=details["category"]["name"], sets=details["sets"]))
@@ -240,9 +244,11 @@ class Board(object):
         """Randomly assign the "Daily Double" to the correct number of sets per round."""
         doubles = itertools.product(range(len(self.categories)), range(len(self.categories[0].sets)))
 
-        for daily_double in random.sample(list(doubles), [0, 1, 2, 0, 0][self.round]):
-            if config.debug:
-                daily_double = (0, 0)
+        for daily_double in random.sample(list(doubles), [1, 2, 0, 0][self.round]):
+            # if config.debug:
+            #     daily_double = (0, 0)
+
+            print(daily_double)
 
             self.categories[daily_double[0]].sets[daily_double[1]].wager = True
 

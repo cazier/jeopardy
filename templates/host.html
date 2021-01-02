@@ -27,7 +27,7 @@
                         Time to be a Host!
                     </h2>
                     <hr>
-                    {% if game.round <= 2 %} <!-- Section loaded for the first two rounds. (Regular and Double) -->
+                    {% if game.round < 2 %} <!-- Section loaded for the first two rounds. (Regular and Double) -->
                         <div class="accordion" id="categories">
                             {% for name in game.board.categories %}
                             <div class="card">
@@ -397,7 +397,7 @@
             manageModal({ action: 'show' });
         });
         socket.on('reveal_wager-s>bh', function (message) {
-            {% if game.round <= 2 %}
+            {% if game.round < 2 %}
             manageModal({ action: 'none', updates: message['updates'] });
             {% endif %}
 

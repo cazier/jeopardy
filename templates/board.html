@@ -28,7 +28,7 @@
                     <h2>
                         Let's Play {{ game.round_text() }}
                     </h2>
-                    {% if game.round <= 2 %} <table class="table">
+                    {% if game.round < 2 %} <table class="table">
                         <tr>
                             {% for name in game.board.categories %}
                             <th style="width: {{ 100 // game.size }}%; text-align: center;">
@@ -52,7 +52,7 @@
                         {% endfor %}
                         </table>
                         <br>
-                        {% elif game.round > 2 %}
+                        {% else %}
                         <div>
                             <hr>
                             <h3>

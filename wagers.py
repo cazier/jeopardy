@@ -16,7 +16,7 @@ def start_wager(game):
 def wager_receipt(data):
     game = storage.pull(room=data["room"])
 
-    if game.round <= 2:
+    if game.round < 2:
         players = [data["name"]]
         game.score.wagerer = data["name"]
 
@@ -43,7 +43,7 @@ def wager_submittal(data):
 
         updates: dict = dict()
 
-        if game.round >= 3:
+        if game.round >= 2:
             if game.score.num == len(game.score):
                 game.score.num = 0
 
@@ -68,7 +68,7 @@ def wager_submittal(data):
             #     {"room": game.room, "updates": {"name": data["name"]}},
             # )
 
-        elif game.round < 3:
+        elif game.round < 2:
             game.score.num = 0
 
             info = game.current_set.get()
@@ -114,10 +114,6 @@ def wager_responded(data):
     game.score.update(game=game, correct=int(data["correct"]))
 
     socketio.emit(
-        "reset_wagers_modals-s>bh", {"room": game.room, "updates": {"wager_answer": "", "wager_question": ""}}
-    )
-
-    socketio.emit(
         "update_scores-s>bph",
         {
             "room": data["room"],
@@ -125,8 +121,12 @@ def wager_responded(data):
         },
     )
 
-    if game.round <= 2:
-        socketio.emit("clear_modal", {"room": data["room"]})
+    if game.round < 2:
+        socketio.emit(
+            "reset_wagers_modals-s>bh", {"room": game.room, "updates": {"wager_answer": "", "wager_question": ""}}
+        )
+
+        socketio.emit("clear_modal-s>bh", {"room": data["room"]})
 
         rounds.end_set(data)
 

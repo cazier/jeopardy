@@ -135,7 +135,7 @@ def end_set(data):
 
     socketio.sleep(0.5)
 
-    if (game.remaining_content <= 0) and (game.round < 3):
+    if (game.remaining_content <= 0) and (game.round < 2):
         socketio.emit(
             "round_complete-s>bh",
             {
@@ -147,5 +147,5 @@ def end_set(data):
             },
         )
 
-    elif game.round == 3:
+    elif game.round >= 2:
         socketio.emit("results-page-s>bph")
