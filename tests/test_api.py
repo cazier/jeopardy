@@ -158,6 +158,30 @@ def test_sets_by_date(testclient, test_data):
     assert "check that your date is valid" in rv.get_json()["message"]
 
 
+def test_sets_by_years(testclient, test_data):
+    rv = testclient.get(f"/set/years/1992/1992")
+    matching = [i for i in test_data if i["date"] == "1992-08-13"]
+
+    assert rv.status_code == 200
+    assert len(rv.get_json()["data"]) == len(matching)
+
+    rv = testclient.get(f"/set/years/1992/1993")
+    assert rv.status_code == 200
+    assert len(rv.get_json()["data"]) == len(matching)
+
+    rv = testclient.get(f"/set/years/1991/1992")
+    assert rv.status_code == 200
+    assert len(rv.get_json()["data"]) == len(matching)
+
+    rv = testclient.get(f"/set/years/1994/1992")
+    assert rv.status_code == 400
+    assert "stop year must be after start year" in rv.get_json()["message"]
+
+    rv = testclient.get(f"/set/years/0/20000")
+    assert rv.status_code == 400
+    assert "year range must be between 0001 and 9999" in rv.get_json()["message"]
+
+
 def test_sets_by_round(testclient, test_data):
     matching = [i for i in test_data if i["round"] == 1]
 
@@ -257,6 +281,29 @@ def test_show_by_date(testclient):
     assert "check that your date is valid" in rv.get_json()["message"]
 
 
+def test_shows_by_years(testclient, test_data):
+    rv = testclient.get(f"/show/years/1992/1992")
+
+    assert rv.status_code == 200
+    assert rv.get_json()["data"] == [{"date": "1992-08-13", "id": 1, "number": 1}]
+
+    rv = testclient.get(f"/show/years/1992/1993")
+    assert rv.status_code == 200
+    assert rv.get_json()["data"] == [{"date": "1992-08-13", "id": 1, "number": 1}]
+
+    rv = testclient.get(f"/show/years/1991/1992")
+    assert rv.status_code == 200
+    assert rv.get_json()["data"] == [{"date": "1992-08-13", "id": 1, "number": 1}]
+
+    rv = testclient.get(f"/show/years/1994/1992")
+    assert rv.status_code == 400
+    assert "stop year must be after start year" in rv.get_json()["message"]
+
+    rv = testclient.get(f"/show/years/0/20000")
+    assert rv.status_code == 400
+    assert "year range must be between 0001 and 9999" in rv.get_json()["message"]
+
+
 def test_categories(testclient, test_data):
     rv = testclient.get(f"/categories")
 
@@ -287,6 +334,30 @@ def test_categories_by_date(testclient, test_data):
 
     assert rv.status_code == 400
     assert "check that your date is valid" in rv.get_json()["message"]
+
+
+def test_category_by_years(testclient, test_data):
+    rv = testclient.get(f"/category/years/1992/1992")
+    expected = {f"{i['category']}_{i['show']}" for i in test_data if i["date"] == "1992-08-13"}
+
+    assert rv.status_code == 200
+    assert len(rv.get_json()["data"]) == len(expected)
+
+    rv = testclient.get(f"/category/years/1992/1993")
+    assert rv.status_code == 200
+    assert len(rv.get_json()["data"]) == len(expected)
+
+    rv = testclient.get(f"/category/years/1991/1992")
+    assert rv.status_code == 200
+    assert len(rv.get_json()["data"]) == len(expected)
+
+    rv = testclient.get(f"/category/years/1994/1992")
+    assert rv.status_code == 400
+    assert "stop year must be after start year" in rv.get_json()["message"]
+
+    rv = testclient.get(f"/category/years/0/20000")
+    assert rv.status_code == 400
+    assert "year range must be between 0001 and 9999" in rv.get_json()["message"]
 
 
 def test_categories_by_completion(testclient, test_data):
@@ -413,7 +484,7 @@ def test_game_resource(testclient, test_data):
     )
 
     expected = [i for i in test_data if (i["date"][:4] == "1992") & (i["complete"])]
-    rv = testclient.get("/game", query_string={"year": 1992})
+    rv = testclient.get("/game", query_string={"start": 1992, "stop": 1992})
 
     assert rv.status_code == 200
     assert len(rv.get_json()) == min(
@@ -459,12 +530,12 @@ def test_game_resource(testclient, test_data):
     rv = testclient.get("/game", query_string={"show_number": 2, "round": 1, "allow_external": True})
 
     assert rv.status_code == 200
-    assert any([j["external"] for i in rv.get_json().values() for j in i["sets"]])
+    assert any([j["external"] for i in rv.get_json() for j in i["sets"]])
 
     rv = testclient.get("/game", query_string={"show_number": 2, "round": 0, "allow_incomplete": True})
 
     assert rv.status_code == 200
-    assert any([not (i["category"]["complete"]) for i in rv.get_json().values()])
+    assert any([not (i["category"]["complete"]) for i in rv.get_json()])
 
     rv = testclient.get("/game", query_string={"round": 4})
 

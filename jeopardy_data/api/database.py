@@ -124,4 +124,3 @@ def add(clue_data: dict, uses_shortnames: bool) -> list:
 
     else:
         raise SetAlreadyExistsError()
-

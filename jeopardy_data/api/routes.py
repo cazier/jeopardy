@@ -1,4 +1,4 @@
-from sqlalchemy import or_
+from sqlalchemy import and_, or_
 from flask import jsonify, request
 from flask_restful import Resource, abort
 import flask_sqlalchemy
@@ -26,30 +26,26 @@ class DetailsResource(Resource):
             "no_external": Set.query.filter(Set.external == False).count(),
         }
 
-        shows = {
-            "total": Show.query.count(),
-            "first_id": Show.query.order_by(Show.id)[0].id,
-            "last_id": Show.query.order_by(Show.id)[-1].id,
-            "first_number": Show.query.order_by(Show.number)[0].number,
-            "last_number": Show.query.order_by(Show.number)[-1].number
-        }
+        shows = {"total": Show.query.count()}
+
+        if 0 in {categories["total"], sets["total"], shows["total"]}:
+            no_results(message="there are no items currently in the database")
+
+        shows.update(
+            {
+                "first_id": Show.query.order_by(Show.id)[0].id,
+                "last_id": Show.query.order_by(Show.id)[-1].id,
+                "first_number": Show.query.order_by(Show.number)[0].number,
+                "last_number": Show.query.order_by(Show.number)[-1].number,
+            }
+        )
 
         air_dates = {
             "oldest": Date.query.order_by(Date.date)[0].date,
-            "most_recent": Date.query.order_by(Date.date)[-1].date
+            "most_recent": Date.query.order_by(Date.date)[-1].date,
         }
 
-        if 0 in {categories["total"], sets["total"], shows['total']}:
-            no_results(message="there are no items currently in the database")
-
-        return jsonify(
-            {
-                "categories": categories,
-                "sets": sets,
-                "shows": shows,
-                "air_dates": air_dates
-            }
-        )
+        return jsonify({"categories": categories, "sets": sets, "shows": shows, "air_dates": air_dates})
 
 
 class SetById(Resource):
@@ -90,6 +86,13 @@ class SetsByShowId(Resource):
 class SetsByDate(Resource):
     def get(self, year: int, month: int = -1, day: int = -1) -> dict:
         results = date_query(model=Set, year=year, month=month, day=day).order_by(Set.id)
+
+        return paginate(model=results, schema=sets_schema.dump, indices=request.args)
+
+
+class SetsByYears(Resource):
+    def get(self, start: int, stop: int) -> dict:
+        results = date_query(model=Set, start=start, stop=stop).order_by(Date.date)
 
         return paginate(model=results, schema=sets_schema.dump, indices=request.args)
 
@@ -147,6 +150,13 @@ class ShowsByDate(Resource):
         return paginate(model=results, schema=shows_schema.dump, indices=request.args)
 
 
+class ShowsByYears(Resource):
+    def get(self, start: int, stop: int) -> dict:
+        results = date_query(model=Show, start=start, stop=stop).order_by(Date.date)
+
+        return paginate(model=results, schema=shows_schema.dump, indices=request.args)
+
+
 class ShowsMultiple(Resource):
     def get(self) -> dict:
         return paginate(model=Show.query, schema=shows_schema.dump, indices=request.args)
@@ -164,19 +174,26 @@ class CategoriesByDate(Resource):
         return paginate(model=results, schema=categories_schema.dump, indices=request.args)
 
 
+class CategoriesByYears(Resource):
+    def get(self, start: int, stop: int) -> dict:
+        results = date_query(model=Category, start=start, stop=stop).order_by(Date.date)
+
+        return paginate(model=results, schema=categories_schema.dump, indices=request.args)
+
+
 class CategoriesByCompletion(Resource):
-    def get(self, completion: str = None, completion_string: str = "") -> dict:
-        if completion != None:
+    def get(self, completion: str = "", completion_string: str = "") -> dict:
+        if completion != "":
             if completion.lower() == "true":
                 completion = True
 
             elif completion.lower() == "false":
                 completion = False
 
-        if completion == True or completion_string == "complete":
+        if completion == True or completion_string.lower() == "complete":
             results = Category.query.filter(Category.complete == True)
 
-        elif completion == False or completion_string == "incomplete":
+        elif completion == False or completion_string.lower() == "incomplete":
             results = Category.query.filter(Category.complete == False)
 
         else:
@@ -233,7 +250,9 @@ class BlankResource(Resource):
 class GameResource(Resource):
     def get(self) -> dict:
         size = int(request.args.get("size", 6))
-        year = int(request.args.get("year", -1))
+        start = int(request.args.get("start", -1))
+        stop = int(request.args.get("stop", -1))
+
         show_number = int(request.args.get("show_number", -1))
         show_id = int(request.args.get("show_id", -1))
 
@@ -251,8 +270,8 @@ class GameResource(Resource):
         else:
             abort(400, message="round number must be between 0 (jeopardy) and 2 (final jeopardy/tiebreaker)")
 
-        if year != -1:
-            categories = date_query(model=Category, year=year, month=-1, day=-1, chained_results=categories)
+        if (start != -1) and (stop != -1):
+            categories = date_query(model=Category, start=start, stop=stop, chained_results=categories)
 
         if show_number != -1 and show_id != -1:
             abort(400, message="only one of show_number and show_id may be supplied at a time")
@@ -322,27 +341,41 @@ def paginate(model, schema, indices) -> dict:
     )
 
 
-def date_query(model, year: int, month: int, day: int, chained_results=None):
-    try:
-        date = datetime.datetime.strptime(f"{year:04d}/{abs(month):02d}/{abs(day):02d}", "%Y/%m/%d")
-
-    except ValueError:
-        abort(
-            400,
-            message="please check that your date is valid (year between 0001 and 9999, month between 1 and 12, and day between 1 and 31, as applicable)",
-        )
-
+def date_query(
+    model, year: int = -1, month: int = -1, day: int = -1, start: int = -1, stop: int = -1, chained_results=None
+):
     if chained_results != None:
-        results = chained_results.filter(model.date.has(year=date.year))
+        results = chained_results
 
     else:
-        results = model.query.filter(model.date.has(year=date.year))
+        results = model.query
 
-    if month != -1:
-        results = results.filter(model.date.has(month=date.month))
+    if year != -1:
+        try:
+            date = datetime.datetime.strptime(f"{year:04d}/{abs(month):02d}/{abs(day):02d}", "%Y/%m/%d")
 
-        if day != -1:
-            results = results.filter(model.date.has(day=date.day))
+        except ValueError:
+            abort(
+                400,
+                message="please check that your date is valid (year between 0001 and 9999, month between 1 and 12, and day between 1 and 31, as applicable)",
+            )
+
+        results = results.filter(model.date.has(year=date.year))
+
+        if month != -1:
+            results = results.filter(model.date.has(month=date.month))
+
+            if day != -1:
+                results = results.filter(model.date.has(day=date.day))
+
+    elif (start != -1) and (stop != -1):
+        if start > stop:
+            abort(400, message="stop year must be after start year")
+
+        if 1 > start or 1 > stop or 9999 < start or 9999 < stop:
+            abort(400, message="year range must be between 0001 and 9999")
+
+        results = results.join(Date, Date.id == model.date_id).filter(and_(start <= Date.year, Date.year <= stop))
 
     return results
 
@@ -399,6 +432,12 @@ api.add_resource(
     "/sets/date/<int:year>/<int:month>/<int:day>",
 )
 
+api.add_resource(
+    SetsByYears,
+    "/set/years/<int:start>/<int:stop>",
+    "/sets/years/<int:start>/<int:stop>",
+)
+
 
 api.add_resource(ShowsMultiple, "/show", "/shows")
 api.add_resource(ShowByNumber, "/show/number/<int:show_number>", "/shows/number/<int:show_number>")
@@ -413,6 +452,13 @@ api.add_resource(
     "/shows/date/<int:year>/<int:month>/<int:day>",
 )
 
+api.add_resource(
+    ShowsByYears,
+    "/show/years/<int:start>/<int:stop>",
+    "/shows/years/<int:start>/<int:stop>",
+)
+
+
 api.add_resource(CategoriesMultiple, "/category/", "/categories")
 api.add_resource(CategoryById, "/category/id/<int:category_id>", "/categories/id/<int:category_id>")
 api.add_resource(
@@ -424,6 +470,13 @@ api.add_resource(
     "/category/date/<int:year>/<int:month>/<int:day>",
     "/categories/date/<int:year>/<int:month>/<int:day>",
 )
+
+api.add_resource(
+    CategoriesByYears,
+    "/category/years/<int:start>/<int:stop>",
+    "/categories/years/<int:start>/<int:stop>",
+)
+
 api.add_resource(CategoriesByCompletion, "/category/complete/<completion>", "/category/<completion_string>")
 api.add_resource(CategoriesByName, "/category/name/<name_string>")
 api.add_resource(CategoriesByRound, "/category/round/<round_number>")
