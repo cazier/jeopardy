@@ -37,7 +37,7 @@ def route_new():
 
     Only allows GET requests.
     """
-    return render_template(template_name_or_list="new.html")
+    return render_template(template_name_or_list="new.html", errors=get_flashed_messages())
 
 
 @routing.route("/join/<room>", methods=["GET"])
@@ -77,17 +77,42 @@ def route_host():
         if (room := request.form.get("room")) :
             room = room
 
-        # If the method has a number of categories supplied, the host is starting a
+        # If the method has a size supplied (because it's a required field), the host is starting a
         # `/new` game.
-        elif (category := request.form.get("categories")) :
-            room = generate_room_code()
+        elif request.form.get("size", False):
+            game_settings: dict = {"room": generate_room_code()}
+
+            game_settings["size"] = int(request.form.get("size"))
+
+            start = request.form.get("start")
+            stop = request.form.get("stop")
+
+            if start != "" and stop != "":
+                game_settings["start"] = int(start)
+                game_settings["stop"] = int(stop)
+
+            elif start == "" and stop == "":
+                pass
+
+            else:
+                flash(
+                    message="If specifying years to get games, you must include both a start and stop year.",
+                    category="error",
+                )
+                return redirect(url_for("routing.route_new"))
+
+            if (style := request.form.get("qualifier")) != "":
+                game_settings[style] = int(show if (show := request.form.get("show")) != "" else -1)
+
+            game = alex.Game(game_settings=game_settings)
+            game.make_board()
 
             storage.push(
-                room=room,
-                value=alex.Game(room=room, size=int(category)),
+                room=game_settings["room"],
+                value=game,
             )
 
-            storage.pull(room=room).make_board()
+            room = game_settings["room"]
 
             session["name"] = "Host"
             session["room"] = room
@@ -250,23 +275,21 @@ def route_test():
 
     Only allows GET requests (for rather obvious reasons)
     """
-    room = generate_room_code()
 
-    storage.push(
-        room=room,
-        value=alex.Game(
-            room=room,
-            size=int(request.form.get("categories", default=6)),
-        ),
-    )
+    config.debug = True
 
-    game = storage.pull(room=room)
+    game_settings: dict = {"room": generate_room_code(), "size": int(request.form.get("size", 6))}
+
+    game = alex.Game(game_settings=game_settings)
     game.make_board()
+
     game.add_player("Alex")
     game.add_player("Brad")
     game.add_player("Carl")
 
-    return render_template(template_name_or_list="testing.html", room=room)
+    storage.push(room=game_settings["room"], value=game)
+
+    return render_template(template_name_or_list="testing.html", room=game_settings["room"])
 
 
 @routing.errorhandler(500)
