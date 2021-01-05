@@ -189,7 +189,7 @@ def route_player():
         else:
             storage.pull(room=room).add_player(name)
 
-            socketio.emit("add_player_to_board-s>b", {"room": room, "player": name})
+            socketio.emit(event="add_player_to_board-s>b", data={"player": name}, room=room)
 
             session["name"] = name
             session["room"] = room
