@@ -12,6 +12,8 @@
     <script>
         var socket = io('http://' + document.domain + ':' + location.port);
 
+        socket.emit("join", { room: "{{ game.room }}" });
+
         var type = 'host';
     </script>
 
@@ -244,7 +246,6 @@
 
                     socket.emit('host_clicked_answer-h>s', {
                         'identifier': this.id,
-                        'room': '{{ game.room }}'
                     });
 
                     $('#finished_reading').show();
@@ -256,18 +257,14 @@
                 }
 
                 else if (this.id == 'finished_reading') {
-                    socket.emit('finished_reading-h>s', {
-                        'room': '{{ game.room }}'
-                    });
+                    socket.emit('finished_reading-h>s');
 
                     $('#finished_reading').hide();
                     $('#dismiss').show();
                 }
 
                 else if (this.id == 'dismiss') {
-                    socket.emit('dismiss-h>s', {
-                        'room': '{{ game.room }}'
-                    });
+                    socket.emit('dismiss-h>s');
                 }
 
                 else if (this.id.endsWith('correct_response')) {
@@ -282,7 +279,6 @@
                     $('#dismiss').removeClass('disabled');
 
                     socket.emit('response_given-h>s', {
-                        'room': '{{ game.room }}',
                         'correct': this.id == 'correct_response'
                     })
                 }
@@ -290,27 +286,22 @@
                 else if (this.id.endsWith('correct_wager')) {
 
                     socket.emit('wager_responded-h>s', {
-                        'room': '{{ game.room }}',
                         'correct': this.id == 'correct_wager'
                     });
                 }
 
                 else if (this.id.endsWith('correct_fj')) {
                     socket.emit('wager_responded-h>s', {
-                        'room': '{{ game.room }}',
                         'correct': this.id == 'correct_fj'
                     });
                 }
 
                 else if (this.id == 'start_next_round') {
-                    socket.emit('start_next_round-h>s', {
-                        'room': '{{ game.room }}'
-                    });
+                    socket.emit('start_next_round-h>s');
                 }
 
                 else if (this.id == 'get_wager') {
                     socket.emit('get_wager-h>s', {
-                        'room': '{{ game.room }}',
                         'name': null
                     });
 
@@ -318,18 +309,13 @@
                 }
 
                 else if (this.id == 'get_questions') {
-                    socket.emit('get_responses-h>s', {
-                        'room': '{{ game.room }}',
-                        'name': null
-                    });
+                    socket.emit('get_responses-h>s');
 
                     $('#hide_1').hide();
                 }
 
                 else if (this.id == 'show_responses') {
-                    socket.emit('show_responses-h>s', {
-                        'room': '{{ game.room }}',
-                    });
+                    socket.emit('show_responses-h>s');
                 }
 
                 else if ((this.id == 'show_responses') | (this.id == 'next')) {
@@ -337,9 +323,7 @@
                         $('#wagering').toggle();
                     };
 
-                    socket.emit('show_responses-h>s', {
-                        'room': '{{ game.room }}',
-                    });
+                    socket.emit('show_responses-h>s');
                 }
             }
         });
@@ -388,7 +372,6 @@
                 $('#show_-1').hide();
 
                 socket.emit('get_wager-h>s', {
-                    'room': '{{ game.room }}',
                     'name': this.id,
                 });
 

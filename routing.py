@@ -16,7 +16,7 @@ import alex
 import config
 import storage
 
-from sockets import socketio
+from sockets import socketio, join_room
 
 routing = Blueprint(name="routing", import_name=__name__)
 
@@ -296,6 +296,13 @@ def route_test():
 def internal_server_error(error):
     """Directs Flask to load the error handling page on HTTP Status Code 500 (Server Errors)"""
     return render_template(template_name_or_list="errors.html", error_code=error), 500
+
+
+@socketio.on("join")
+def on_join(data):
+    """Connects the player to the specific room associated with the game"""
+
+    join_room(room=data["room"])
 
 
 def generate_room_code() -> str:

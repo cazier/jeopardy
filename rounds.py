@@ -1,5 +1,5 @@
-from flask import Blueprint
-from sockets import socketio
+from flask import Blueprint, request
+from sockets import socketio, get_room
 
 import config
 import wagers
@@ -17,28 +17,30 @@ def host_clicked_answer(data):
     - `data` (dict) - A dictionary containing the information associated with the selected
     set; the identifier of the set, and the room it was selected from.
     """
-    game = storage.pull(data["room"])
+    room = get_room(sid=request.sid)
+
+    game = storage.pull(room)
     info = game.get(data["identifier"])
 
     socketio.emit(
-        "disable_question-s>b",
-        {
-            "room": data["room"],
+        event="disable_question-s>b",
+        data={
             "identifier": f'#{data[u"identifier"]}',
         },
+        room=room,
     )
 
     # If the set is not a Daily Double or Final Round (which would require a wager!)
     if not info["wager"]:
         socketio.emit(
-            "reveal_standard_set-s>bh",
-            {
-                "room": data["room"],
+            event="reveal_standard_set-s>bh",
+            data={
                 "updates": {
                     "question": info["question"].replace("<br />", "\n"),
                     "answer": info["answer"].replace("<br />", "\n"),
                 },
             },
+            room=room,
         )
 
     # If the set is a DD or in one of the final rounds, need to request a wager prior to
@@ -48,23 +50,27 @@ def host_clicked_answer(data):
 
 
 @socketio.on("finished_reading-h>s")
-def enable_buzzers(data, incorrect_players: list = list()):
+def enable_buzzers(incorrect_players: list = list()):
     """After receiving the `socket.on` that the host has finished reading the answer, `socket.emit` the
     signal to enable the buzzers for each player.
 
     This takes an optional argument `incorrect_players` prohiting players who have already guessed
     incorrectly to try to do so again.
     """
-    socketio.emit("enable_buzzers-s>p", {"room": data["room"], "players": incorrect_players})
+    room = get_room(sid=request.sid)
+
+    socketio.emit(event="enable_buzzers-s>p", data={"players": incorrect_players}, room=room)
 
 
 @socketio.on("dismiss-h>s")
-def dismiss(data):
+def dismiss():
     """After receiving the `socket.on` that the host has determined no one wants to buzz in, `socket.emit` the signal to dismiss the set and return to the game board."""
 
-    socketio.emit("reset_buzzers-s>p", {"room": data["room"]})
+    room = get_room(sid=request.sid)
 
-    end_set(data=data)
+    socketio.emit(event="reset_buzzers-s>p", room=room)
+
+    end_set(room=room)
 
 
 @socketio.on("buzz_in-p>s")
@@ -72,17 +78,19 @@ def player_buzzed_in(data):
     """After receiving the `socket.on` that a player is buzzing in, `socket.emit` the player's name to the
     host.
     """
-    game = storage.pull(data["room"])
+    room = get_room(sid=request.sid)
+
+    game = storage.pull(room)
     game.buzz(data["name"])
 
-    socketio.emit("reset_buzzers-s>p", {"room": data["room"]})
+    socketio.emit(event="reset_buzzers-s>p", data={"room": room}, room=room)
 
     socketio.emit(
-        "player_buzzed-s>h",
-        {
-            "room": data["room"],
+        event="player_buzzed-s>h",
+        data={
             "name": game.buzz_order[-1],
         },
+        room=room,
     )
 
 
@@ -94,41 +102,44 @@ def response_given(data):
     If the player was correct, clean up the board and continue the game. Otherwise, allow the buzzing
     in availability for the remaining players.
     """
-    game = storage.pull(data["room"])
+    room = get_room(sid=request.sid)
+
+    game = storage.pull(room)
 
     game.score.update(game=game, correct=int(data["correct"]))
 
-    socketio.emit("update_scores-s>bph", {"room": data["room"], "scores": game.score.emit()})
+    socketio.emit(event="update_scores-s>bph", data={"scores": game.score.emit()}, room=room)
 
     if data["correct"] or len(game.score) == len(game.buzz_order):
-        end_set(data)
+        end_set(room)
 
     else:
-        enable_buzzers(data, incorrect_players=game.buzz_order)
+        enable_buzzers(incorrect_players=game.buzz_order)
 
 
 @socketio.on("start_next_round-h>s")
-def start_next_round(data):
+def start_next_round():
     """After receiving the `socket.on` that the host has clicked to start the next round, run
     the game logic that does so, and then `socket.emit` to the board and host to move on.
     """
-    game = storage.pull(data["room"])
+    room = get_room(sid=request.sid)
+    game = storage.pull(room)
 
     game.start_next_round()
 
-    socketio.emit("next_round_started-s>bh")
+    socketio.emit(event="next_round_started-s>bh", room=room)
 
 
-def end_set(data):
+def end_set(room: str):
     """Clean up some variables and code whenever a set is completed. Firstly clear the buzzers list
     and the current set, and check to see if the round is over.
     """
-    game = storage.pull(data["room"])
+    game = storage.pull(room)
 
     game.buzz_order = list()
     game.current_set = None
 
-    socketio.emit("clear_modal-s>bh", {"room": data["room"]})
+    socketio.emit(event="clear_modal-s>bh", room=room)
 
     if config.debug:
         print(game.remaining_content)
@@ -137,15 +148,15 @@ def end_set(data):
 
     if (game.remaining_content <= 0) and (game.round < 2):
         socketio.emit(
-            "round_complete-s>bh",
-            {
-                "room": data["room"],
+            event="round_complete-s>bh",
+            data={
                 "updates": {
                     "current_round": game.round_text(),
                     "next_round": game.round_text(upcoming=True),
                 },
             },
+            room=room,
         )
 
     elif game.round >= 2:
-        socketio.emit("results-page-s>bph")
+        socketio.emit(event="results-page-s>bph", room=room)

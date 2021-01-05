@@ -2,19 +2,21 @@ import config
 import rounds
 import storage
 
-from sockets import socketio
+from flask import request
+
+from sockets import socketio, get_room
 
 
 def start_wager(game):
-    socketio.emit(
-        "start_wager_round-s>bh",
-        {"room": game.room, "players": game.score.keys()},
-    )
+    room = get_room(sid=request.sid)
+    socketio.emit(event="start_wager_round-s>bh", data={"players": game.score.keys()}, room=room)
 
 
 @socketio.on("get_wager-h>s")
 def wager_receipt(data):
-    game = storage.pull(room=data["room"])
+    room = get_room(sid=request.sid)
+
+    game = storage.pull(room=room)
 
     if game.round < 2:
         players = [data["name"]]
@@ -23,20 +25,16 @@ def wager_receipt(data):
     else:
         players = game.score.keys()
 
-    socketio.emit(
-        "wager_amount_prompt-s>p",
-        {"room": data["room"], "players": players},
-    )
+    socketio.emit(event="wager_amount_prompt-s>p", data={"players": players}, room=room)
 
 
 @socketio.on("wager_submitted-p>s")
 def wager_submittal(data):
-    game = storage.pull(room=data["room"])
+    room = get_room(sid=request.sid)
 
-    socketio.emit(
-        "wager_submitted-s>h",
-        {"room": game.room, "updates": {"name": data["name"]}},
-    )
+    game = storage.pull(room=room)
+
+    socketio.emit(event="wager_submitted-s>h", data={"updates": {"name": data["name"]}}, room=room)
 
     if "wager" in data.keys():
         game.score[data["name"]] = ("amount", int(data["wager"]))
@@ -57,8 +55,7 @@ def wager_submittal(data):
                 }
 
                 socketio.emit(
-                    "reset_wager_names-s>h",
-                    {"room": game.room, "players": list(game.score.players.keys())},
+                    event="reset_wager_names-s>h", data={"players": list(game.score.players.keys())}, room=room
                 )
 
                 reveal_wager(game=game, updates=updates)
@@ -89,74 +86,74 @@ def wager_submittal(data):
             game.score.num = 0
 
             socketio.emit(
-                "enable_show_responses-s>h",
-                {
-                    "room": game.room,
+                event="enable_show_responses-s>h",
+                data={
                     "updates": updates,
                 },
+                room=room,
             )
 
 
 def reveal_wager(game, updates: dict) -> None:
     socketio.emit(
-        "reveal_wager-s>bh",
-        {
-            "room": game.room,
+        event="reveal_wager-s>bh",
+        data={
             "updates": updates,
         },
+        room=game.room,
     )
 
 
 @socketio.on("wager_responded-h>s")
 def wager_responded(data):
-    game = storage.pull(room=data["room"])
+    room = get_room(sid=request.sid)
+
+    game = storage.pull(room=room)
 
     game.score.update(game=game, correct=int(data["correct"]))
 
     socketio.emit(
-        "update_scores-s>bph",
-        {
-            "room": data["room"],
+        event="update_scores-s>bph",
+        data={
             "scores": game.score.emit(),
         },
+        room=room,
     )
 
     if game.round < 2:
         socketio.emit(
-            "reset_wagers_modals-s>bh", {"room": game.room, "updates": {"wager_answer": "", "wager_question": ""}}
+            event="reset_wagers_modals-s>bh", data={"updates": {"wager_answer": "", "wager_question": ""}}, room=room
         )
 
-        socketio.emit("clear_modal-s>bh", {"room": data["room"]})
+        socketio.emit(event="clear_modal-s>bh", room=room)
 
-        rounds.end_set(data)
+        rounds.end_set(room)
 
 
 @socketio.on("get_responses-h>s")
-def wager_response_prompt(data):
-    game = storage.pull(room=data["room"])
+def wager_response_prompt():
+    room = get_room(sid=request.sid)
+
+    game = storage.pull(room=room)
 
     players = game.score.keys()
 
-    socketio.emit(
-        "wager_response_prompt-s>p",
-        {"room": data["room"], "players": players},
-    )
+    socketio.emit(event="wager_response_prompt-s>p", data={"players": players}, room=room)
 
 
 @socketio.on("show_responses-h>s")
-def show_responses(data):
-    game = storage.pull(room=data["room"])
+def show_responses():
+    room = get_room(sid=request.sid)
+
+    game = storage.pull(room=room)
 
     if game.score.num == len(game.score):
-        rounds.end_set(data)
+        rounds.end_set(room)
 
     else:
         player = game.score.sort()[game.score.num]
         game.score.wagerer = player
 
-        socketio.emit(
-            "display_final_response-s>bph",
-            {"room": data["room"], "updates": game.score.wager(player)},
-        )
+        socketio.emit(event="display_final_response-s>bph", data={"updates": game.score.wager(player)}, room=room)
 
         game.score.num += 1

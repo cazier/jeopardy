@@ -12,6 +12,8 @@
     <script>
         var socket = io('http://' + document.domain + ':' + location.port);
 
+        socket.emit("join", {room: "{{ game.room }}"});
+
         var type = 'player';
     </script>
 
@@ -125,7 +127,6 @@
         $('button').click(function (event) {
             if (this.id == 'buzzer') {
                 socket.emit('buzz_in-p>s', {
-                    'room': '{{ game.room }}',
                     'name': '{{ session["name"] }}'
                 });
             }
@@ -137,7 +138,6 @@
 
                     if (((wager <= score) | ((wager > score) & (wager <= 1000))) & wager >= 0) {
                         socket.emit('wager_submitted-p>s', {
-                            'room': '{{ game.room }}',
                             'name': '{{ session["name"] }}',
                             'wager': wager,
                         });
@@ -160,7 +160,6 @@
                     question = $('#question_value').val();
                     if (question.trim().length > 0) {
                         socket.emit('wager_submitted-p>s', {
-                            'room': '{{ game.room }}',
                             'name': '{{ session["name"] }}',
                             'question': question,
                         });
