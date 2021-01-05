@@ -123,7 +123,6 @@ class Game(object):
         entry, category, value = identifier.split("_")
 
         if entry == "q":
-            print(self.board.categories[0].sets, value)
             response = self.board.categories[int(category)].sets[int(value)]
             self.current_set = response.get_content()
             return response.get()
@@ -245,10 +244,8 @@ class Board(object):
         doubles = itertools.product(range(len(self.categories)), range(len(self.categories[0].sets)))
 
         for daily_double in random.sample(list(doubles), [1, 2, 0, 0][self.round]):
-            # if config.debug:
-            #     daily_double = (0, 0)
-
-            print(daily_double)
+            if config.debug:
+                daily_double = (0, 0)
 
             self.categories[daily_double[0]].sets[daily_double[1]].wager = True
 
