@@ -2,7 +2,7 @@ import config
 import rounds
 import storage
 
-from flask import request
+from flask import request, Markup
 
 from sockets import socketio, get_room
 
@@ -49,8 +49,8 @@ def wager_submittal(data):
                 info = game.current_set.get()
 
                 updates = {
-                    "wager_question": info["question"].replace("<br />", "\n"),
-                    "wager_answer": info["answer"].replace("<br />", "\n"),
+                    "wager_question": Markup(info["question"]),
+                    "wager_answer": Markup(info["answer"]),
                     "displayedInModal": "#wager_round",
                 }
 
@@ -71,8 +71,8 @@ def wager_submittal(data):
             info = game.current_set.get()
 
             updates = {
-                "wager_question": info["question"].replace("<br />", "\n"),
-                "wager_answer": info["answer"].replace("<br />", "\n"),
+                "wager_question": Markup(info["question"]),
+                "wager_answer": Markup(info["answer"]),
             }
 
             reveal_wager(game=game, updates=updates)

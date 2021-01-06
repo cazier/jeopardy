@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, Markup
 from sockets import socketio, get_room
 
 import config
@@ -36,8 +36,8 @@ def host_clicked_answer(data):
             event="reveal_standard_set-s>bh",
             data={
                 "updates": {
-                    "question": info["question"].replace("<br />", "\n"),
-                    "answer": info["answer"].replace("<br />", "\n"),
+                    "question": Markup(info["question"]),
+                    "answer": Markup(info["answer"]),
                 },
             },
             room=room,
