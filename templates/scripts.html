@@ -42,7 +42,9 @@
 	function manageModal({ action, modal_id = '#master-modal', updates = false }) {
 		if (!(updates === false)) {
 			for (var item in updates) {
-				$('#' + item).text(updates[item]);
+				if (item != "displayedInModal") {
+					document.getElementById(item).innerHTML = updates[item];
+				}
 			};
 
 			if ('displayedInModal' in updates) {
