@@ -18,27 +18,6 @@
 </script>
 
 <script type="text/javascript">
-	// https://stackoverflow.com/questions/133925/javascript-post-request-like-a-form-submit
-	function post(path, params, method = 'post') {
-		const web_form = document.createElement('form');
-		web_form.method = method;
-		web_form.action = path;
-
-		for (const key in params) {
-			if (params.hasOwnProperty(key)) {
-				const hiddenField = document.createElement('input');
-				hiddenField.type = 'hidden';
-				hiddenField.name = key;
-				hiddenField.value = params[key];
-
-				web_form.appendChild(hiddenField);
-			}
-		}
-
-		document.body.appendChild(web_form);
-		web_form.submit();
-	}
-
 	function manageModal({ action, modal_id = '#master-modal', updates = false }) {
 		if (!(updates === false)) {
 			for (var item in updates) {
