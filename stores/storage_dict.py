@@ -1,15 +1,15 @@
-from typing import Any
+# from typing import Any
 
-GAMES: dict = dict()
-
-
-def pull(room: str):
-    return GAMES[room]
+# GAMES: dict = dict()
 
 
-def push(room: str, value: Any) -> None:
-    GAMES[room] = value
+# def pull(room: str):
+#     return GAMES[room]
 
 
-def rooms():
-    return GAMES.keys()
+# def push(room: str, value: Any) -> None:
+#     GAMES[room] = value
+
+
+# def rooms():
+#     return GAMES.keys()

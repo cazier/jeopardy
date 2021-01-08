@@ -1,10 +1,13 @@
-import config
+GAMES: dict = dict()
 
-if config.storage == u"dict":
-    from stores.storage_dict import *
 
-elif config.storage == u"sqlite":
-    from stores.storage_sqlite import *
+def pull(room: str):
+    return GAMES[room]
 
-# pull = storage.pull
-# push = storage.push
+
+def push(room: str, value) -> None:
+    GAMES[room] = value
+
+
+def rooms():
+    return GAMES.keys()
