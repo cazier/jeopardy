@@ -92,7 +92,8 @@
                                     <div class="container">
                                         <div class="row">
                                             <div class="modal-custom col-sm">Answer:</div>
-                                            <div class="modal-custom alert-light col-sm" style="text-align: right;">(<span id="year"></span>)</div>
+                                            <div class="modal-custom alert-light col-sm" style="text-align: right;">
+                                                (<span id="year"></span>)</div>
                                         </div>
                                     </div>
                                     <div class="modal-body" id="answer"></div>
@@ -106,12 +107,18 @@
                                             <div class="card" id="wager_2" style="display: none;">
                                                 <div class="card-body">
                                                     <div class="card-title d-flex justify-content-between">
-                                                        <h3><span>Answer:</span></h3>
-                                                        <h3></h3>
+                                                        <div class="container">
+                                                            <div class="row modal-custom" style="padding: 0px;">
+                                                                <div class="col" style="padding: 0px;">Answer:</div>
+                                                                <div class="col alert-light" style="text-align: right; padding: 0px;">
+                                                                    (<span id="wager_year"></span>)</div>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                     <hr>
                                                     <div id="wager_answer" class="card-text smaller"></div>
-                                                    <div id="wager_question" style="display: none;" class="card-text smaller"></div>
+                                                    <div id="wager_question" style="display: none;"
+                                                        class="card-text smaller"></div>
                                                 </div>
                                             </div>
                                             <div class="card" id="final_reveal" style="display: none;">

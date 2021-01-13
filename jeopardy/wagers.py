@@ -51,6 +51,7 @@ def wager_submittal(data):
                 updates = {
                     "wager_question": Markup(info["question"]),
                     "wager_answer": Markup(info["answer"]),
+                    "wager_year": info["year"],
                     "displayedInModal": "#wager_round",
                 }
 
@@ -73,6 +74,7 @@ def wager_submittal(data):
             updates = {
                 "wager_question": Markup(info["question"]),
                 "wager_answer": Markup(info["answer"]),
+                "wager_year": info["year"],
             }
 
             reveal_wager(game=game, updates=updates)

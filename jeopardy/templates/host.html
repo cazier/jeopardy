@@ -118,7 +118,10 @@
                                         </div>
                                         <div id="show_0" style="display: none;">
                                             <div class="modal-custom">
-                                                <div>Answer:</div>
+                                                <div class="row">
+                                                    <div class="col modal-custom">Answer:</div>
+                                                    <div class="col modal-custom alert-light" style="text-align: right;">(<span id="wager_year"></span>)</div>
+                                                </div>
                                                 <div id="wager_answer" class="smaller"></div>
                                             </div>
                                             <div class="modal-custom">
@@ -153,9 +156,11 @@
                             </div>
                             <div>
                                 <hr>
-                                <h4>
-                                    CATEGORY:
-                                </h4>
+                                <div class="container">
+                                    <div class="row">
+                                        <div class="col modal-custom">CATEGORY:</div>
+                                    </div>
+                                </div>
                                 <h5 style="padding-left: 25px">{{ game.board.categories[0].category }}</h5>
                                 <hr>
                                 <div class="btn-toolbar" role="toolbar" id="hide_0">
@@ -164,9 +169,12 @@
                                     </div>
                                 </div>
                                 <div id="show_0" style="display: none;">
-                                    <h4>
-                                        ANSWER:
-                                    </h4>
+                                    <div class="container">
+                                        <div class="row">
+                                            <div class="col modal-custom">ANSWER:</div>
+                                            <div class="col modal-custom alert-light" style="text-align: right; background-color: transparent;">({{ game.board.categories[0].sets[0].year }})</div>
+                                        </div>
+                                    </div>
                                     <h5 style="padding-left: 25px">{{ game.board.categories[0].sets[0].answer | safe }}</h5>
                                     <hr>
                                     <div class="btn-toolbar" role="toolbar" id="hide_1">
