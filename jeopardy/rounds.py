@@ -38,6 +38,7 @@ def host_clicked_answer(data):
                 "updates": {
                     "question": Markup(info["question"]),
                     "answer": Markup(info["answer"]),
+                    "year": info["year"],
                 },
             },
             room=room,

@@ -309,6 +309,7 @@ class Content(object):
             "question": self.question,
             "answer": self.answer,
             "wager": self.wager,
+            "year": self.year
         }
 
     def get_content(self):
