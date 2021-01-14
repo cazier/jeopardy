@@ -283,8 +283,9 @@
                 }
 
                 else if (this.id.endsWith('correct_response')) {
+                    document.getElementById('player').innerHTML = "&nbsp;"
+
                     if (this.id == 'incorrect_response') {
-                        $('#player').text('');
 
                         $('#correct_response').addClass('disabled');
                         $('#incorrect_response').addClass('disabled');
@@ -360,8 +361,6 @@
         });
 
         socket.on('clear_modal-s>bh', function (message) {
-            $('#player').text('');
-
             manageModal({ action: 'hide' });
         });
 
