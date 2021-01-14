@@ -12,7 +12,9 @@
     <script>
         var socket = io('http://' + document.domain + ':' + location.port);
 
-        socket.emit("join", { room: "{{ game.room }}" });
+        socket.emit("join", {
+            room: "{{ game.room }}"
+        });
 
         var type = 'host';
     </script>
@@ -29,232 +31,239 @@
                         Time to be a Host!
                     </h2>
                     <hr>
-                    {% if game.round < 2 %} <!-- Section loaded for the first two rounds. (Regular and Double) -->
-                        <div class="accordion" id="categories">
-                            {% for name in game.board.categories %}
-                            <div class="card">
-                                <div class="card-header" id="category_{{ loop.index0 }}">
-                                    <h3 class="mb-0">
-                                        <button class="btn btn-link btn-block text-left" type="button"
-                                            data-toggle="collapse" data-target="#content_{{ loop.index0 }}"
-                                            aria-expanded="false" aria-controls="content_{{ loop.index0 }}"
-                                            style="white-space: normal;">
-                                            {{ name }}
-                                        </button>
-                                    </h3>
-                                </div>
-                                <div id="content_{{ loop.index0 }}" class="collapse text-center"
-                                    aria-labelledby="category_{{ loop.index0 }}" data-parent="#categories">
-                                    <div class="btn-group" role="group" aria-label="values"
-                                        style="padding-top: 6px; padding-bottom: 6px;">
-                                        {% for answer in name.sets %}
-                                        <button
-                                            class="btn btn-primary show-answer {% if answer.shown %}disabled{% endif %}"
-                                            type="button" id="q_{{ answer.id() }}">
-                                            {{ currency }}{{ (answer.value + 1) * (game.round + 1) * 200 }}
-                                        </button>
-                                        {% endfor %}
-                                    </div>
-                                </div>
+                    {% if game.round < 2 %}
+                    <!-- Section loaded for the first two rounds. (Regular and Double) -->
+                    <div class="accordion" id="categories">
+                        {% for name in game.board.categories %}
+                        <div class="card">
+                            <div class="card-header" id="category_{{ loop.index0 }}">
+                                <h3 class="mb-0">
+                                    <button class="btn btn-link btn-block text-left" type="button"
+                                      data-toggle="collapse" data-target="#content_{{ loop.index0 }}"
+                                      aria-expanded="false" aria-controls="content_{{ loop.index0 }}"
+                                      style="white-space: normal;">
+                                        {{ name }}
+                                    </button>
+                                </h3>
                             </div>
-                            {% endfor %}
-                        </div>
-                        <div class="modal fade" id="master-modal" tabindex="-1" role="dialog"
-                            aria-labelledby="master-modal-holder" aria-hidden="true" data-keyboard="false"
-                            data-backdrop="static">
-                            <div class="modal-dialog modal-dialog-centered" role="document">
-                                <div class="modal-content" id="standard_set" style="display: none;">
-                                    <div id="modal-text">
-                                        <div class="container">
-                                            <div class="row">
-                                                <div class="col modal-custom">Answer:</div>
-                                                <div class="col modal-custom alert-light" style="text-align: right;">(<span id="year"></span>)</div>
-                                            </div>
-                                        </div>
-                                        <div class="modal-body" id="answer"></div>
-                                        <div class="modal-custom">Question:</div>
-                                        <div class="modal-body" id="question"></div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <div class="container">
-                                            <div class="row" style="margin: 4px;">
-                                                <div class="btn btn-block btn-outline-dark disabled" style="margin: 4px; text-align: center;" id="player">&nbsp;</div>
-                                            </div>
-                                            <div class="row" style="margin: 4px;">
-                                                <button class="btn btn-success col-sm disabled" style="margin: 4px;"
-                                                    id="correct_response">Correct!</button>
-                                                <button class="btn btn-danger col-sm disabled" style="margin: 4px;"
-                                                    id="incorrect_response">Incorrect</button>
-                                                <button class="btn btn-dark col-sm" style="margin: 4px;" id="finished_reading">Finished
-                                                    Reading!</button>
-                                                <button class="btn btn-info col-sm" style="margin: 4px;" id="dismiss"
-                                                    style="display: none;">Dismiss</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                </div>
-                                <div class="modal-content" id="round_transition" style="display: none;">
-                                    <div id="modal-text">
-                                        <div class="modal-custom">Round Complete!</div>
-                                        <div class="modal-body">
-                                            Congratulations on finishing <span id="current_round"></span> Are you ready
-                                            to
-                                            start <span id="next_round"></span>?
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button class="btn btn-success mr-auto" id="start_next_round">Start the next
-                                            round!</button>
-                                    </div>
-                                </div>
-                                <div class="modal-content" id="wager_round" style="display: none;">
-                                    <div class="modal-text">
-                                        <div class="modal-custom centered">{{ game.heading() }}</div>
-                                        <div id="show_-1">
-                                            <div class="modal-custom small">Who chose the category?</div>
-                                            <div class="btn-toolbar" role="toolbar" style="padding: 16px;">
-                                                <div class="btn-group" role="group" id="players">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div id="show_0" style="display: none;">
-                                            <div class="modal-custom">
-                                                <div class="row">
-                                                    <div class="col modal-custom">Answer:</div>
-                                                    <div class="col modal-custom alert-light" style="text-align: right;">(<span id="wager_year"></span>)</div>
-                                                </div>
-                                                <div id="wager_answer" class="smaller"></div>
-                                            </div>
-                                            <div class="modal-custom">
-                                                <div>Question:</div>
-                                                <div id="wager_question" class="smaller"></div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <div class="btn-toolbar" role="toolbar">
-                                                    <div class="btn-group" role="group" id='wager_footer'>
-                                                        <button class="btn btn-success mr-auto"
-                                                            id="correct_wager">Correct</button>
-                                                        <button class="btn btn-danger mr-auto"
-                                                            id="incorrect_wager">Incorrect</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        {% else %}
-                        <!-- Section loaded for the wagering rounds. (Final and Tiebreaker) -->
-                        <div>
-                            <div class="btn-toolbar" role="toolbar">
-                                <div class="btn-group" role="group" id="wagerers">
-                                    {% for name in game.score.keys() %}
-                                    <button class="btn btn-danger wager_names" id="{{ name }}_wagered">{{ name
-                                        }}</button>
+                            <div id="content_{{ loop.index0 }}" class="collapse text-center"
+                              aria-labelledby="category_{{ loop.index0 }}" data-parent="#categories">
+                                <div class="btn-group" role="group" aria-label="values"
+                                  style="padding-top: 6px; padding-bottom: 6px;">
+                                    {% for answer in name.sets %}
+                                    <button
+                                      class="btn btn-primary show-answer {% if answer.shown %}disabled{% endif %}"
+                                      type="button" id="q_{{ answer.id() }}">
+                                        {{ currency }}{{ (answer.value + 1) * (game.round + 1) * 200 }}
+                                    </button>
                                     {% endfor %}
                                 </div>
                             </div>
-                            <div>
-                                <hr>
-                                <div class="container">
-                                    <div class="row">
-                                        <div class="col modal-custom">CATEGORY:</div>
-                                    </div>
-                                </div>
-                                <h5 style="padding-left: 25px">{{ game.board.categories[0].category }}</h5>
-                                <hr>
-                                <div class="btn-toolbar" role="toolbar" id="hide_0">
-                                    <div class="btn-group mr-2" role="group">
-                                        <button class="btn btn-success" id="get_wager">Prompt for Wagers</button>
-                                    </div>
-                                </div>
-                                <div id="show_0" style="display: none;">
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="modal fade" id="master-modal" tabindex="-1" role="dialog"
+                      aria-labelledby="master-modal-holder" aria-hidden="true" data-keyboard="false"
+                      data-backdrop="static">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content" id="standard_set" style="display: none;">
+                                <div id="modal-text">
                                     <div class="container">
                                         <div class="row">
-                                            <div class="col modal-custom">ANSWER:</div>
-                                            <div class="col modal-custom alert-light" style="text-align: right; background-color: transparent;">({{ game.board.categories[0].sets[0].year }})</div>
+                                            <div class="col modal-custom">Answer:</div>
+                                            <div class="col modal-custom alert-light" style="text-align: right;">
+                                                (<span id="year"></span>)</div>
                                         </div>
                                     </div>
-                                    <h5 style="padding-left: 25px">{{ game.board.categories[0].sets[0].answer | safe }}</h5>
-                                    <hr>
-                                    <div class="btn-toolbar" role="toolbar" id="hide_1">
-                                        <div class="btn-group mr-2" role="group">
-                                            <button class="btn btn-success" id="get_questions">Prompt for
-                                                Questions</button>
-                                        </div>
-                                    </div>
+                                    <div class="modal-body" id="answer"></div>
+                                    <div class="modal-custom">Question:</div>
+                                    <div class="modal-body" id="question"></div>
                                 </div>
-                                <div id="show_1" style="display: none;">
-                                    <div class="btn-toolbar" role="toolbar" id="hide_2">
-                                        <div class="btn-group mr-2" role="group">
-                                            <button class="btn btn-success" id="show_responses">Show Players'
-                                                Responses!</button>
+                                <div class="modal-footer">
+                                    <div class="container">
+                                        <div class="row" style="margin: 4px;">
+                                            <div class="btn btn-block btn-outline-dark disabled"
+                                              style="margin: 4px; text-align: center;" id="player">&nbsp;</div>
+                                        </div>
+                                        <div class="row" style="margin: 4px;">
+                                            <button class="btn btn-success col-sm disabled" style="margin: 4px;"
+                                              id="correct_response">Correct!</button>
+                                            <button class="btn btn-danger col-sm disabled" style="margin: 4px;"
+                                              id="incorrect_response">Incorrect</button>
+                                            <button class="btn btn-dark col-sm" style="margin: 4px;"
+                                              id="finished_reading">Finished
+                                                Reading!</button>
+                                            <button class="btn btn-info col-sm" style="margin: 4px;" id="dismiss"
+                                              style="display: none;">Dismiss</button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="modal fade" id="master-modal" tabindex="-1" role="dialog"
-                                aria-labelledby="master-modal-holder" aria-hidden="true" data-keyboard="false"
-                                data-backdrop="static">
-                                <div class="modal-dialog modal-dialog-centered" role="document">
-                                    <div class="modal-content" id="final_reveal" style="display: none;">
-                                        <div class="card">
-                                            <div class="card-header">
-                                                <h3 id="player"></h3>
-                                            </div>
-                                            <div class="card-body">
-                                                <div>
-                                                    <div>The player currently has <span style="font-weight: bold;">{{
-                                                            currency }}<span id="score"></span></span>.
-                                                    </div>
-                                                    <hr>
-                                                    <div>Their response:<br><span style="font-weight: bold;"
-                                                            id="question"></span></div>
-                                                    <hr>
-                                                    <div>The <em>correct</em> response is:<br>
-                                                        <button class="btn btn-primary" disabled>({{
-                                                            game.board.categories[0].sets[0].question }})</button>
-                                                    </div>
-                                                    <hr>
-                                                    <div>Did they get it right?</div>
-                                                    <div class="btn-toolbar" style="margin-left:auto;" role="toolbar">
-                                                        <div class="btn-group" role="group">
-                                                            <button class="btn btn-success mr-auto"
-                                                                id="correct_fj">Correct!</button>
-                                                            <button class="btn btn-danger mr-auto"
-                                                                id="incorrect_fj">Incorrect</button>
-                                                        </div>
-                                                    </div>
-                                                    <hr>
-                                                    <div id="wagering" style="display: none;">
-                                                        They wagered <span style="font-weight: bold;">{{ currency
-                                                            }}<span id="amount"></span></span>
-                                                        <hr>
-                                                        Leaving them with a final score of:
-                                                        <br>
-                                                        <span style="font-weight: bold;">{{ currency }}<span
-                                                                id="final_score"></span></span>
-                                                        <hr>
-                                                        <button class="btn btn-info mr-auto" id="next">Next!</button>
-                                                    </div>
-                                                </div>
+                        </div>
+                        <div class="modal-content" id="round_transition" style="display: none;">
+                            <div id="modal-text">
+                                <div class="modal-custom">Round Complete!</div>
+                                <div class="modal-body">
+                                    Congratulations on finishing <span id="current_round"></span> Are you ready
+                                    to
+                                    start <span id="next_round"></span>?
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button class="btn btn-success mr-auto" id="start_next_round">Start the next
+                                    round!</button>
+                            </div>
+                        </div>
+                        <div class="modal-content" id="wager_round" style="display: none;">
+                            <div class="modal-text">
+                                <div class="modal-custom centered">{{ game.heading() }}</div>
+                                <div id="show_-1">
+                                    <div class="modal-custom small">Who chose the category?</div>
+                                    <div class="btn-toolbar" role="toolbar" style="padding: 16px;">
+                                        <div class="btn-group" role="group" id="players">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="show_0" style="display: none;">
+                                    <div class="modal-custom">
+                                        <div class="row">
+                                            <div class="col modal-custom">Answer:</div>
+                                            <div class="col modal-custom alert-light" style="text-align: right;">
+                                                (<span id="wager_year"></span>)</div>
+                                        </div>
+                                        <div id="wager_answer" class="smaller"></div>
+                                    </div>
+                                    <div class="modal-custom">
+                                        <div>Question:</div>
+                                        <div id="wager_question" class="smaller"></div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <div class="btn-toolbar" role="toolbar">
+                                            <div class="btn-group" role="group" id='wager_footer'>
+                                                <button class="btn btn-success mr-auto"
+                                                  id="correct_wager">Correct</button>
+                                                <button class="btn btn-danger mr-auto"
+                                                  id="incorrect_wager">Incorrect</button>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+                {% else %}
+                <!-- Section loaded for the wagering rounds. (Final and Tiebreaker) -->
+                <div>
+                    <div class="btn-toolbar" role="toolbar">
+                        <div class="btn-group" role="group" id="wagerers">
+                            {% for name in game.score.keys() %}
+                            <button class="btn btn-danger wager_names" id="{{ name }}_wagered">{{ name
+                                }}</button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div>
+                        <hr>
+                        <div class="container">
+                            <div class="row">
+                                <div class="col modal-custom">CATEGORY:</div>
+                            </div>
+                        </div>
+                        <h5 style="padding-left: 25px">{{ game.board.categories[0].category }}</h5>
+                        <hr>
+                        <div class="btn-toolbar" role="toolbar" id="hide_0">
+                            <div class="btn-group mr-2" role="group">
+                                <button class="btn btn-success" id="get_wager">Prompt for Wagers</button>
+                            </div>
+                        </div>
+                        <div id="show_0" style="display: none;">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col modal-custom">ANSWER:</div>
+                                    <div class="col modal-custom alert-light"
+                                      style="text-align: right; background-color: transparent;">({{
+                                        game.board.categories[0].sets[0].year }})</div>
+                                </div>
+                            </div>
+                            <h5 style="padding-left: 25px">{{ game.board.categories[0].sets[0].answer | safe }}</h5>
+                            <hr>
+                            <div class="btn-toolbar" role="toolbar" id="hide_1">
+                                <div class="btn-group mr-2" role="group">
+                                    <button class="btn btn-success" id="get_questions">Prompt for
+                                        Questions</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="show_1" style="display: none;">
+                            <div class="btn-toolbar" role="toolbar" id="hide_2">
+                                <div class="btn-group mr-2" role="group">
+                                    <button class="btn btn-success" id="show_responses">Show Players'
+                                        Responses!</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal fade" id="master-modal" tabindex="-1" role="dialog"
+                      aria-labelledby="master-modal-holder" aria-hidden="true" data-keyboard="false"
+                      data-backdrop="static">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content" id="final_reveal" style="display: none;">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3 id="player"></h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <div>
+                                            <div>The player currently has <span style="font-weight: bold;">{{
+                                                    currency }}<span id="score"></span></span>.
+                                            </div>
+                                            <hr>
+                                            <div>Their response:<br><span style="font-weight: bold;"
+                                                  id="question"></span></div>
+                                            <hr>
+                                            <div>The <em>correct</em> response is:<br>
+                                                <button class="btn btn-primary" disabled>({{
+                                                    game.board.categories[0].sets[0].question }})</button>
+                                            </div>
+                                            <hr>
+                                            <div>Did they get it right?</div>
+                                            <div class="btn-toolbar" style="margin-left:auto;" role="toolbar">
+                                                <div class="btn-group" role="group">
+                                                    <button class="btn btn-success mr-auto"
+                                                      id="correct_fj">Correct!</button>
+                                                    <button class="btn btn-danger mr-auto"
+                                                      id="incorrect_fj">Incorrect</button>
+                                                </div>
+                                            </div>
+                                            <hr>
+                                            <div id="wagering" style="display: none;">
+                                                They wagered <span style="font-weight: bold;">{{ currency
+                                                    }}<span id="amount"></span></span>
+                                                <hr>
+                                                Leaving them with a final score of:
+                                                <br>
+                                                <span style="font-weight: bold;">{{ currency }}<span
+                                                      id="final_score"></span></span>
+                                                <hr>
+                                                <button class="btn btn-info mr-auto" id="next">Next!</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        {% endif %}
+    </div>
+    {% endif %}
     </div>
     <script type="text/javascript">
         var displayedInModal = null;
 
-        $('button').click(function (event) {
+        $('button').click(function(event) {
             if (!this.className.includes('disabled')) {
                 if (this.className.includes('show-answer')) {
                     $('#' + this.id).addClass('disabled');
@@ -269,20 +278,14 @@
                     $('#correct_response').addClass('disabled');
                     $('#incorrect_response').addClass('disabled');
 
-                }
-
-                else if (this.id == 'finished_reading') {
+                } else if (this.id == 'finished_reading') {
                     socket.emit('finished_reading-h>s');
 
                     $('#finished_reading').hide();
                     $('#dismiss').show();
-                }
-
-                else if (this.id == 'dismiss') {
+                } else if (this.id == 'dismiss') {
                     socket.emit('dismiss-h>s');
-                }
-
-                else if (this.id.endsWith('correct_response')) {
+                } else if (this.id.endsWith('correct_response')) {
                     document.getElementById('player').innerHTML = "&nbsp;"
 
                     if (this.id == 'incorrect_response') {
@@ -297,44 +300,30 @@
                     socket.emit('response_given-h>s', {
                         'correct': this.id == 'correct_response'
                     })
-                }
-
-                else if (this.id.endsWith('correct_wager')) {
+                } else if (this.id.endsWith('correct_wager')) {
 
                     socket.emit('wager_responded-h>s', {
                         'correct': this.id == 'correct_wager'
                     });
-                }
-
-                else if (this.id.endsWith('correct_fj')) {
+                } else if (this.id.endsWith('correct_fj')) {
                     socket.emit('wager_responded-h>s', {
                         'correct': this.id == 'correct_fj'
                     });
-                }
-
-                else if (this.id == 'start_next_round') {
+                } else if (this.id == 'start_next_round') {
                     socket.emit('start_next_round-h>s');
-                }
-
-                else if (this.id == 'get_wager') {
+                } else if (this.id == 'get_wager') {
                     socket.emit('get_wager-h>s', {
                         'name': null
                     });
 
                     $('#hide_0').hide();
-                }
-
-                else if (this.id == 'get_questions') {
+                } else if (this.id == 'get_questions') {
                     socket.emit('get_responses-h>s');
 
                     $('#hide_1').hide();
-                }
-
-                else if (this.id == 'show_responses') {
+                } else if (this.id == 'show_responses') {
                     socket.emit('show_responses-h>s');
-                }
-
-                else if ((this.id == 'show_responses') | (this.id == 'next')) {
+                } else if ((this.id == 'show_responses') | (this.id == 'next')) {
                     if (this.id == 'next') {
                         $('#wagering').toggle();
                     };
@@ -345,13 +334,16 @@
         });
 
 
-        socket.on('reveal_standard_set-s>bh', function (message) {
+        socket.on('reveal_standard_set-s>bh', function(message) {
             displayedInModal = '#standard_set';
 
-            manageModal({ action: 'show', updates: message['updates'] });
+            manageModal({
+                action: 'show',
+                updates: message['updates']
+            });
         });
 
-        socket.on('player_buzzed-s>h', function (message) {
+        socket.on('player_buzzed-s>h', function(message) {
             $('#player').text(message['name']);
 
             $('#dismiss').addClass('disabled');
@@ -360,29 +352,37 @@
             $('#incorrect_response').removeClass('disabled');
         });
 
-        socket.on('clear_modal-s>bh', function (message) {
-            manageModal({ action: 'hide' });
+        socket.on('clear_modal-s>bh', function(message) {
+            manageModal({
+                action: 'hide'
+            });
         });
 
-        socket.on('round_complete-s>bh', function (message) {
+        socket.on('round_complete-s>bh', function(message) {
             displayedInModal = '#round_transition';
 
-            manageModal({ action: 'show', updates: message['updates'] });
+            manageModal({
+                action: 'show',
+                updates: message['updates']
+            });
         });
 
-        socket.on('next_round_started-s>bh', function (message) {
-            $("<form method='POST' action='" + document.URL + "'><input type='hidden' name='room' value='{{ game.room }}'/></form>").appendTo("body").submit();
+        socket.on('next_round_started-s>bh', function(message) {
+            $("<form method='POST' action='" + document.URL +
+                    "'><input type='hidden' name='room' value='{{ game.room }}'/></form>").appendTo("body")
+                .submit();
         });
 
-        socket.on('start_wager_round-s>bh', function (message) {
+        socket.on('start_wager_round-s>bh', function(message) {
             displayedInModal = '#wager_round';
 
             names = message['players'];
             for (name in names) {
-                $('#players').append($('<button class="btn btn-success" id="' + names[name] + '">' + names[name] + '</button>'));
+                $('#players').append($('<button class="btn btn-success" id="' + names[name] + '">' + names[
+                    name] + '</button>'));
             };
 
-            $('#players').on('click', '.btn', function () {
+            $('#players').on('click', '.btn', function() {
                 $('#show_-1').hide();
 
                 socket.emit('get_wager-h>s', {
@@ -391,47 +391,58 @@
 
             });
 
-            manageModal({ action: 'show' });
+            manageModal({
+                action: 'show'
+            });
         });
-        socket.on('reveal_wager-s>bh', function (message) {
+        socket.on('reveal_wager-s>bh', function(message) {
             {% if game.round < 2 %}
-            manageModal({ action: 'none', updates: message['updates'] });
+                manageModal({
+                    action: 'none',
+                    updates: message['updates']
+                });
             {% endif %}
 
             $('#show_0').show();
         });
 
-        socket.on('reset_wager_names-s>h', function (message) {
+        socket.on('reset_wager_names-s>h', function(message) {
             names = message['players'];
             for (name in names) {
                 $('#' + names[name] + '_wagered').toggleClass('btn-danger btn-success');
             }
         });
 
-        socket.on('wager_submitted-s>h', function (message) {
+        socket.on('wager_submitted-s>h', function(message) {
             $('#' + message['updates']['name'] + '_wagered').toggleClass('btn-danger btn-success');
         });
 
-        socket.on('enable_show_responses-s>h', function (message) {
+        socket.on('enable_show_responses-s>h', function(message) {
             $('#show_1').toggle();
         });
 
-        socket.on('display_final_response-s>bph', function (message) {
+        socket.on('display_final_response-s>bph', function(message) {
             displayedInModal = '#final_reveal';
 
-            manageModal({ action: 'show', updates: message['updates'] });
+            manageModal({
+                action: 'show',
+                updates: message['updates']
+            });
         });
 
-        socket.on("reset_wagers_modals-s>bh", function (message) {
+        socket.on("reset_wagers_modals-s>bh", function(message) {
             $('#players')[0].innerHTML = ""
             $('#show_-1').show();
             $('#show_0').hide()
 
-            manageModal({ action: 'hide', updates: message['updates'] });
+            manageModal({
+                action: 'hide',
+                updates: message['updates']
+            });
 
         });
 
-        socket.on('update_scores-s>bph', function (message) {
+        socket.on('update_scores-s>bph', function(message) {
             var player = $("#player").text();
 
             $('#final_score').text(message['scores'][player]);
@@ -439,10 +450,11 @@
             $('#wagering').toggle();
         });
 
-        socket.on('results-page-s>bph', function (message) {
-            $("<form method='POST' action='" + window.location.origin + "/results/'><input type='hidden' name='room' value='{{ game.room }}'/><input type='hidden' name='type' value='" + type + "'/></form>").appendTo("body").submit();
+        socket.on('results-page-s>bph', function(message) {
+            $("<form method='POST' action='" + window.location.origin +
+                "/results/'><input type='hidden' name='room' value='{{ game.room }}'/><input type='hidden' name='type' value='" +
+                type + "'/></form>").appendTo("body").submit();
         });
-
     </script>
 </body>
 
