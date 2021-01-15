@@ -8,7 +8,9 @@
     <script>
         var socket = io('http://' + document.domain + ':' + location.port);
 
-        socket.emit("join", {room: "{{ game.room }}"});
+        socket.emit("join", {
+            room: "{{ game.room }}"
+        });
 
         var type = 'board';
     </script>
@@ -17,181 +19,195 @@
 </head>
 
 <body>
-                {% include "header.html" %}
+    {% include "header.html" %}
     <div class="jumbotron">
-                    <h2>
-                        Let's Play {{ game.round_text() }}
-                    </h2>
-                    {% if game.round < 2 %} <table class="table">
-                        <tr>
-                            {% for name in game.board.categories %}
-                            <th style="width: {{ 100 // game.size }}%; text-align: center;">
-                                <h5>
-                                    {{ name.category }}
-                                </h5>
-                            </th>
-                            {% endfor %}
-                        </tr>
-                        {% for category in game.html_board() %}
-                        <tr>
-                            {% for answer in category %}
-                            <td>
-                                <button class="btn btn-block btn-primary {% if answer.shown %}disabled{% endif %}"
-                                    id="q_{{ answer.id() }}">
-                                    {{ currency }}{{ (answer.value + 1) * (game.round + 1) * 200 }}
-                                </button>
-                            </td>
-                            {% endfor %}
-                        </tr>
-                        {% endfor %}
-                        </table>
-                        <br>
-                        {% else %}
-                        <div>
-                            <hr>
-                            <h3>
-                                The category is:
-                            </h3>
-                            <h4 style="padding-left: 25px">{{ game.board.categories[0].category }}</h4>
+        <h2>
+            Let's Play {{ game.round_text() }}
+        </h2>
+        {% if game.round < 2 %} <table class="table">
+            <tr>
+                {% for name in game.board.categories %}
+                <th style="width: {{ 100 // game.size }}%; text-align: center;">
+                    <h5>
+                        {{ name.category }}
+                    </h5>
+                </th>
+                {% endfor %}
+            </tr>
+            {% for category in game.html_board() %}
+            <tr>
+                {% for answer in category %}
+                <td>
+                    <button class="btn btn-block btn-primary {% if answer.shown %}disabled{% endif %}"
+                      id="q_{{ answer.id() }}">
+                        {{ currency }}{{ (answer.value + 1) * (game.round + 1) * 200 }}
+                    </button>
+                </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+        <br>
+        {% else %}
+        <div>
+            <hr>
+            <h3>
+                The category is:
+            </h3>
+            <h4 style="padding-left: 25px">{{ game.board.categories[0].category }}</h4>
+        </div>
+        {% endif %}
+        <hr>
+        <table class="table" style="width: 100%;" id="score_board">
+            <h4>
+                Scores!
+            </h4>
+            <tr id='players'>
+                {% for name in game.score.keys() %}
+                <th style="text-align: center;">
+                    {{ name }}
+                </th>
+                {% endfor %}
+            </tr>
+            <tr id='scores'>
+                {% for name in game.score.keys() %}
+                <td style="text-align: center;">
+                    <span>{{ currency }}</span>
+                    <span id="{{ name }}_score">{{ game.score[name] }}</span>
+                </td>
+                {% endfor %}
+            </tr>
+        </table>
+        <div class="modal fade" id="master-modal" tabindex="-1" role="dialog" aria-labelledby="master-modal-holder"
+          aria-hidden="true" data-keyboard="false" data-backdrop="static">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content" id="standard_set" style="display: none;">
+                    <div class="container">
+                        <div class="row">
+                            <div class="modal-custom col-sm">Answer:</div>
+                            <div class="modal-custom alert-light col-sm" style="text-align: right;">
+                                (<span id="year"></span>)</div>
                         </div>
-                        {% endif %}
-                        <hr>
-                        <table class="table" style="width: 100%;" id="score_board">
-                            <h4>
-                                Scores!
-                            </h4>
-                            <tr id='players'>
-                                {% for name in game.score.keys() %}
-                                <th style="text-align: center;">
-                                    {{ name }}
-                                </th>
-                                {% endfor %}
-                            </tr>
-                            <tr id='scores'>
-                                {% for name in game.score.keys() %}
-                                <td style="text-align: center;">
-                                    <span>{{ currency }}</span>
-                                    <span id="{{ name }}_score">{{ game.score[name] }}</span>
-                                </td>
-                                {% endfor %}
-                            </tr>
-                        </table>
-                        <div class="modal fade" id="master-modal" tabindex="-1" role="dialog"
-                            aria-labelledby="master-modal-holder" aria-hidden="true" data-keyboard="false"
-                            data-backdrop="static">
-                            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-                                <div class="modal-content" id="standard_set" style="display: none;">
-                                    <div class="container">
-                                        <div class="row">
-                                            <div class="modal-custom col-sm">Answer:</div>
-                                            <div class="modal-custom alert-light col-sm" style="text-align: right;">
-                                                (<span id="year"></span>)</div>
-                                        </div>
-                                    </div>
-                                    <div class="modal-body" id="answer"></div>
-                                </div>
-                                <div class="modal-content" id="wager_round" style="display: none;">
-                                    <div class="modal-header">
-                                        <h2 class="modal-title centered">{{ game.heading() }}</h2>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div class="card-group">
-                                            <div class="card" id="wager_2" style="display: none;">
-                                                <div class="card-body">
-                                                    <div class="card-title d-flex justify-content-between">
-                                                        <div class="container">
-                                                            <div class="row modal-custom" style="padding: 0px;">
-                                                                <div class="col" style="padding: 0px;">Answer:</div>
-                                                                <div class="col alert-light" style="text-align: right; padding: 0px;">
-                                                                    (<span id="wager_year"></span>)</div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <hr>
-                                                    <div id="wager_answer" class="card-text smaller"></div>
-                                                    <div id="wager_question" style="display: none;"
-                                                        class="card-text smaller"></div>
-                                                </div>
-                                            </div>
-                                            <div class="card" id="final_reveal" style="display: none;">
-                                                <div class="card-body">
-                                                    <div class="card-title d-flex justify-content-between">
-                                                        <h3 id="player"></h3>
-                                                        <h3>{{ currency }}<span id="score"></span></h3>
-                                                    </div>
-                                                    <hr>
-                                                    <div class="card-text">Their response:</div>
-                                                    <div class="card-text" id="question" style="font-weight: bold;">
-                                                    </div>
-                                                    <div style="display: none;" id="wagering">
-                                                        <hr>
-                                                        <div class="card-text">They wagered <span
-                                                                style="font-weight: bold;">{{ currency }}<span
-                                                                    id="amount"></span></span></div>
-                                                        <hr>
-                                                        <div class="card-text">Leaving them with a final score of:</div>
-                                                        <div class="card-text" style="font-weight: bold;">
-                                                            {{ currency }}<span id="final_score"></span></div>
-                                                    </div>
-                                                </div>
+                    </div>
+                    <div class="modal-body" id="answer"></div>
+                </div>
+                <div class="modal-content" id="wager_round" style="display: none;">
+                    <div class="modal-header">
+                        <h2 class="modal-title centered">{{ game.heading() }}</h2>
+                    </div>
+                    <div class="modal-body">
+                        <div class="card-group">
+                            <div class="card" id="wager_2" style="display: none;">
+                                <div class="card-body">
+                                    <div class="card-title d-flex justify-content-between">
+                                        <div class="container">
+                                            <div class="row modal-custom" style="padding: 0px;">
+                                                <div class="col" style="padding: 0px;">Answer:</div>
+                                                <div class="col alert-light" style="text-align: right; padding: 0px;">
+                                                    (<span id="wager_year"></span>)</div>
                                             </div>
                                         </div>
                                     </div>
+                                    <hr>
+                                    <div id="wager_answer" class="card-text smaller"></div>
+                                    <div id="wager_question" style="display: none;" class="card-text smaller"></div>
                                 </div>
-                                <div class="modal-content" id="round_transition" style="display: none;">
-                                    <div class="modal-custom">Round Complete!</div>
-                                    <div class="modal-body">
-                                        Congratulations on finishing <span id="current_round"></span> Are you ready to
-                                        start <span id="next_round"></span>?
+                            </div>
+                            <div class="card" id="final_reveal" style="display: none;">
+                                <div class="card-body">
+                                    <div class="card-title d-flex justify-content-between">
+                                        <h3 id="player"></h3>
+                                        <h3>{{ currency }}<span id="score"></span></h3>
+                                    </div>
+                                    <hr>
+                                    <div class="card-text">Their response:</div>
+                                    <div class="card-text" id="question" style="font-weight: bold;">
+                                    </div>
+                                    <div style="display: none;" id="wagering">
+                                        <hr>
+                                        <div class="card-text">They wagered <span
+                                              style="font-weight: bold;">{{ currency }}<span id="amount"></span></span>
+                                        </div>
+                                        <hr>
+                                        <div class="card-text">Leaving them with a final score of:</div>
+                                        <div class="card-text" style="font-weight: bold;">
+                                            {{ currency }}<span id="final_score"></span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-content" id="round_transition" style="display: none;">
+                    <div class="modal-custom">Round Complete!</div>
+                    <div class="modal-body">
+                        Congratulations on finishing <span id="current_round"></span> Are you ready to
+                        start <span id="next_round"></span>?
+                    </div>
+                </div>
+            </div>
             <script type="text/javascript">
                 var displayedInModal = null;
 
-                socket.on('add_player_to_board-s>b', function (message) {
+                socket.on('add_player_to_board-s>b', function(message) {
                     $('#players').append('<th style="text-align: center;">' + message['player'] + '</th>');
-                    $('#scores').append('<td style="text-align: center;"><span>{{ currency }}</span><span id="' + message['player'] + '_score">0</span></td>');
+                    $('#scores').append(
+                        '<td style="text-align: center;"><span>{{ currency }}</span><span id="' + message[
+                            'player'] + '_score">0</span></td>');
                 })
 
-                socket.on('reveal_standard_set-s>bh', function (message) {
+                socket.on('reveal_standard_set-s>bh', function(message) {
                     displayedInModal = '#standard_set';
 
-                    manageModal({ action: 'show', updates: message['updates'] });
+                    manageModal({
+                        action: 'show',
+                        updates: message['updates']
+                    });
                 });
 
-                socket.on('disable_question-s>b', function (message) {
+                socket.on('disable_question-s>b', function(message) {
                     $(message['identifier']).addClass('disabled');
                 });
 
 
-                socket.on('start_wager_round-s>bh', function (message) {
+                socket.on('start_wager_round-s>bh', function(message) {
                     displayedInModal = '#wager_round';
 
-                    manageModal({ action: 'show' });
+                    manageModal({
+                        action: 'show'
+                    });
                 });
 
-                socket.on('reveal_wager-s>bh', function (message) {
-                    manageModal({ action: 'none', updates: message['updates'] });
+                socket.on('reveal_wager-s>bh', function(message) {
+                    manageModal({
+                        action: 'none',
+                        updates: message['updates']
+                    });
 
                     $('#wager_2').show();
 
                 });
 
-                socket.on('clear_modal-s>bh', function (message) {
+                socket.on('clear_modal-s>bh', function(message) {
                     $('#player').text('');
 
-                    manageModal({ action: 'hide' });
+                    manageModal({
+                        action: 'hide'
+                    });
                 });
 
-                socket.on("reset_wagers_modals-s>bh", function (message) {
+                socket.on("reset_wagers_modals-s>bh", function(message) {
                     $('#wager_2').hide();
 
-                    manageModal({ action: 'hide', updates: message['updates'] });
+                    manageModal({
+                        action: 'hide',
+                        updates: message['updates']
+                    });
                 });
 
 
-                socket.on('update_scores-s>bph', function (message) {
+                socket.on('update_scores-s>bph', function(message) {
                     for (player in message['scores']) {
                         $('#' + player + '_score').text(message['scores'][player]);
 
@@ -203,28 +219,36 @@
                     };
                 });
 
-                socket.on('round_complete-s>bh', function (message) {
+                socket.on('round_complete-s>bh', function(message) {
                     displayedInModal = '#round_transition';
 
-                    manageModal({ action: 'show', updates: message['updates'] });
+                    manageModal({
+                        action: 'show',
+                        updates: message['updates']
+                    });
                 });
 
-                socket.on('next_round_started-s>bh', function (message) {
-                    $("<form method='POST' action='" + document.URL + "'><input type='hidden' name='room' value='{{ game.room }}'/></form>").appendTo("body").submit();
+                socket.on('next_round_started-s>bh', function(message) {
+                    $("<form method='POST' action='" + document.URL +
+                        "'><input type='hidden' name='room' value='{{ game.room }}'/></form>").appendTo(
+                        "body").submit();
                 });
 
-                socket.on('results-page-s>bph', function (message) {
-                    $("<form method='POST' action='" + window.location.origin + "/results/'><input type='hidden' name='room' value='{{ game.room }}'/><input type='hidden' name='type' value='" + type + "'/></form>").appendTo("body").submit();
+                socket.on('results-page-s>bph', function(message) {
+                    $("<form method='POST' action='" + window.location.origin +
+                        "/results/'><input type='hidden' name='room' value='{{ game.room }}'/><input type='hidden' name='type' value='" +
+                        type + "'/></form>").appendTo("body").submit();
                 });
 
-                socket.on('display_final_response-s>bph', function (message) {
+                socket.on('display_final_response-s>bph', function(message) {
                     $('#wagering').hide();
                     displayedInModal = '#final_reveal';
 
-                    manageModal({ action: 'show', updates: message['updates'] });
+                    manageModal({
+                        action: 'show',
+                        updates: message['updates']
+                    });
                 });
-
-
             </script>
         </div>
 </body>

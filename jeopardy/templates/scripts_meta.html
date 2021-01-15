@@ -23,40 +23,40 @@
 </script>
 
 <script type="text/javascript">
-	function manageModal({ action, modal_id = '#master-modal', updates = false }) {
-		if (!(updates === false)) {
-			for (var item in updates) {
-				if (item != "displayedInModal") {
-					document.getElementById(item).innerHTML = updates[item];
-				}
-			};
+    function manageModal({
+        action,
+        modal_id = '#master-modal',
+        updates = false
+    }) {
+        if (!(updates === false)) {
+            for (var item in updates) {
+                if (item != "displayedInModal") {
+                    document.getElementById(item).innerHTML = updates[item];
+                }
+            };
 
-			if ('displayedInModal' in updates) {
-				displayedInModal = updates['displayedInModal'];
-				action = 'show';
-			}
-		}
-
-
-		if (action == 'show') {
-			$(displayedInModal).css("display", "block");
-
-			$(modal_id).modal({
-				focus: true,
-				backdrop: 'static',
-				keyboard: false,
-			}, 'show');
-		}
-
-		else if (action == 'hide') {
-			$(modal_id).modal('hide');
-
-			$(displayedInModal).css("display", "none");
-		}
-
-	};
+            if ('displayedInModal' in updates) {
+                displayedInModal = updates['displayedInModal'];
+                action = 'show';
+            }
+        }
 
 
+        if (action == 'show') {
+            $(displayedInModal).css("display", "block");
+
+            $(modal_id).modal({
+                focus: true,
+                backdrop: 'static',
+                keyboard: false,
+            }, 'show');
+        } else if (action == 'hide') {
+            $(modal_id).modal('hide');
+
+            $(displayedInModal).css("display", "none");
+        }
+
+    };
 </script>
 
 

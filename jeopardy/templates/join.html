@@ -9,115 +9,115 @@
 </head>
 
 <body>
-                {% include "header.html" %}
-                <div class="jumbotron">
-                    <h2>
-                        Oh Boy! What a great idea! Let's Play!
+    {% include "header.html" %}
+    <div class="jumbotron">
+        <h2>
+            Oh Boy! What a great idea! Let's Play!
+        </h2>
+        <hr>
+        {% if errors %}
+        {% for alert in errors %}
+        <div class="alert alert-danger" role="alert">
+            {{ alert }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        <div class="accordion" id="jointype">
+            <div class="card">
+                <div class="card-header" id="Player">
+                    <h2 class="mb-0">
+                        <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#cplayer"
+                          aria-expanded="true" aria-controls="cplayer">
+                            Player Settings
+                        </button>
                     </h2>
-                    <hr>
-                    {% if errors %}
-                    {% for alert in errors %}
-                    <div class="alert alert-danger" role="alert">
-                        {{ alert }}
-                    </div>
-                    {% endfor %}
-                    {% endif %}
-                    <div class="accordion" id="jointype">
-                        <div class="card">
-                            <div class="card-header" id="Player">
-                                <h2 class="mb-0">
-                                    <button class="btn btn-link" type="button" data-toggle="collapse"
-                                        data-target="#cplayer" aria-expanded="true" aria-controls="cplayer">
-                                        Player Settings
-                                    </button>
-                                </h2>
+                </div>
+                <div id="cplayer" class="collapse show" aria-labelledby="Player" data-parent="#jointype">
+                    <div class="card-body">
+                        <form action="/play/" method="POST">
+                            <div class="form-group">
+                                <label for="players">What is your name?</label>
+                                <input name="name" type="text" class="form-control" placeholder="Alex Trebek" required
+                                  value="Alex">
+                                <small class="form-text text-muted"></small>
                             </div>
-                            <div id="cplayer" class="collapse show" aria-labelledby="Player" data-parent="#jointype">
-                                <div class="card-body">
-                                    <form action="/play/" method="POST">
-                                        <div class="form-group">
-                                            <label for="players">What is your name?</label>
-                                            <input name="name" type="text" class="form-control"
-                                                placeholder="Alex Trebek" required value="Alex">
-                                            <small class="form-text text-muted"></small>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="room">What is the room code?</label>
-                                            {% if room_code %}
-                                                <input name="room" type="text" class="form-control" placeholder="{{ room_code }}"
-                                                    size="4" required value="{{ room_code }}" readonly>
-                                            {% else %}
-                                                <input name="room" type="text" class="form-control" placeholder="ABCD"
-                                                size="4" required value="ABCD">
-                                            {% endif %}
-                                        </div>
-                                        <div class="form-group">
-                                            <button type="submit" class="btn btn-success">Let's Go!</button>
-                                        </div>
-                                    </form>
-                                </div>
+                            <div class="form-group">
+                                <label for="room">What is the room code?</label>
+                                {% if room_code %}
+                                <input name="room" type="text" class="form-control" placeholder="{{ room_code }}"
+                                  size="4" required value="{{ room_code }}" readonly>
+                                {% else %}
+                                <input name="room" type="text" class="form-control" placeholder="ABCD" size="4"
+                                  required value="ABCD">
+                                {% endif %}
                             </div>
-                        </div>
-                        <div class="card">
-                            <div class="card-header" id="Board">
-                                <h2 class="mb-0">
-                                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse"
-                                        data-target="#cboard" aria-expanded="false" aria-controls="cboard">
-                                        Board Settings
-                                    </button>
-                                </h2>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-success">Let's Go!</button>
                             </div>
-                            <div id="cboard" class="collapse" aria-labelledby="Board" data-parent="#jointype">
-                                <div class="card-body">
-                                    <form action="/board/" method="POST">
-                                        <div class="form-group">
-                                            <label for="room">What is the room code?</label>
-                                            {% if room_code %}
-                                                <input name="room" type="text" class="form-control" placeholder="{{ room_code }}"
-                                                    size="4" required value="{{ room_code }}" readonly>
-                                            {% else %}
-                                                <input name="room" type="text" class="form-control" placeholder="ABCD"
-                                                size="4" required value="ABCD">
-                                            {% endif %}
-                                        </div>
-                                        <div class="form-group">
-                                            <button type="submit" class="btn btn-success">Let's Go!</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card">
-                            <div class="card-header" id="Host">
-                                <h2 class="mb-0">
-                                    <button class="btn btn-link collapsed" type="button" data-toggle="collapse"
-                                        data-target="#chost" aria-expanded="false" aria-controls="chost">
-                                        Host Settings
-                                    </button>
-                                </h2>
-                            </div>
-                            <div id="chost" class="collapse" aria-labelledby="Host" data-parent="#jointype">
-                                <div class="card-body">
-                                    <form action="/host/" method="POST">
-                                        <div class="form-group">
-                                            <label for="room">What is the room code?</label>
-                                            {% if room_code %}
-                                                <input name="room" type="text" class="form-control" placeholder="{{ room_code }}"
-                                                    size="4" required value="{{ room_code }}" readonly>
-                                            {% else %}
-                                                <input name="room" type="text" class="form-control" placeholder="ABCD"
-                                                size="4" required value="ABCD">
-                                            {% endif %}
-                                        </div>
-                                        <div class="form-group">
-                                            <button type="submit" class="btn btn-success">Let's Go!</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
+                        </form>
                     </div>
                 </div>
+            </div>
+            <div class="card">
+                <div class="card-header" id="Board">
+                    <h2 class="mb-0">
+                        <button class="btn btn-link collapsed" type="button" data-toggle="collapse"
+                          data-target="#cboard" aria-expanded="false" aria-controls="cboard">
+                            Board Settings
+                        </button>
+                    </h2>
+                </div>
+                <div id="cboard" class="collapse" aria-labelledby="Board" data-parent="#jointype">
+                    <div class="card-body">
+                        <form action="/board/" method="POST">
+                            <div class="form-group">
+                                <label for="room">What is the room code?</label>
+                                {% if room_code %}
+                                <input name="room" type="text" class="form-control" placeholder="{{ room_code }}"
+                                  size="4" required value="{{ room_code }}" readonly>
+                                {% else %}
+                                <input name="room" type="text" class="form-control" placeholder="ABCD" size="4"
+                                  required value="ABCD">
+                                {% endif %}
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-success">Let's Go!</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header" id="Host">
+                    <h2 class="mb-0">
+                        <button class="btn btn-link collapsed" type="button" data-toggle="collapse"
+                          data-target="#chost" aria-expanded="false" aria-controls="chost">
+                            Host Settings
+                        </button>
+                    </h2>
+                </div>
+                <div id="chost" class="collapse" aria-labelledby="Host" data-parent="#jointype">
+                    <div class="card-body">
+                        <form action="/host/" method="POST">
+                            <div class="form-group">
+                                <label for="room">What is the room code?</label>
+                                {% if room_code %}
+                                <input name="room" type="text" class="form-control" placeholder="{{ room_code }}"
+                                  size="4" required value="{{ room_code }}" readonly>
+                                {% else %}
+                                <input name="room" type="text" class="form-control" placeholder="ABCD" size="4"
+                                  required value="ABCD">
+                                {% endif %}
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-success">Let's Go!</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

@@ -7,52 +7,52 @@
 </head>
 
 <body>
-                {% include "header.html" %}
-                <div class="jumbotron">
-                    <h1>
-                        {% if you == results[0][0] %}
-                        Congratulations {{ you }}!
-                        {% else %}
-                        Congratulations!
-                        {% endif %}
-                    </h1>
-                    <hr>
-                    <table class="table table-striped" style="margin-left:auto;margin-right:auto;">
-                        <tr style="font-size: 2.5rem;">
-                            <td>1st</td>
-                            <td>{{ results[0][0] }}</td>
-                            <td>{{ currency }}{{ results[0][1] }}</td>
-                        </tr>
-                        {% if results | length > 1 %}
-                        <tr style="font-size: 2rem;">
-                            <td>2nd</td>
-                            <td>{{ results[1][0] }}</td>
-                            <td>{{ currency }}{{ results[1][1] }}</td>
-                        </tr>
-                        {% endif %}
-                        {% if results | length > 2 %}
-                        <tr style="font-size: 1.5rem;">
-                            <td>3rd</td>
-                            <td>{{ results[2][0] }}</td>
-                            <td>{{ currency }}{{ results[2][1] }}</td>
-                        </tr>
-                        {% endif %}
-                        {% if results | length > 3 %}
-                        {% for player in results[3:] %}
-                        <tr style="font-size: 1.5rem;">
-                            <td>&nbsp;</td>
-                            <td>{{ player[0] }}</td>
-                            <td>{{ currency }}{{ player[1] }}</td>
-                        </tr>
-                        {% endfor %}
-                        {% endif %}
-                    </table>
-                    <div class="container">
-                        <div class="row">
-                            <a class="btn btn-primary btn-large col spaced" href="/new">Start a New Game!</a>
-                            <a class="btn btn-success btn-large col spaced" href="/join">Join a Game!</a>
-                        </div>
-                    </div>
+    {% include "header.html" %}
+    <div class="jumbotron">
+        <h1>
+            {% if you == results[0][0] %}
+            Congratulations {{ you }}!
+            {% else %}
+            Congratulations!
+            {% endif %}
+        </h1>
+        <hr>
+        <table class="table table-striped" style="margin-left:auto;margin-right:auto;">
+            <tr style="font-size: 2.5rem;">
+                <td>1st</td>
+                <td>{{ results[0][0] }}</td>
+                <td>{{ currency }}{{ results[0][1] }}</td>
+            </tr>
+            {% if results | length > 1 %}
+            <tr style="font-size: 2rem;">
+                <td>2nd</td>
+                <td>{{ results[1][0] }}</td>
+                <td>{{ currency }}{{ results[1][1] }}</td>
+            </tr>
+            {% endif %}
+            {% if results | length > 2 %}
+            <tr style="font-size: 1.5rem;">
+                <td>3rd</td>
+                <td>{{ results[2][0] }}</td>
+                <td>{{ currency }}{{ results[2][1] }}</td>
+            </tr>
+            {% endif %}
+            {% if results | length > 3 %}
+            {% for player in results[3:] %}
+            <tr style="font-size: 1.5rem;">
+                <td>&nbsp;</td>
+                <td>{{ player[0] }}</td>
+                <td>{{ currency }}{{ player[1] }}</td>
+            </tr>
+            {% endfor %}
+            {% endif %}
+        </table>
+        <div class="container">
+            <div class="row">
+                <a class="btn btn-primary btn-large col spaced" href="/new">Start a New Game!</a>
+                <a class="btn btn-success btn-large col spaced" href="/join">Join a Game!</a>
+            </div>
+        </div>
     </div>
 </body>
 <script src="https://cdn.jsdelivr.net/gh/mathusummut/confetti.js/confetti.min.js"></script>

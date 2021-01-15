@@ -8,7 +8,9 @@
     <script>
         var socket = io('http://' + document.domain + ':' + location.port);
 
-        socket.emit("join", {room: "{{ game.room }}"});
+        socket.emit("join", {
+            room: "{{ game.room }}"
+        });
 
         var type = 'player';
     </script>
@@ -16,81 +18,82 @@
 </head>
 
 <body>
-                {% include "header.html" %}
-                <div class="jumbotron">
-                    <h2>
-                        Hey {{ session['name'] }}!
-                    </h2>
-                    <div class="input-group-lg mb-3">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text">Current Score:
-                                {{ currency }}
-                                <span id="score">{{ game.score[session['name']] }}</span>
-                            </span>
+    {% include "header.html" %}
+    <div class="jumbotron">
+        <h2>
+            Hey {{ session['name'] }}!
+        </h2>
+        <div class="input-group-lg mb-3">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Current Score:
+                    {{ currency }}
+                    <span id="score">{{ game.score[session['name']] }}</span>
+                </span>
+            </div>
+        </div>
+        <br>
+        <div id="buzzer_container">
+            <button id="buzzer" class="btn btn-block btn-danger disabled">BUZZ IN!</button>
+        </div>
+        <div class="modal fade" id="master-modal" tabindex="-1" role="dialog" aria-labelledby="master-modal-holder"
+          aria-hidden="true" data-keyboard="false" data-backdrop="static">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content" id="wager-amount" style="display: none;">
+                    <div class="modal-text">
+                        <div class="modal-custom">{{ game.heading() }}</div>
+                        <div class="modal-custom small">You currently have {{ currency }}<span
+                              id="scores">{{ game.score[session['name']] }}</span>!</div>
+                        <div class="alert alert-danger collapse tiny" role="alert" id="alert">
+                            This is an invalid wager. Please try again!<br>(Click <a
+                              href="https://www.j-archive.com/help.php#dailydouble" target="_blank">
+                                here</a> for details.)
+                        </div>
+                        <br>
+                        <div class="form-group modal-custom smaller" id="wager">
+                            <label for="wager">How much would you like to wager?</label>
+                            <input name="wager" type="number" class="form-control" placeholder="0" value="0" required
+                              id="wager_value" minlength="1" maxlength="6">
+                            <small class="form-text text-muted"></small>
+                        </div>
+                        <div class="form-group modal-custom smaller" id="question" style="display: none;">
+                            <label for="wager">Please enter a question!</label>
+                            <input name="wager" type="text" class="form-control" placeholder="" required
+                              id="question_value" minlength="1" maxlength="100">
+                            <small class="form-text text-muted"></small>
                         </div>
                     </div>
-                    <br>
-                    <div id="buzzer_container">
-                        <button id="buzzer" class="btn btn-block btn-danger disabled">BUZZ IN!</button>
+                    <div class="modal-footer">
+                        <button class="btn btn-success mr-auto" id="wager_submit">Submit!</button>
                     </div>
-                    <div class="modal fade" id="master-modal" tabindex="-1" role="dialog"
-                        aria-labelledby="master-modal-holder" aria-hidden="true" data-keyboard="false"
-                        data-backdrop="static">
-                        <div class="modal-dialog modal-dialog-centered" role="document">
-                            <div class="modal-content" id="wager-amount" style="display: none;">
-                                <div class="modal-text">
-                                    <div class="modal-custom">{{ game.heading() }}</div>
-                                    <div class="modal-custom small">You currently have {{ currency }}<span
-                                            id="scores">{{ game.score[session['name']] }}</span>!</div>
-                                    <div class="alert alert-danger collapse tiny" role="alert" id="alert">
-                                        This is an invalid wager. Please try again!<br>(Click <a
-                                            href="https://www.j-archive.com/help.php#dailydouble" target="_blank">
-                                            here</a> for details.)
-                                    </div>
-                                    <br>
-                                    <div class="form-group modal-custom smaller" id="wager">
-                                        <label for="wager">How much would you like to wager?</label>
-                                        <input name="wager" type="number" class="form-control" placeholder="0" value="0"
-                                            required id="wager_value" minlength="1" maxlength="6">
-                                        <small class="form-text text-muted"></small>
-                                    </div>
-                                    <div class="form-group modal-custom smaller" id="question" style="display: none;">
-                                        <label for="wager">Please enter a question!</label>
-                                        <input name="wager" type="text" class="form-control" placeholder="" required
-                                            id="question_value" minlength="1" maxlength="100">
-                                        <small class="form-text text-muted"></small>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button class="btn btn-success mr-auto" id="wager_submit">Submit!</button>
-                                </div>
-                            </div>
-                        </div>
+                </div>
+            </div>
         </div>
     </div>
     <script type="text/javascript">
         var displayedInModal = null;
         var finalRound = false;
 
-        socket.on('enable_buzzers-s>p', function (message) {
+        socket.on('enable_buzzers-s>p', function(message) {
             if (!message['players'].includes("{{ session['name'] }}")) {
                 $('#buzzer').toggleClass('disabled btn-danger btn-success');
 
             }
         });
 
-        socket.on('reset_buzzers-s>p', function (message) {
+        socket.on('reset_buzzers-s>p', function(message) {
             $('#buzzer').removeClass('btn-success');
             $('#buzzer').addClass('disabled btn-danger');
         });
 
-        socket.on('update_scores-s>bph', function (message) {
+        socket.on('update_scores-s>bph', function(message) {
             $('#score').text(message['scores']['{{ session["name"] }}']);
             $('#scores').text(message['scores']['{{ session["name"] }}']);
         });
 
-        socket.on('wager_amount_prompt-s>p', function (message) {
-            if (message['players'].length != 1) { finalRound = true; };
+        socket.on('wager_amount_prompt-s>p', function(message) {
+            if (message['players'].length != 1) {
+                finalRound = true;
+            };
             $('#wager_value').val(0);
 
             if (message['players'].includes('{{ session["name"] }}')) {
@@ -102,7 +105,7 @@
             }
         });
 
-        socket.on('wager_response_prompt-s>p', function (message) {
+        socket.on('wager_response_prompt-s>p', function(message) {
 
             if (message['players'].includes('{{ session["name"] }}')) {
                 displayedInModal = '#wager-amount';
@@ -113,14 +116,12 @@
             }
         });
 
-        $('button').click(function (event) {
+        $('button').click(function(event) {
             if (this.id == 'buzzer') {
                 socket.emit('buzz_in-p>s', {
                     'name': '{{ session["name"] }}'
                 });
-            }
-
-            else if (this.id == 'wager_submit') {
+            } else if (this.id == 'wager_submit') {
                 if ($('#alert').text().trim().length != 46) {
                     wager = parseInt($('#wager_value').val());
                     score = parseInt($('#score').text());
@@ -130,7 +131,9 @@
                             'name': '{{ session["name"] }}',
                             'wager': wager,
                         });
-                        manageModal({ action: 'hide' })
+                        manageModal({
+                            action: 'hide'
+                        })
                         $('#alert').hide();
 
                         if (finalRound) {
@@ -138,36 +141,33 @@
                             $('#wager').hide();
                             $('#question').show();
                         }
-                    }
-
-                    else {
+                    } else {
                         $('#alert').show();
                     }
-                }
-
-                else {
+                } else {
                     question = $('#question_value').val();
                     if (question.trim().length > 0) {
                         socket.emit('wager_submitted-p>s', {
                             'name': '{{ session["name"] }}',
                             'question': question,
                         });
-                        manageModal({ action: 'hide' })
+                        manageModal({
+                            action: 'hide'
+                        })
                         $('#alert').hide();
-                    }
-
-                    else {
+                    } else {
                         $('#alert').show();
                     }
                 }
             }
         });
 
-        socket.on('results-page-s>bph', function (message) {
-            $("<form method='POST' action='" + window.location.origin + "/results/'><input type='hidden' name='room' value='{{ game.room }}'/><input type='hidden' name='type' value='" + type + "'/><input type='hidden' name='name' value='{{ session["name"] }}'/></form>").appendTo("body").submit();
+        socket.on('results-page-s>bph', function(message) {
+            $("<form method='POST' action='" + window.location.origin +
+                "/results/'><input type='hidden' name='room' value='{{ game.room }}'/><input type='hidden' name='type' value='" +
+                type + "'/><input type='hidden' name='name' value='{{ session["
+                name "] }}'/></form>").appendTo("body").submit();
         });
-
-
     </script>
 </body>
 

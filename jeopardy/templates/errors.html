@@ -8,22 +8,22 @@
 </head>
 
 <body>
-                {% include "header.html" %}
-                <div class="jumbotron">
-                    <h2>
-                        Uh oh! An error occurred... Try one of the options below, and maybe it'll work this time.
-                        Otherwise, come back later!
-                    </h2>
-                    <hr>
-                    <h5>
-                        {{ error_code }}
-                    </h5>
-                    <hr>
-                    <p>
-                        <a class="btn btn-primary btn-large" href="/new">Start a New Game!</a>
-                        <a class="btn btn-primary btn-large" href="/join">Join a Game!</a>
-                    </p>
-                </div>
+    {% include "header.html" %}
+    <div class="jumbotron">
+        <h2>
+            Uh oh! An error occurred... Try one of the options below, and maybe it'll work this time.
+            Otherwise, come back later!
+        </h2>
+        <hr>
+        <h5>
+            {{ error_code }}
+        </h5>
+        <hr>
+        <p>
+            <a class="btn btn-primary btn-large" href="/new">Start a New Game!</a>
+            <a class="btn btn-primary btn-large" href="/join">Join a Game!</a>
+        </p>
+    </div>
 </body>
 
 </html>
