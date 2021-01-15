@@ -8,6 +8,14 @@ A complete playable Jeopardy! clone for online, quarantine-safe, fun!
 - Great for quarantines!
 
 ## Usage
+### Requirements
+- Python3.9+ (It is functionally compatible with 3.8+, but you may have to adjust the requirements.txt file because of the "[pkg-resources](https://github.com/cazier/jeopardy/blob/master/requirements.txt#L11)")
+- Flask and Flask-SocketIO
+- (Optional) Eventlet (See [here](https://flask-socketio.readthedocs.io/en/latest/#requirements) for more details)
+
+> HEADS UP!
+> This version of jeopardy (currently) requires the companion project [jeopardy_data](https://www.github.com/cazier/jeopardy_data) running in order to create games.
+
 ### Deployment
 Run in a "development" environment super easily!
 
