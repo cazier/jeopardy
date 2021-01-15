@@ -2,8 +2,9 @@ import sqlite3
 import random
 import itertools
 import datetime
+import urllib
+import json
 
-import requests
 
 import config
 
@@ -234,7 +235,10 @@ class Board(object):
         if self.round == 2:
             settings["size"] = 1
 
-        game = requests.get(config.api_endpoint, params=settings).json()
+        base_url = f"{config.api_endpoint}?"
+        params = urllib.parse.urlencode(settings)
+
+        game = json.loads(urllib.request.urlopen(base_url + params).read().decode("utf-8"))
 
         for index, details in enumerate(game):
             self.categories.append(Category(index=index, name=details["category"]["name"], sets=details["sets"]))
@@ -305,12 +309,7 @@ class Content(object):
         """Gets the set, as done within the Jinja loading of the webpage"""
         self.shown = True
 
-        return {
-            "question": self.question,
-            "answer": self.answer,
-            "wager": self.wager,
-            "year": self.year
-        }
+        return {"question": self.question, "answer": self.answer, "wager": self.wager, "year": self.year}
 
     def get_content(self):
         """Gets the set, as done within the Jinja loading of the webpage"""
