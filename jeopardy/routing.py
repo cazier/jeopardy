@@ -252,7 +252,7 @@ def route_results():
 
         return render_template(template_name_or_list="results.html", results=results, you=player)
 
-    else:
+    elif request.method == "GET" and config.debug:            
         session = "A"
         game = "B"
         results = [
@@ -264,7 +264,8 @@ def route_results():
         ]
         return render_template(template_name_or_list="results.html", results=results, you="Alex")
 
-        # return redirect(url_for("routing.route_join"))
+    else:
+        return redirect(url_for("routing.route_index"))
 
 
 @routing.route("/test/", methods=["GET"])
