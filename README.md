@@ -9,7 +9,7 @@ A complete playable Jeopardy! clone for online, quarantine-safe, fun!
 
 ## Usage
 ### Requirements
-- Python3.9+ (It is functionally compatible with 3.8+, but you may have to adjust the requirements.txt file because of the "[pkg-resources](https://github.com/cazier/jeopardy/blob/master/requirements.txt#L11)")
+- Python3.8+ (Uses the assignment operator `:=`)
 - Flask and Flask-SocketIO
 - (Optional) Eventlet (See [here](https://flask-socketio.readthedocs.io/en/latest/#requirements) for more details)
 
