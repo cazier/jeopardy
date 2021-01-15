@@ -1,24 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <title>{{ game_name }} - Python/WebSocket Trivia!</title>
+    <head>
+        <title>{{ game_name }} - Python/WebSocket Trivia!</title>
         {% include "scripts_meta.html" %}
-</head>
+    </head>
 
-<body>
-                {% include "header.html" %}
+    <body>
+        {% include "header.html" %}
         <div class="jumbotron">
-                    <div class="container">
-                        <div class="row">
-                            <a class="btn btn-primary btn-large col spaced" href="/new">Start a New Game!</a>
-                            <a class="btn btn-success btn-large col spaced" href="/join">Join a Game!</a>
-                        </div>
-                    </div>
+            <h2>Welcome to {{ game_name }}!</h2>
+            <hr />
+            <div class="container">
+                <div class="row">
+                    <a class="btn btn-primary btn-large col spaced" href="/new">Start a New Game!</a>
+                    <a class="btn btn-success btn-large col spaced" href="/join">Join a Game!</a>
                 </div>
-</body>
+            </div>
+        </div>
+    </body>
 </html>
