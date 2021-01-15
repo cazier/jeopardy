@@ -48,15 +48,18 @@
                             </div>
                             <div id="content_{{ loop.index0 }}" class="collapse text-center"
                               aria-labelledby="category_{{ loop.index0 }}" data-parent="#categories">
-                                <div class="btn-group" role="group" aria-label="values"
-                                  style="padding-top: 6px; padding-bottom: 6px;">
-                                    {% for answer in name.sets %}
-                                    <button
-                                      class="btn btn-primary show-answer {% if answer.shown %}disabled{% endif %}"
-                                      type="button" id="q_{{ answer.id() }}">
-                                        {{ currency }}{{ (answer.value + 1) * (game.round + 1) * 200 }}
-                                    </button>
-                                    {% endfor %}
+                                <div class="btn" role="group" aria-label="values">
+                                  <div class="container">
+                                      <div class="row">
+                                          {% for answer in name.sets %}
+                                          <button
+                                            class="btn btn-primary col-sm show-answer {% if answer.shown %}disabled{% endif %} spaced"
+                                            type="button" id="q_{{ answer.id() }}">
+                                              {{ currency }}{{ (answer.value + 1) * (game.round + 1) * 200 }}
+                                          </button>
+                                          {% endfor %}
+                                      </div>
+                                  </div>
                                 </div>
                             </div>
                         </div>
@@ -81,19 +84,19 @@
                                 </div>
                                 <div class="modal-footer">
                                     <div class="container">
-                                        <div class="row" style="margin: 4px;">
-                                            <div class="btn btn-block btn-outline-dark disabled"
-                                              style="margin: 4px; text-align: center;" id="player">&nbsp;</div>
+                                        <div class="row spaced">
+                                            <div class="btn btn-block btn-outline-dark disabled spaced"
+                                              id="player">&nbsp;</div>
                                         </div>
-                                        <div class="row" style="margin: 4px;">
-                                            <button class="btn btn-success col-sm disabled" style="margin: 4px;"
+                                        <div class="row spaced">
+                                            <button class="btn btn-success col-sm disabled spaced"
                                               id="correct_response">Correct!</button>
-                                            <button class="btn btn-danger col-sm disabled" style="margin: 4px;"
+                                            <button class="btn btn-danger col-sm disabled spaced"
                                               id="incorrect_response">Incorrect</button>
-                                            <button class="btn btn-dark col-sm" style="margin: 4px;"
+                                            <button class="btn btn-dark col-sm spaced"
                                               id="finished_reading">Finished
                                                 Reading!</button>
-                                            <button class="btn btn-info col-sm" style="margin: 4px;" id="dismiss"
+                                            <button class="btn btn-info col-sm spaced" id="dismiss"
                                               style="display: none;">Dismiss</button>
                                         </div>
                                     </div>
