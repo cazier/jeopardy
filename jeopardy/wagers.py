@@ -22,10 +22,14 @@ def wager_receipt(data):
         players = [data["name"]]
         game.score.wagerer = data["name"]
 
+        round_ = "Daily Double!"
+
     else:
         players = game.score.keys()
 
-    socketio.emit(event="wager_amount_prompt-s>p", data={"players": players}, room=room)
+        round_ = game.round_text()
+
+    socketio.emit(event="wager_amount_prompt-s>p", data={"players": players, "round": round_}, room=room)
 
 
 @socketio.on("wager_submitted-p>s")
