@@ -5,13 +5,9 @@
     <title>{{ game_name }} - Python/WebSocket Trivia!</title>
 
     {% include "scripts_meta.html" %}
+    {% include "socketio_connect.html" %}
+    
     <script>
-        var socket = io('http://' + document.domain + ':' + location.port);
-
-        socket.emit("join", {
-            room: "{{ game.room }}"
-        });
-
         var type = 'host';
     </script>
 
