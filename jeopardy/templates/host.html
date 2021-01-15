@@ -379,16 +379,12 @@
             });
         });
         socket.on('reveal_wager-s>bh', function(message) {
-            {
-                %
-                if game.round < 2 %
-            }
-            manageModal({
-                action: 'none',
-                updates: message['updates']
-            }); {
-                % endif %
-            }
+            {% if game.round < 2 %}
+                manageModal({
+                    action: 'none',
+                    updates: message['updates']
+                });
+            {% endif %}
 
             $('#show_0').show();
         });
