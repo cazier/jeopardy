@@ -5,7 +5,7 @@ storage = u"dict"
 
 app_secret = u"secret!"
 
-debug = True
+debug = False
 sets = 2
 start_round = 0
 
