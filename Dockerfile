@@ -1,20 +1,29 @@
-FROM python:3.9.1-alpine
+FROM python:3.9.1-alpine AS app
 
-RUN apk add bash python3 python3-dev gcc musl-dev py3-pip
+### BUILD STAGE
+FROM app as builder
+
+RUN apk add --no-cache python3-dev g++ musl-dev py3-pip
+
+COPY requirements.txt /requirements.txt
+
+RUN python -m venv /venv
+
+ENV PATH="/venv/bin:$PATH"
+
+RUN python -m pip install --upgrade pip wheel
+RUN python -m pip install -r /requirements.txt
+
+### APP STAGE
+FROM app
 
 RUN addgroup -S www-data && adduser -S jeopardy -G www-data
 COPY . /home/jeopardy/app
+COPY --from=builder /venv/ /home/jeopardy/app/venv
 
 WORKDIR /home/jeopardy/app
 
-RUN python3 -m pip install --upgrade pip setuptools
-### CURRENTLY BREAKING ON PKG-RESOURCES==0.0.0
-RUN python3 -m pip install -r requirements.txt
-
-RUN apk add --no-cache tini
-
-ENTRYPOINT ["/sbin/tini", "--"]
-
 EXPOSE 5000
+ENV PATH="/home/jeopardy/app/venv/bin:$PATH"
 
-CMD ["/usr/bin/python3", "/home/jeopardy/app/jeopardy/web.py"]
+CMD ["python", "/home/jeopardy/app/jeopardy/web.py"]
