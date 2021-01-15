@@ -288,6 +288,10 @@
                     socket.emit('wager_responded-h>s', {
                         'correct': this.id == 'correct_fj'
                     });
+
+                    $('#correct_fj').prop("disabled", true);
+                    $('#incorrect_fj').prop("disabled", true);
+
                 } else if (this.id == 'start_next_round') {
                     socket.emit('start_next_round-h>s');
                 } else if (this.id == 'get_wager') {
@@ -300,10 +304,11 @@
                     socket.emit('get_responses-h>s');
 
                     $('#hide_1').hide();
-                } else if (this.id == 'show_responses') {
-                    socket.emit('show_responses-h>s');
                 } else if ((this.id == 'show_responses') | (this.id == 'next')) {
                     if (this.id == 'next') {
+                        $('#correct_fj').prop("disabled", false);
+                        $('#incorrect_fj').prop("disabled", false);
+
                         $('#wagering').toggle();
                     };
 
