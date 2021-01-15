@@ -11,12 +11,8 @@
 </head>
 
 <body>
-
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-12">
                 {% include "header.html" %}
-                <div class="jumbotron card card-block">
+                <div class="jumbotron">
                     <h1>
                         {% if you == results[0][0] %}
                         Congratulations {{ you }}!
@@ -61,9 +57,6 @@
                             <a class="btn btn-success btn-large col spaced" href="/join">Join a Game!</a>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
     </div>
 </body>
 <script src="https://cdn.jsdelivr.net/gh/mathusummut/confetti.js/confetti.min.js"></script>
