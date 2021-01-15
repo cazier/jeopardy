@@ -13,7 +13,8 @@ app.register_blueprint(blueprint=routing.routing)
 app.jinja_env.globals.update(game_name=config.game_name)
 app.jinja_env.globals.update(currency=config.currency)
 
-app.config[u"SECRET_KEY"] = config.app_secret
+app.config["SECRET_KEY"] = config.secret_key
+
 app.debug = config.debug
 
 socketio = sockets.socketio

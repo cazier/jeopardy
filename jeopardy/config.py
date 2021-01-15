@@ -1,12 +1,22 @@
-game_name = u"Jeopardy"
-currency = u"¢"
+import os
+import uuid
 
-storage = u"dict"
 
-app_secret = u"secret!"
+game_name = "Jeopardy"
+currency = "$"
+
+secret_key = os.getenv(key="SECRET_KEY", default="correctbatteryhorsestaple")
+
 
 debug = False
 sets = 2
 start_round = 0
 
-api_endpoint = "http://192.168.1.173:5001/game"
+api_endpoint = "http://127.0.0.1:5001/game"
+
+access_key = uuid.uuid4().hex
+
+if not debug:
+    print(f"+{'-' * 46}+")
+    print("| ACCESS KEY:", access_key, "|")
+    print(f"+{'-' * 46}+")
