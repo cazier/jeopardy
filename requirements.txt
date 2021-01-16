@@ -14,7 +14,6 @@ lxml==4.6.2
 MarkupSafe==1.1.1
 marshmallow==3.10.0
 marshmallow-sqlalchemy==0.24.1
-pkg-resources==0.0.0
 pyjsparser==2.7.1
 pytz==2020.5
 requests==2.25.1
