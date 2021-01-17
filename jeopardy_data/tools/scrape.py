@@ -18,7 +18,7 @@ CACHE_PATH = ""
 
 BASE_URL = "http://www.j-archive.com"
 
-DELAY = 5
+DELAY = 20
 
 EXTERNAL_LINKS: list = list()
 
