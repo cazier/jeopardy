@@ -34,7 +34,7 @@ def cli():
     show_default=True,
 )
 @click.option("--host", default="0.0.0.0", help="the address on which to run the api", show_default=True)
-@click.option("--port", default=5001, help="the port on which to run the API", show_default=True)
+@click.option("--port", default=5000, help="the port on which to run the API", show_default=True)
 @click.option(
     "--create/--no-create",
     help="create a new database if one doesn't exist",
