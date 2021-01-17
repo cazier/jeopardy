@@ -33,7 +33,7 @@ python -m pip install -r requirements.txt
 export DEBUG_APP=1
 
 # Run!
-python jeopardy/app.py
+python jeopardy/web.py
 ```
 
 Alternatively, you can run it using Docker pretty easily too! This is how I run it in "production". Make sure to forward port 5000 from the container as needed!
