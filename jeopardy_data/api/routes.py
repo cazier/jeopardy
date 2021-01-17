@@ -61,7 +61,7 @@ class SetById(Resource):
         return jsonify({"deleted": set_id})
 
 
-class SetsByRound(Resource):
+class SetByRound(Resource):
     def get(self, round_number: str) -> dict:
         round_number = int(round_number)
         results = round_query(model=Set, number=round_number).order_by(Set.id)
@@ -69,35 +69,35 @@ class SetsByRound(Resource):
         return paginate(model=results, schema=sets_schema.dump, indices=request.args)
 
 
-class SetsByShowNumber(Resource):
+class SetByShowNumber(Resource):
     def get(self, show_number: int) -> dict:
         results = show_query(model=Set, identifier="number", value=show_number).order_by(Set.id)
 
         return paginate(model=results, schema=sets_schema.dump, indices=request.args)
 
 
-class SetsByShowId(Resource):
+class SetByShowId(Resource):
     def get(self, show_id: int) -> dict:
         results = show_query(model=Set, identifier="id", value=show_id).order_by(Set.id)
 
         return paginate(model=results, schema=sets_schema.dump, indices=request.args)
 
 
-class SetsByDate(Resource):
+class SetByDate(Resource):
     def get(self, year: int, month: int = -1, day: int = -1) -> dict:
         results = date_query(model=Set, year=year, month=month, day=day).order_by(Set.id)
 
         return paginate(model=results, schema=sets_schema.dump, indices=request.args)
 
 
-class SetsByYears(Resource):
+class SetByYear(Resource):
     def get(self, start: int, stop: int) -> dict:
         results = date_query(model=Set, start=start, stop=stop).order_by(Date.date)
 
         return paginate(model=results, schema=sets_schema.dump, indices=request.args)
 
 
-class SetsMultiple(Resource):
+class SetMultiple(Resource):
     def get(self) -> dict:
         results = Set.query
 
@@ -143,21 +143,21 @@ class ShowByNumber(Resource):
             return jsonify(show_schema.dump(show))
 
 
-class ShowsByDate(Resource):
+class ShowByDate(Resource):
     def get(self, year: int, month: int = -1, day: int = -1) -> dict:
         results = date_query(model=Show, year=year, month=month, day=day).order_by(Show.number)
 
         return paginate(model=results, schema=shows_schema.dump, indices=request.args)
 
 
-class ShowsByYears(Resource):
+class ShowByYears(Resource):
     def get(self, start: int, stop: int) -> dict:
         results = date_query(model=Show, start=start, stop=stop).order_by(Date.date)
 
         return paginate(model=results, schema=shows_schema.dump, indices=request.args)
 
 
-class ShowsMultiple(Resource):
+class ShowMultiple(Resource):
     def get(self) -> dict:
         return paginate(model=Show.query, schema=shows_schema.dump, indices=request.args)
 
@@ -167,21 +167,21 @@ class CategoryById(Resource):
         return jsonify(category_schema.dump(id_query(model=Category, id_=category_id)))
 
 
-class CategoriesByDate(Resource):
+class CategoryByDate(Resource):
     def get(self, year: int, month: int = -1, day: int = -1) -> dict:
         results = date_query(model=Category, year=year, month=month, day=day).order_by(Category.name)
 
         return paginate(model=results, schema=categories_schema.dump, indices=request.args)
 
 
-class CategoriesByYears(Resource):
+class CategoryByYears(Resource):
     def get(self, start: int, stop: int) -> dict:
         results = date_query(model=Category, start=start, stop=stop).order_by(Date.date)
 
         return paginate(model=results, schema=categories_schema.dump, indices=request.args)
 
 
-class CategoriesByCompletion(Resource):
+class CategoryByCompletion(Resource):
     def get(self, completion: str = "", completion_string: str = "") -> dict:
         if completion != "":
             if completion.lower() == "true":
@@ -205,7 +205,7 @@ class CategoriesByCompletion(Resource):
         return paginate(model=results, schema=categories_schema.dump, indices=request.args)
 
 
-class CategoriesByName(Resource):
+class CategoryByName(Resource):
     def get(self, name_string: int) -> dict:
         results = Category.query.filter(Category.name.like(f"%{name_string}%"))
 
@@ -215,14 +215,14 @@ class CategoriesByName(Resource):
         return paginate(model=results, schema=categories_schema.dump, indices=request.args)
 
 
-class CategoriesByShowNumber(Resource):
+class CategoryByShowNumber(Resource):
     def get(self, show_number: int) -> dict:
         results = show_query(model=Category, identifier="number", value=show_number).order_by(Category.name)
 
         return paginate(model=results, schema=categories_schema.dump, indices=request.args)
 
 
-class CategoriesByRound(Resource):
+class CategoryByRound(Resource):
     def get(self, round_number: str) -> dict:
         round_number = int(round_number)
         results = round_query(model=Category, number=round_number).order_by(Category.name)
@@ -230,14 +230,14 @@ class CategoriesByRound(Resource):
         return paginate(model=results, schema=categories_schema.dump, indices=request.args)
 
 
-class CategoriesByShowId(Resource):
+class CategoryByShowId(Resource):
     def get(self, show_id: int) -> dict:
         results = show_query(model=Category, identifier="id", value=show_id).order_by(Category.name)
 
         return paginate(model=results, schema=categories_schema.dump, indices=request.args)
 
 
-class CategoriesMultiple(Resource):
+class CategoryMultiple(Resource):
     def get(self) -> dict:
         return paginate(model=Category.query, schema=categories_schema.dump, indices=request.args)
 
@@ -417,71 +417,53 @@ def no_results(message: str = "no items were found with that query"):
     abort(404, message=message)
 
 
-api.add_resource(SetsMultiple, "/set", "/sets")
-api.add_resource(SetById, "/set/id/<int:set_id>", "/sets/id/<int:set_id>")
-api.add_resource(SetsByRound, "/set/round/<round_number>")
-api.add_resource(SetsByShowNumber, "/set/show/number/<int:show_number>")
-api.add_resource(SetsByShowId, "/set/show/id/<int:show_id>")
+api.add_resource(SetMultiple, "/set")
+api.add_resource(SetById, "/set/id/<int:set_id>")
+api.add_resource(SetByRound, "/set/round/<round_number>")
+api.add_resource(SetByShowNumber, "/set/show/number/<int:show_number>")
+api.add_resource(SetByShowId, "/set/show/id/<int:show_id>")
 api.add_resource(
-    SetsByDate,
+    SetByDate,
     "/set/date/<int:year>",
-    "/sets/date/<int:year>",
     "/set/date/<int:year>/<int:month>",
-    "/sets/date/<int:year>/<int:month>",
     "/set/date/<int:year>/<int:month>/<int:day>",
-    "/sets/date/<int:year>/<int:month>/<int:day>",
 )
 
 api.add_resource(
-    SetsByYears,
+    SetByYear,
     "/set/years/<int:start>/<int:stop>",
-    "/sets/years/<int:start>/<int:stop>",
 )
 
 
-api.add_resource(ShowsMultiple, "/show", "/shows")
-api.add_resource(ShowByNumber, "/show/number/<int:show_number>", "/shows/number/<int:show_number>")
-api.add_resource(ShowById, "/show/id/<int:show_id>", "/shows/id/<int:show_id>")
+api.add_resource(ShowMultiple, "/show")
+api.add_resource(ShowByNumber, "/show/number/<int:show_number>")
+api.add_resource(ShowById, "/show/id/<int:show_id>")
 api.add_resource(
-    ShowsByDate,
+    ShowByDate,
     "/show/date/<int:year>",
-    "/shows/date/<int:year>",
     "/show/date/<int:year>/<int:month>",
-    "/shows/date/<int:year>/<int:month>",
     "/show/date/<int:year>/<int:month>/<int:day>",
-    "/shows/date/<int:year>/<int:month>/<int:day>",
 )
 
-api.add_resource(
-    ShowsByYears,
-    "/show/years/<int:start>/<int:stop>",
-    "/shows/years/<int:start>/<int:stop>",
-)
+api.add_resource(ShowByYears, "/show/years/<int:start>/<int:stop>")
 
 
-api.add_resource(CategoriesMultiple, "/category/", "/categories")
-api.add_resource(CategoryById, "/category/id/<int:category_id>", "/categories/id/<int:category_id>")
+api.add_resource(CategoryMultiple, "/category/")
+api.add_resource(CategoryById, "/category/id/<int:category_id>")
 api.add_resource(
-    CategoriesByDate,
+    CategoryByDate,
     "/category/date/<int:year>",
-    "/categories/date/<int:year>",
     "/category/date/<int:year>/<int:month>",
-    "/categories/date/<int:year>/<int:month>",
     "/category/date/<int:year>/<int:month>/<int:day>",
-    "/categories/date/<int:year>/<int:month>/<int:day>",
 )
 
-api.add_resource(
-    CategoriesByYears,
-    "/category/years/<int:start>/<int:stop>",
-    "/categories/years/<int:start>/<int:stop>",
-)
+api.add_resource(CategoryByYears, "/category/years/<int:start>/<int:stop>")
 
-api.add_resource(CategoriesByCompletion, "/category/complete/<completion>", "/category/<completion_string>")
-api.add_resource(CategoriesByName, "/category/name/<name_string>")
-api.add_resource(CategoriesByRound, "/category/round/<round_number>")
-api.add_resource(CategoriesByShowNumber, "/category/show/number/<int:show_number>")
-api.add_resource(CategoriesByShowId, "/category/show/id/<int:show_id>")
+api.add_resource(CategoryByCompletion, "/category/complete/<completion>", "/category/<completion_string>")
+api.add_resource(CategoryByName, "/category/name/<name_string>")
+api.add_resource(CategoryByRound, "/category/round/<round_number>")
+api.add_resource(CategoryByShowNumber, "/category/show/number/<int:show_number>")
+api.add_resource(CategoryByShowId, "/category/show/id/<int:show_id>")
 
 api.add_resource(DetailsResource, "/details")
 api.add_resource(GameResource, "/game")
