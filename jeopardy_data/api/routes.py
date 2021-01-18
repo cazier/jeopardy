@@ -448,7 +448,7 @@ api.add_resource(
 api.add_resource(ShowByYears, "/show/years/<int:start>/<int:stop>")
 
 
-api.add_resource(CategoryMultiple, "/category/")
+api.add_resource(CategoryMultiple, "/category")
 api.add_resource(CategoryById, "/category/id/<int:category_id>")
 api.add_resource(
     CategoryByDate,
