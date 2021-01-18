@@ -115,4 +115,11 @@ dmypy.json
 
 
 # Custom
-data/database.db
+*.db
+*.json
+!incomplete.json
+!complete.json
+!test-full.db
+
+storage/
+output/

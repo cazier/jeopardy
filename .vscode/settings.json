@@ -6,5 +6,24 @@
     "python.pythonPath": "venv/bin/python",
     "python.formatting.blackArgs": [
         "--line-length=119"
-    ]
+    ],
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "venv": true,
+        ".pytest*": true,
+        "**/__pycache__": true,
+    },
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/node_modules/**": true,
+        "**/.hg/store/**": true,
+        "venv": true,
+        ".pytest*": true,
+        "**/__pycache__": true,
+    }
 }

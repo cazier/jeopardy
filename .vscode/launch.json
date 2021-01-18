@@ -5,12 +5,27 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Better Jeopardy!",
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Scraper Testing",
+            "type": "python",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/tools/",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Run API",
             "type": "python",
             "request": "launch",
             "module": "flask",
             "env": {
-                "FLASK_APP": "web.py",
+                "FLASK_APP": "tools/api/__init__.py",
                 "FLASK_ENV": "development",
                 "FLASK_DEBUG": "0"
             },
@@ -18,16 +33,46 @@
                 "run",
                 "--no-debugger",
                 "--no-reload",
-                "--host=0.0.0.0"
+                "--host=0.0.0.0",
+                "--port=5001"
             ],
             "jinja": true
         },
-        {
-            "name": "Python: Current File",
-            "type": "python",
-            "request": "launch",
-            "program": "web.py",
-            "console": "integratedTerminal"
-        }
+        // {
+        //     "name": "API Debug",
+        //     "type": "python",
+        //     "request": "launch",
+        //     "module": "flask",
+        //     "env": {
+        //         "FLASK_APP": "api/api.py",
+        //         "FLASK_ENV": "development",
+        //         "FLASK_DEBUG": "0"
+        //     },
+        //     "args": [
+        //         "run",
+        //         "--no-debugger",
+        //         "--no-reload",
+        //         "--host=0.0.0.0"
+        //     ],
+        //     "jinja": true
+        // },
+        // {
+        //     "name": "DBAPI Debug",
+        //     "type": "python",
+        //     "request": "launch",
+        //     "module": "flask",
+        //     "env": {
+        //         "FLASK_APP": "api/dbapi/__init__.py",
+        //         "FLASK_ENV": "development",
+        //         "FLASK_DEBUG": "0"
+        //     },
+        //     "args": [
+        //         "run",
+        //         "--no-debugger",
+        //         "--no-reload",
+        //         "--host=0.0.0.0"
+        //     ],
+        //     "jinja": true
+        // }
     ]
 }

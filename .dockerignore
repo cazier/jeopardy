@@ -1,4 +1,12 @@
-venv
+# Caches
 .mypy_cache
 */__pycache__
+
+# User Files
 .git
+.vscode
+.github
+venv
+htmlcov
+tests
+*.json
