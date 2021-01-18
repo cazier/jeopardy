@@ -43,7 +43,7 @@ def test_get_details_methods(api_emptyclient):
 
 
 def test_empty_client(api_emptyclient):
-    for endpoint in ["/details", "/shows", "/show", "/set", "/sets"]:
+    for endpoint in ["/details", "/show", "/set"]:
         rv = api_emptyclient.get(endpoint)
 
         assert rv.status_code == 404
@@ -65,21 +65,21 @@ def test_get_details(testclient, test_data):
 
 
 def test_pagination(testclient, test_data):
-    rv = testclient.get("/sets", query_string={"number": 13, "start": 4})
+    rv = testclient.get("/set", query_string={"number": 13, "start": 4})
     assert rv.status_code == 200
     assert len(rv.get_json()["data"]) == 13
 
-    rv = testclient.get("/sets", query_string={"start": 100})
+    rv = testclient.get("/set", query_string={"start": 100})
     assert rv.status_code == 200
     assert len(rv.get_json()["data"]) == len(test_data) - 100
 
-    rv = testclient.get("/sets", query_string={"start": 200})
+    rv = testclient.get("/set", query_string={"start": 200})
     assert rv.status_code == 400
     assert rv.get_json()["message"] == "start number too great"
 
 
 def test_sets_including_by_id(testclient, test_data):
-    rv = testclient.get(f"/sets")
+    rv = testclient.get(f"/set")
 
     assert rv.status_code == 200
     assert len(rv.get_json()["data"]) == 100
@@ -102,7 +102,7 @@ def test_set_changes(testclient, test_data):
     assert rv.status_code == 200
     assert rv.get_json() == {"deleted": 119}
 
-    rv = testclient.post(f"/sets", json=set_)
+    rv = testclient.post(f"/set", json=set_)
     assert rv.status_code == 200
     assert rv.get_json() == dict(set_, **{"id": 119})
 
@@ -110,13 +110,13 @@ def test_set_changes(testclient, test_data):
     assert rv.status_code == 200
     assert rv.get_json() == dict(set_, **{"id": 119})
 
-    rv = testclient.post(f"/sets", json=set_)
+    rv = testclient.post(f"/set", json=set_)
     assert rv.status_code == 400
     assert rv.get_json() == {"message": "the supplied data is already in the database"}
 
     set_.pop("show")
 
-    rv = testclient.post(f"/sets", json=set_)
+    rv = testclient.post(f"/set", json=set_)
     assert rv.status_code == 400
     assert rv.get_json() == {"message": "the posted data is missing some data"}
 
@@ -209,7 +209,7 @@ def test_sets_by_round_empty(api_emptyclient):
 
 
 def test_show(testclient):
-    rv = testclient.get(f"/shows")
+    rv = testclient.get(f"/show")
 
     assert rv.status_code == 200
     assert len(rv.get_json()["data"]) == 2
@@ -305,7 +305,7 @@ def test_shows_by_years(testclient, test_data):
 
 
 def test_categories(testclient, test_data):
-    rv = testclient.get(f"/categories")
+    rv = testclient.get(f"/category")
 
     assert rv.status_code == 200
     assert len(rv.get_json()["data"]) == len({f"{i['category']}_{i['show']}" for i in test_data})
@@ -459,7 +459,7 @@ def test_categories_by_round_empty(api_emptyclient):
 def test_empty_db(api_emptyclient, test_data):
     question = test_data[0]
 
-    rv = api_emptyclient.post("/sets", json=question)
+    rv = api_emptyclient.post("/set", json=question)
 
     assert rv.data != None
 
