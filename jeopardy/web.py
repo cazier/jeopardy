@@ -23,10 +23,8 @@ def create_app():
 
     app.debug = config.debug
     app.config["SECRET_KEY"] = config.secret_key
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite://"
+    app.config["SQLALCHEMY_DATABASE_URI"] = config.api_db
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////home/brendan/Documents/merge/jeopardy/questions.db"
 
     api.models.db.init_app(app)
 
@@ -43,4 +41,4 @@ if __name__ == u"__main__":
     socketio = sockets.socketio
     socketio.init_app(app)
 
-    socketio.run(app, host=u"0.0.0.0")
+    socketio.run(app, host=u"0.0.0.0", debug=config.debug, port=config.port)
