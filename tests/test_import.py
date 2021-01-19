@@ -269,4 +269,3 @@ def test_add_bad_external(emptyclient):
 
     with pytest.raises(api.database.BadDataError, match=".*external tag is supplied.*"):
         api.database.add(clue_data=clue, uses_shortnames=True)
-

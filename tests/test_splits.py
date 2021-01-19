@@ -121,4 +121,3 @@ def test_by_limit(test_data):
 
     with pytest.raises(TypeError, match=".*must be an.*"):
         results = split.by_limit(data=test_data, limit="A")
-

@@ -1,10 +1,8 @@
 import zlib
 import datetime
 
-from . import db
 from .models import *
-
-KEYS = {"date", "show", "round", "complete", "answer", "question", "external", "value", "category"}
+from . import KEYS
 
 
 class SetAlreadyExistsError(Exception):

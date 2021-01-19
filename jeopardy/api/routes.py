@@ -3,7 +3,7 @@ from flask import jsonify, request
 from flask_restful import Resource, abort
 import flask_sqlalchemy
 
-from . import api, db, KEYS
+from . import api, KEYS
 from . import database
 from .models import *
 from .schemas import *

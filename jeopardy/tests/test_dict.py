@@ -37,4 +37,3 @@ def test_rooms():
     rooms = storage.rooms()
 
     assert rooms is not None
-

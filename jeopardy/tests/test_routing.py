@@ -113,7 +113,7 @@ def test_route_player_get(get_client):
     """Testing function for the player game template (`play.html`). Uses the `test_client()` pytest fixture.
 
     This only performs a check of the GET request.
-    
+
     Additionally, it requires rendering of the `/test` endpoint to create the sample room. Use of the
     client/pytest fixture means this uses the existing `/test` pull from `test_route_host_get()`
     """
@@ -139,7 +139,7 @@ def test_route_board_get(get_client):
     """Testing function for the player game template (`play.html`). Uses the `test_client()` pytest fixture.
 
     This only performs a check of the GET request.
-    
+
     Additionally, it requires rendering of the `/test` endpoint to create the sample room. Use of the
     client/pytest fixture means this uses the existing `/test` pull from `test_route_host_get()`
     """
@@ -177,4 +177,3 @@ def test_generate_room_code():
     assert type(room) == str
     assert len(room) == 4
     assert room.isalpha() == True
-

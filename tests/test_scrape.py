@@ -396,4 +396,3 @@ def test_get_external_media():
 
     with pytest.raises(scrape.ParsingError, match=".*has no url"):
         scrape.get_external_media(item=item, category=0)
-
