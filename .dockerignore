@@ -10,3 +10,5 @@ venv
 htmlcov
 tests
 *.json
+*.db
+!sample.db

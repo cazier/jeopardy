@@ -40,6 +40,7 @@ def create_app():
 
 
 if __name__ == u"__main__":
+    print("Loading database file from:", config.db_file)
     app = create_app()
 
     socketio = sockets.socketio
