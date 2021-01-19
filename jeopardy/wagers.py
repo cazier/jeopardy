@@ -15,7 +15,6 @@ except ImportError:
     from jeopardy.sockets import socketio, get_room
 
 
-
 def start_wager(game):
     room = get_room(sid=request.sid)
     socketio.emit(event="start_wager_round-s>bh", data={"players": game.score.keys()}, room=room)

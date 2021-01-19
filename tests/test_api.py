@@ -10,6 +10,7 @@ from jeopardy.api import models
 
 API_VERSION = config.api_version
 
+
 @pytest.fixture
 def testclient():
     jeopardy = web.create_app()

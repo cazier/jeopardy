@@ -23,7 +23,7 @@ except ImportError:
     from jeopardy import alex
     from jeopardy import config
     from jeopardy import storage
-    
+
     from jeopardy.sockets import socketio, get_room
 
 
