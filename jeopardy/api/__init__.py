@@ -1,15 +1,12 @@
-from flask import Flask
+from flask import Blueprint
 from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 
 
-app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite://"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-db = SQLAlchemy(app=app)
-ma = Marshmallow(app=app)
-api = Api(app=app)
+bp = Blueprint(name="api", import_name=__name__)
+ma = Marshmallow(app=bp)
+api = Api(app=bp, prefix="/api/v1")
 
 KEYS = {"date", "show", "round", "complete", "category", "value", "external", "question", "answer"}
 

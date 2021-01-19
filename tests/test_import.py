@@ -3,7 +3,7 @@ import json
 
 import pytest
 
-from jeopardy_data import api
+from jeopardy import api
 
 
 def test_add_one_long(emptyclient):
@@ -269,4 +269,3 @@ def test_add_bad_external(emptyclient):
 
     with pytest.raises(api.database.BadDataError, match=".*external tag is supplied.*"):
         api.database.add(clue_data=clue, uses_shortnames=True)
-

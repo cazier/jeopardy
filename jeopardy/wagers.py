@@ -1,10 +1,18 @@
-import config
-import rounds
-import storage
-
 from flask import request, Markup
 
-from sockets import socketio, get_room
+try:
+    import config
+    import rounds
+    import storage
+
+    from sockets import socketio, get_room
+
+except ImportError:
+    from jeopardy import config
+    from jeopardy import rounds
+    from jeopardy import storage
+
+    from jeopardy.sockets import socketio, get_room
 
 
 def start_wager(game):

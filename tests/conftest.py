@@ -7,24 +7,23 @@ import json
 import shutil
 import pathlib
 
-from jeopardy_data.tools import scrape
-from jeopardy_data import api
-
-scrape.DELAY = 0
+from jeopardy import web
+from jeopardy.api import models
 
 
 @pytest.fixture(scope="module")
 def emptyclient():
-    jeopardy = api.app
+    jeopardy = web.create_app()
     jeopardy.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{pathlib.Path('tests/files/test-empty.db').absolute()}"
     jeopardy.config["TESTING"] = True
 
-    api.db.create_all()
+    with jeopardy.app_context():
+        models.db.create_all()
 
-    with jeopardy.test_client() as client:
-        yield client
+        with jeopardy.test_client() as client:
+            yield client
 
-    api.db.drop_all()
+        models.db.drop_all()
 
 
 @pytest.fixture(autouse=True, scope="session")

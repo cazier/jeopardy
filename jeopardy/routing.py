@@ -12,11 +12,20 @@ from flask import (
 
 import random
 
-import alex
-import config
-import storage
+try:
+    import alex
+    import config
+    import storage
 
-from sockets import socketio, join_room
+    from sockets import socketio, get_room
+
+except ImportError:
+    from jeopardy import alex
+    from jeopardy import config
+    from jeopardy import storage
+
+    from jeopardy.sockets import socketio, get_room
+
 
 routing = Blueprint(name="routing", import_name=__name__)
 
@@ -252,7 +261,7 @@ def route_results():
 
         return render_template(template_name_or_list="results.html", results=results, you=player)
 
-    elif request.method == "GET" and config.debug:            
+    elif request.method == "GET" and config.debug:
         session = "A"
         game = "B"
         results = [
@@ -263,7 +272,7 @@ def route_results():
             ["Erik", 50],
         ]
         return render_template(template_name_or_list="results.html", results=results, you="Alex")
-    
+
     else:
         return redirect(url_for("routing.route_index"))
 

@@ -6,7 +6,12 @@ import urllib
 import json
 
 
-import config
+try:
+    import config
+
+except ImportError:
+    from jeopardy import config
+
 
 if config.debug:
     from pprint import pprint
