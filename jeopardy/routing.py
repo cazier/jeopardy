@@ -17,14 +17,14 @@ try:
     import config
     import storage
 
-    from sockets import socketio, get_room
+    from sockets import socketio, get_room, join_room
 
 except ImportError:
     from jeopardy import alex
     from jeopardy import config
     from jeopardy import storage
 
-    from jeopardy.sockets import socketio, get_room
+    from jeopardy.sockets import socketio, get_room, join_room
 
 
 routing = Blueprint(name="routing", import_name=__name__)
@@ -277,29 +277,29 @@ def route_results():
         return redirect(url_for("routing.route_index"))
 
 
-# @routing.route("/test/", methods=["GET"])
-# def route_test():
-#     """Displays a (rather convoluted) testing page with a number of iframes to show each user
-#     type. The test sets the `config.debug` variable to true, because it is assumed to be so,
-#     and creates a game (to facilitate loading each of the sub pages as GET requests).
+@routing.route("/test/", methods=["GET"])
+def route_test():
+    """Displays a (rather convoluted) testing page with a number of iframes to show each user
+    type. The test sets the `config.debug` variable to true, because it is assumed to be so,
+    and creates a game (to facilitate loading each of the sub pages as GET requests).
 
-#     Only allows GET requests (for rather obvious reasons)
-#     """
+    Only allows GET requests (for rather obvious reasons)
+    """
 
-#     config.debug = True
+    config.debug = True
 
-#     game_settings: dict = {"room": generate_room_code(), "size": int(request.form.get("size", 6))}
+    game_settings: dict = {"room": generate_room_code(), "size": int(request.form.get("size", 6))}
 
-#     game = alex.Game(game_settings=game_settings)
-#     game.make_board()
+    game = alex.Game(game_settings=game_settings)
+    game.make_board()
 
-#     game.add_player("Alex")
-#     game.add_player("Brad")
-#     game.add_player("Carl")
+    game.add_player("Alex")
+    game.add_player("Brad")
+    game.add_player("Carl")
 
-#     storage.push(room=game_settings["room"], value=game)
+    storage.push(room=game_settings["room"], value=game)
 
-#     return render_template(template_name_or_list="testing.html", room=game_settings["room"])
+    return render_template(template_name_or_list="testing.html", room=game_settings["room"])
 
 
 @routing.errorhandler(500)
