@@ -12,11 +12,20 @@ from flask import (
 
 import random
 
-import alex
-import config
-import storage
+try:
+    import alex
+    import config
+    import storage
 
-from sockets import socketio, join_room
+    from sockets import socketio, get_room
+
+except ImportError:
+    from jeopardy import alex
+    from jeopardy import config
+    from jeopardy import storage
+    
+    from jeopardy.sockets import socketio, get_room
+
 
 routing = Blueprint(name="routing", import_name=__name__)
 

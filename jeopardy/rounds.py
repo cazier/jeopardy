@@ -1,9 +1,17 @@
 from flask import Blueprint, request, Markup
-from sockets import socketio, get_room
 
-import config
-import wagers
-import storage
+try:
+    from sockets import socketio, get_room
+    import config
+    import wagers
+    import storage
+
+except ImportError:
+    from jeopardy.sockets import socketio, get_room
+    from jeopardy import config
+    from jeopardy import wagers
+    from jeopardy import storage
+
 
 rounds = Blueprint(name="rounds", import_name=__name__)
 
