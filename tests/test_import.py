@@ -3,7 +3,7 @@ import json
 
 import pytest
 
-from jeopardy_data import api
+from jeopardy import api
 
 
 def test_add_one_long(emptyclient):
