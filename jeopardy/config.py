@@ -1,6 +1,7 @@
 import os
 import uuid
 
+api_version = 1
 
 game_name = "Jeopardy"
 currency = "$"

@@ -7,10 +7,7 @@ import json
 import shutil
 import pathlib
 
-from jeopardy_data.tools import scrape
-from jeopardy_data import api
-
-scrape.DELAY = 0
+from jeopardy import api
 
 
 @pytest.fixture(scope="module")
