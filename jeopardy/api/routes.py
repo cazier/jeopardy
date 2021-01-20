@@ -121,10 +121,10 @@ class SetMultiple(Resource):
                 return jsonify(set_schema.dump(resp))
 
             except database.SetAlreadyExistsError:
-                abort(400, message="the supplied data is already in the database")
+                abort(400, message="The question set supplied is already in the database!")
 
         else:
-            abort(400, message="the posted data is missing some data")
+            abort(400, message="The question set supplied is missing some data. Every field is required.")
 
 
 class ShowById(Resource):
@@ -197,7 +197,7 @@ class CategoryByCompletion(Resource):
             results = Category.query.filter(Category.complete == False)
 
         else:
-            abort(400, message="completion status must be supplied either 'true' or 'false'")
+            abort(400, message="The completion status must be one of either \"True/False\" or \"Complete/Incomplete\"")
 
         results = results.join(Date, Date.id == Category.date_id).join(Round, Round.id == Category.round_id)
         results = results.order_by(Date.date, Round.number, Category.name)
@@ -268,13 +268,13 @@ class GameResource(Resource):
             categories = Category.query.filter(Category.round.has(number=round_))
 
         else:
-            abort(400, message="round number must be between 0 (jeopardy) and 2 (final jeopardy/tiebreaker)")
+            abort(400, message="The round number must be one of 0 (Jeopardy!), 1 (Double Jeopardy!), or 2 (Final Jeopardy!)")
 
         if (start != -1) and (stop != -1):
             categories = date_query(model=Category, start=start, stop=stop, chained_results=categories)
 
         if show_number != -1 and show_id != -1:
-            abort(400, message="only one of show_number and show_id may be supplied at a time")
+            abort(400, message="Only one of Show Number or Show ID may be supplied at a time.")
 
         elif show_number != -1:
             categories = show_query(model=Category, identifier="number", value=show_number, chained_results=categories)
@@ -293,7 +293,7 @@ class GameResource(Resource):
         categories = categories.order_by(Category.id)
 
         if (number_results := categories.count()) < size:
-            abort(400, message=f"requested too many categories; only {number_results} were found")
+            abort(400, message=f"Unfortunately only {number_results} categories were found. Please reduce the size.")
 
         numbers = random.sample(range(0, number_results), min(number_results, size * 2))
 
@@ -304,7 +304,7 @@ class GameResource(Resource):
                 category = categories[numbers.pop(0)]
 
             except IndexError:
-                abort(400, message=f"requested too many categories; only {len(game)} were found")
+                abort(400, message=f"Unfortunately only {number_results} categories were found. Please reduce the size.")
 
             if category.name not in (i["category"]["name"] for i in game):
                 sets = Set.query.filter(Set.category_id == category.id)
@@ -370,10 +370,13 @@ def date_query(
 
     elif (start != -1) and (stop != -1):
         if start > stop:
-            abort(400, message="stop year must be after start year")
+            abort(400, message="The stop year must come after the starting year.")
 
         if 1 > start or 1 > stop or 9999 < start or 9999 < stop:
             abort(400, message="year range must be between 0001 and 9999")
+
+        if Date.query.filter(and_(start <= Date.year, Date.year <= stop)).count() == 0:
+            abort(400, message="Unfortunately, there are no data in the database within that year span. Please double check your values.")
 
         results = results.join(Date, Date.id == model.date_id).filter(and_(start <= Date.year, Date.year <= stop))
 
@@ -398,9 +401,15 @@ def show_query(model, identifier: str, value: int, chained_results=None) -> flas
         results = model.query
 
     if identifier == "number":
+        if Show.query.filter_by(number=value).count() == 0:
+            abort(400, message="Unfortunately, there is no show in the database with that number. Please double check your values.")
+
         results = results.filter(model.show.has(number=value))
 
-    else:
+    elif identifier == 'id':
+        if Show.query.filter_by(id=value).count() == 0:
+            abort(400, message="Unfortunately, there is no show in the database with that ID. Please double check your values.")
+
         results = results.filter(model.show.has(id=value))
 
     return results

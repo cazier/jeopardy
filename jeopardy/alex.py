@@ -64,7 +64,8 @@ class Game(object):
 
         self.board = Board(round_=self.round, settings=self.game_settings)
 
-        self.board.add_wagers()
+        if not self.board.build_error:
+            self.board.add_wagers()
 
     def reset(self, reset_score: bool = False, reset_players: bool = False):
         """Reset the game to play again!
@@ -243,11 +244,29 @@ class Board(object):
         base_url = f"{config.api_endpoint}?"
         params = urllib.parse.urlencode(settings)
 
-        game = json.loads(urllib.request.urlopen(base_url + params).read().decode("utf-8"))
+        try:
+            api_data = urllib.request.urlopen(base_url + params)
+            
+            game = json.loads(api_data.read().decode("utf-8"))
+            
+            for index, details in enumerate(game):
+                self.categories.append(Category(index=index, name=details["category"]["name"], sets=details["sets"]))
+            
+            self.build_error = False
 
-        for index, details in enumerate(game):
-            self.categories.append(Category(index=index, name=details["category"]["name"], sets=details["sets"]))
+        except urllib.error.HTTPError as error_data:
+            if error_data.code == 400:
+                data = json.loads(error_data.read().decode("utf-8"))
+                self.message = data['message']
+            
+            elif error_data.code == 404:
+                self.message = "An error occurred finding the API. Please try restarting the server, or check your configuration."
 
+            else:
+                self.message = "An unknown error occurred. Please submit a bug report with details!"
+            
+            self.build_error = True
+        
     def add_wagers(self) -> None:
         """Randomly assign the "Daily Double" to the correct number of sets per round."""
         doubles = itertools.product(range(len(self.categories)), range(len(self.categories[0].sets)))
