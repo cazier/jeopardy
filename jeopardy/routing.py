@@ -8,6 +8,7 @@ from flask import (
     abort,
     flash,
     get_flashed_messages,
+    current_app,
 )
 
 import random
@@ -277,29 +278,30 @@ def route_results():
         return redirect(url_for("routing.route_index"))
 
 
-# @routing.route("/test/", methods=["GET"])
-# def route_test():
-#     """Displays a (rather convoluted) testing page with a number of iframes to show each user
-#     type. The test sets the `config.debug` variable to true, because it is assumed to be so,
-#     and creates a game (to facilitate loading each of the sub pages as GET requests).
+@routing.route("/test/", methods=["GET"])
+def route_test():
+    """Displays a (rather convoluted) testing page with a number of iframes to show each user
+    type. The test can only be accessed (for now) while `config.debug == True`, and creates a
+    game (to facilitate loading each of the sub pages as GET requests).
 
-#     Only allows GET requests (for rather obvious reasons)
-#     """
+    Only allows GET requests (for rather obvious reasons)
+    """
+    if config.debug:
+        game_settings: dict = {"room": generate_room_code(), "size": int(request.form.get("size", 6))}
 
-#     config.debug = True
+        game = alex.Game(game_settings=game_settings)
+        game.make_board()
 
-#     game_settings: dict = {"room": generate_room_code(), "size": int(request.form.get("size", 6))}
+        game.add_player("Alex")
+        game.add_player("Brad")
+        game.add_player("Carl")
 
-#     game = alex.Game(game_settings=game_settings)
-#     game.make_board()
+        storage.push(room=game_settings["room"], value=game)
 
-#     game.add_player("Alex")
-#     game.add_player("Brad")
-#     game.add_player("Carl")
+        return render_template(template_name_or_list="testing.html", room=game_settings["room"])
 
-#     storage.push(room=game_settings["room"], value=game)
-
-#     return render_template(template_name_or_list="testing.html", room=game_settings["room"])
+    else:
+        return redirect(url_for("routing.route_index"))
 
 
 @routing.errorhandler(500)
