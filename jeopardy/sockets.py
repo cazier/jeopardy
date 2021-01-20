@@ -1,7 +1,9 @@
 from flask_socketio import SocketIO, join_room, rooms
 from flask import request
 
-socketio = SocketIO()
+import config
+
+socketio = SocketIO(cors_allowed_origins=config.url)
 
 
 def get_room(sid: str) -> str:
