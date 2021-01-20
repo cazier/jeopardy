@@ -39,7 +39,7 @@ Note, per the [Flask-SocketIO documentation](https://flask-socketio.readthedocs.
 There's also a Docker image you can use too! Just make sure to forward the port, as needed, and make sure that you're providing a database file, via a bind mount, if you want to use more than the sample. 
 
 ```docker
-docker run -p 5000:5000 --env DB_FILE=questions.db -v ${PWD}/questions.db:/home/jeopardy/app/questions.db -it -d cazier/jeopardy:latest
+docker run -p 5000:5000 --env DB_FILE=questions.db -v ${PWD}/questions.db:/home/jeopardy/app/questions.db --env APP_URL=https://<your_domain_here> -it -d cazier/jeopardy:latest
 ```
 
 ## API
