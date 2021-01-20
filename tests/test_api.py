@@ -117,13 +117,13 @@ def test_set_changes(testclient, test_data):
 
     rv = testclient.post(f"/api/v{API_VERSION}/set", json=set_)
     assert rv.status_code == 400
-    assert rv.get_json() == {"message": "the supplied data is already in the database"}
+    assert rv.get_json() == {"message": "The question set supplied is already in the database!"}
 
     set_.pop("show")
 
     rv = testclient.post(f"/api/v{API_VERSION}/set", json=set_)
     assert rv.status_code == 400
-    assert rv.get_json() == {"message": "the posted data is missing some data"}
+    assert rv.get_json() == {"message": "The question set supplied is missing some data. Every field is required."}
 
 
 def test_sets_by_show(testclient, test_data):
@@ -141,13 +141,13 @@ def test_sets_by_show(testclient, test_data):
 
     rv = testclient.get(f"/api/v{API_VERSION}/set/show/number/100")
 
-    assert rv.status_code == 404
-    assert rv.get_json() == {"message": "no items were found with that query"}
+    assert rv.status_code == 400
+    assert rv.get_json() == {"message": "Unfortunately, there is no show in the database with that number. Please double check your values."}
 
     rv = testclient.get(f"/api/v{API_VERSION}/set/show/id/100")
 
-    assert rv.status_code == 404
-    assert rv.get_json() == {"message": "no items were found with that query"}
+    assert rv.status_code == 400
+    assert rv.get_json() == {"message": "Unfortunately, there is no show in the database with that ID. Please double check your values."}
 
 
 def test_sets_by_date(testclient, test_data):
@@ -180,7 +180,7 @@ def test_sets_by_years(testclient, test_data):
 
     rv = testclient.get(f"/api/v{API_VERSION}/set/years/1994/1992")
     assert rv.status_code == 400
-    assert "stop year must be after start year" in rv.get_json()["message"]
+    assert "The stop year must come after the starting year." in rv.get_json()["message"]
 
     rv = testclient.get(f"/api/v{API_VERSION}/set/years/0/20000")
     assert rv.status_code == 400
@@ -302,7 +302,7 @@ def test_shows_by_years(testclient, test_data):
 
     rv = testclient.get(f"/api/v{API_VERSION}/show/years/1994/1992")
     assert rv.status_code == 400
-    assert "stop year must be after start year" in rv.get_json()["message"]
+    assert "The stop year must come after the starting year." in rv.get_json()["message"]
 
     rv = testclient.get(f"/api/v{API_VERSION}/show/years/0/20000")
     assert rv.status_code == 400
@@ -358,7 +358,7 @@ def test_category_by_years(testclient, test_data):
 
     rv = testclient.get(f"/api/v{API_VERSION}/category/years/1994/1992")
     assert rv.status_code == 400
-    assert "stop year must be after start year" in rv.get_json()["message"]
+    assert "The stop year must come after the starting year." in rv.get_json()["message"]
 
     rv = testclient.get(f"/api/v{API_VERSION}/category/years/0/20000")
     assert rv.status_code == 400
@@ -426,13 +426,13 @@ def test_categories_by_show(testclient, test_data):
 
     rv = testclient.get(f"/api/v{API_VERSION}/category/show/number/100")
 
-    assert rv.status_code == 404
-    assert rv.get_json() == {"message": "no items were found with that query"}
+    assert rv.status_code == 400
+    assert rv.get_json() == {"message": "Unfortunately, there is no show in the database with that number. Please double check your values."}
 
     rv = testclient.get(f"/api/v{API_VERSION}/category/show/id/100")
 
-    assert rv.status_code == 404
-    assert rv.get_json() == {"message": "no items were found with that query"}
+    assert rv.status_code == 400
+    assert rv.get_json() == {"message": "Unfortunately, there is no show in the database with that ID. Please double check your values."}
 
 
 def test_categories_by_round(testclient, test_data):
@@ -530,7 +530,7 @@ def test_game_resource(testclient, test_data):
     rv = testclient.get(f"/api/v{API_VERSION}/game", query_string={"show_id": 2, "show_number": 2})
 
     assert rv.status_code == 400
-    assert rv.get_json() == {"message": "only one of show_number and show_id may be supplied at a time"}
+    assert rv.get_json() == {"message": "Only one of Show Number or Show ID may be supplied at a time."}
 
     rv = testclient.get(
         f"/api/v{API_VERSION}/game", query_string={"show_number": 2, "round": 1, "allow_external": True}
@@ -549,18 +549,18 @@ def test_game_resource(testclient, test_data):
     rv = testclient.get(f"/api/v{API_VERSION}/game", query_string={"round": 4})
 
     assert rv.status_code == 400
-    assert rv.get_json() == {"message": "round number must be between 0 (jeopardy) and 2 (final jeopardy/tiebreaker)"}
+    assert rv.get_json() == {"message": "The round number must be one of 0 (Jeopardy!), 1 (Double Jeopardy!), or 2 (Final Jeopardy!)"}
 
     rv = testclient.get(f"/api/v{API_VERSION}/game", query_string={"size": 30})
 
     assert rv.status_code == 400
-    assert "requested too many categories; only " in rv.get_json()["message"]
+    assert "categories were found. Please reduce the size." in rv.get_json()["message"]
 
     # Due to omitting duplicated category names
     rv = testclient.get(f"/api/v{API_VERSION}/game", query_string={"size": 18})
 
     assert rv.status_code == 400
-    assert "requested too many categories; only " in rv.get_json()["message"]
+    assert "categories were found. Please reduce the size." in rv.get_json()["message"]
 
 
 # """
