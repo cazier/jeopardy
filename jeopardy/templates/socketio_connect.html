@@ -1,5 +1,5 @@
 <script>
-    var socket = io('http://' + document.domain + ':' + location.port);
+    var socket = io(document.baseURI);
 
     socket.emit("join", {
         room: "{{ game.room }}"
