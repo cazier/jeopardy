@@ -17,7 +17,7 @@ secret_key = os.getenv(key="SECRET_KEY", default="correctbatteryhorsestaple")
 
 port = os.getenv(key="PORT", default="5000")
 
-url = os.getenv(key="APP_URL", default="*")
+url = os.getenv(key="APP_URL", default="*").split(',')
 api_endpoint = os.getenv(key="API_ENDPOINT", default=f"http://127.0.0.1:5000/api/v{api_version}/game")
 debug = bool(os.getenv(key="DEBUG", default=False))
 
