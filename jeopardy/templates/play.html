@@ -116,7 +116,7 @@
         });
 
         $('button').click(function(event) {
-            if (this.id == 'buzzer') {
+            if ((this.id == 'buzzer') & (this.classList.contains("disabled") == false)) {
                 socket.emit('buzz_in-p>s', {
                     'name': '{{ session["name"] }}'
                 });
