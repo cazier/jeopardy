@@ -241,7 +241,7 @@ class Board(object):
         if self.round == 2:
             settings["size"] = 1
 
-        base_url = f"{config.api_endpoint}?"
+        base_url = f"{config.api_endpoint}/game?"
         params = urllib.parse.urlencode(settings)
 
         try:
