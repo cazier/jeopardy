@@ -11,7 +11,9 @@ from flask import (
     current_app,
 )
 
+import json
 import random
+import urllib
 
 try:
     import alex
@@ -285,6 +287,29 @@ def route_results():
 
     else:
         return redirect(url_for("routing.route_index"))
+
+@routing.route("/details/", methods=["GET"])
+def route_details():
+    """Displays a final results page, ranking the players from first to last. There are also a number of
+    buttons to allow the host to choose to restart the game with the same, or new, players.
+
+    Allows only POST requests.
+    """
+    try:
+        api_data = urllib.request.urlopen(config.api_endpoint + "details")
+
+        details = json.loads(api_data.read().decode('utf-8'))
+    
+    except urllib.error.HTTPError as error_data:
+        if error_data.code == 404:
+            flash(
+                message="An error occurred finding the API. Please try restarting the server, or check your configuration.",
+                category="error",
+            )
+        
+        return redirect(url_for("routing.route_index"))
+ 
+    return render_template(template_name_or_list="details.html", details = details)
 
 
 @routing.route("/test/", methods=["GET"])

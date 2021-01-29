@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>{{ game_name }} - Python/WebSocket Trivia!</title>
+    {% include "scripts_meta.html" %}
+</head>
+
+<body>
+    {% include "header.html" %}
+    <div class="jumbotron">
+        <h2>Database Details</h2>
+        <hr />
+        <div class="container">
+            <div class="row">
+                <h3>Shows</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Qualifier</th>
+                            <th scope="col">First</th>
+                            <th scope="col">Last</th>
+                            <th scope="col">Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">Air Date</th>
+                            <td>{{ details["air_dates"]["oldest"] }}</td>
+                            <td>{{ details["air_dates"]["most_recent"] }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Number</th>
+                            <td>{{ details["shows"]["first_number"] }}</td>
+                            <td>{{ details["shows"]["last_number"] }}</td>
+                            <td>{{ details["shows"]["total"] }}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">ID</th>
+                            <td>{{ details["shows"]["first_id"] }}</td>
+                            <td>{{ details["shows"]["last_id"] }}</td>
+                            <td>{{ details["shows"]["total"] }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="row">
+                <h3>Sets</h3>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Has External Content</th>
+                            <th scope="col">No External Content</th>
+                            <th scope="col">Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ details["sets"]["has_external"] }}</td>
+                            <td>{{ details["sets"]["no_external"] }}</td>
+                            <td>{{ details["sets"]["total"] }}</td>
+                        </tr>
+                        <!-- <tr>
+                            <th scope="row">ID</th>
+                            <td>{{ details["shows"]["first_id"] }}</td>
+                            <td>{{ details["shows"]["last_id"] }}</td>
+                            <td>{{ details["shows"]["total"] }}</td>
+                        </tr> -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row">
+                <a class="btn btn-primary btn-large col spaced" href="/new">Start a New Game!</a>
+                <a class="btn btn-success btn-large col spaced" href="/join">Join a Game!</a>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
