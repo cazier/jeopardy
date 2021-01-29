@@ -34,10 +34,10 @@
             <tr>
                 {% for answer in category %}
                 <td>
-                    <button class="btn btn-block btn-primary {% if answer.shown %}disabled{% endif %}"
-                      id="q_{{ answer.id() }}">
+                    <div class="btn btn-block btn-primary {% if answer.shown %}disabled{% endif %}"
+                      id="q_{{ answer.id() }}" style="pointer-events: none;">
                         {{ currency }}{{ (answer.value + 1) * (game.round + 1) * 200 }}
-                    </button>
+                </div>
                 </td>
                 {% endfor %}
             </tr>
