@@ -475,7 +475,7 @@
                 <td>
                   <div
                     onmouseover="toggle('clue_J_5_3', 'clue_J_5_3_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Friends&lt;/em&gt;')"
-                    onmouseout="toggle('clue_J_5_3', 'clue_J_5_3_stuck', 'Six close acquaintences process to always be there for you, even if it\&#x27;s raining out.')"
+                    onmouseout="toggle('clue_J_5_3', 'clue_J_5_3_stuck', 'Six close acquaintences profess to always be there for you, even if it\&#x27;s raining out.')"
                     onclick="togglestick('clue_J_5_3_stuck')">
                     <table class="clue_header">
                       <tr>
@@ -487,7 +487,7 @@
                 </td>
               </tr>
               <tr>
-                <td id="clue_J_5_3" class="clue_text">Six close acquaintences process to always be there for you, even
+                <td id="clue_J_5_3" class="clue_text">Six close acquaintences profess to always be there for you, even
                   if it's
                   raining out.</td>
               </tr>
@@ -1062,7 +1062,7 @@
                 <td>
                   <div
                     onmouseover="toggle('clue_DJ_2_2', 'clue_DJ_2_2_stuck', '&lt;em class=&quot;correct_response&quot;&gt;AIO (All-In-One)&lt;/em&gt;')"
-                    onmouseout="toggle('clue_DJ_2_2', 'clue_DJ_2_2_stuck', 'This &quot;easy&quot; form of component cooling pprovides a single piece liquid-cooler and a radiator, without requiring running tubing or a pump')"
+                    onmouseout="toggle('clue_DJ_2_2', 'clue_DJ_2_2_stuck', 'This &quot;easy&quot; form of component cooling provides a single piece liquid-cooler and a radiator, without requiring running tubing or a pump')"
                     onclick="togglestick('clue_DJ_2_2_stuck')">
                     <table class="clue_header">
                       <tr>
@@ -1074,7 +1074,7 @@
                 </td>
               </tr>
               <tr>
-                <td id="clue_DJ_2_2" class="clue_text">This "easy" form of component cooling pprovides a single piece
+                <td id="clue_DJ_2_2" class="clue_text">This "easy" form of component cooling provides a single piece
                   liquid-cooler and a radiator, without requiring running tubing or a pump</td>
               </tr>
             </table>
@@ -1525,7 +1525,7 @@
                 <td>
                   <div
                     onmouseover="toggle('clue_DJ_3_5', 'clue_DJ_3_5_stuck', '&lt;em class=&quot;correct_response&quot;&gt;Code of Hammurabi&lt;/em&gt;')"
-                    onmouseout="toggle('clue_DJ_3_5', 'clue_DJ_3_5_stuck', 'This Babylonian text, which is one of the oldest deciphered writings in history, includes laws regulating tbeer and bars.')"
+                    onmouseout="toggle('clue_DJ_3_5', 'clue_DJ_3_5_stuck', 'This Babylonian text, which is one of the oldest deciphered writings in history, includes laws regulating beer and bars.')"
                     onclick="togglestick('clue_DJ_3_5_stuck')">
                     <table class="clue_header">
                       <tr>
@@ -1539,7 +1539,7 @@
               <tr>
                 <td id="clue_DJ_3_5" class="clue_text">This Babylonian text, which is one of the oldest deciphered
                   writings in
-                  history, includes laws regulating tbeer and bars.</td>
+                  history, includes laws regulating beer and bars.</td>
               </tr>
             </table>
           </td>

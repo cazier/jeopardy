@@ -354,7 +354,7 @@
 	{
 		"category": "BUILDAPC",
 		"value": 1,
-		"answer": "<html><body><p>This \"easy\" form of component cooling pprovides a single piece liquid-cooler and a radiator, without requiring running tubing or a pump</p></body></html>",
+		"answer": "<html><body><p>This \"easy\" form of component cooling provides a single piece liquid-cooler and a radiator, without requiring running tubing or a pump</p></body></html>",
 		"question": "AIO (All-In-One)",
 		"external": false,
 		"round": 1,
@@ -442,7 +442,7 @@
 	{
 		"category": "BEER",
 		"value": 4,
-		"answer": "<html><body><p>This Babylonian text, which is one of the oldest deciphered writings in history, includes laws regulating tbeer and bars.</p></body></html>",
+		"answer": "<html><body><p>This Babylonian text, which is one of the oldest deciphered writings in history, includes laws regulating beer and bars.</p></body></html>",
 		"question": "Code of Hammurabi",
 		"external": false,
 		"round": 1,
