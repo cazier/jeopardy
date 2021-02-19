@@ -90,14 +90,14 @@ def player_buzzed_in(data):
     room = get_room(sid=request.sid)
 
     game = storage.pull(room)
-    game.buzz(data["name"])
+    game.buzz(data = data)
 
     socketio.emit(event="reset_buzzers-s>p", data={"room": room}, room=room)
 
     socketio.emit(
         event="player_buzzed-s>h",
         data={
-            "name": game.buzz_order[-1],
+            "name": sorted(game.buzz_order, key=lambda k: k['time'])[0]['name'],
         },
         room=room,
     )

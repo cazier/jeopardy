@@ -138,7 +138,7 @@ class Game(object):
             print("An error has occurred....")
             return False
 
-    def buzz(self, name: str):
+    def buzz(self, data: dict):
         """Method tracking that a player has "buzzed in". Because the method `.appends()` the player name,
         the game uses the `index` -1 to get the _first_ buzzer.
 
@@ -146,8 +146,8 @@ class Game(object):
 
         name (str) -- The name of the player that buzzed in.
         """
-        if name in self.score:
-            self.buzz_order.append(name)
+        if data["name"] in self.score:
+            self.buzz_order.append(data)
 
     def heading(self) -> str:
         if self.round < 2:

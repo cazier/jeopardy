@@ -68,12 +68,14 @@
     <script type="text/javascript">
         var displayedInModal = null;
         var finalRound = false;
+        var buzzerStartTime = null;
 
         socket.on('enable_buzzers-s>p', function(message) {
             if (!message['players'].includes("{{ session['name'] }}")) {
                 $('#buzzer').toggleClass('disabled btn-danger btn-success');
-
             }
+
+            buzzerStartTime = new Date();
         });
 
         socket.on('reset_buzzers-s>p', function(message) {
@@ -117,8 +119,10 @@
 
         $('button').click(function(event) {
             if ((this.id == 'buzzer') & (this.classList.contains("disabled") == false)) {
+                var buzzerStopTime = new Date();
                 socket.emit('buzz_in-p>s', {
-                    'name': '{{ session["name"] }}'
+                    'name': '{{ session["name"] }}',
+                    'time': buzzerStopTime.valueOf() - buzzerStartTime.valueOf()
                 });
             } else if (this.id == 'wager_submit') {
                 if ($('#alert').text().trim().length != 46) {
