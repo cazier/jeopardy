@@ -70,6 +70,11 @@
         var finalRound = false;
         var buzzerStartTime = null;
 
+        function disableBuzzer() {
+            $('#buzzer').removeClass('btn-success');
+            $('#buzzer').addClass('disabled btn-danger');
+        }
+
         socket.on('enable_buzzers-s>p', function(message) {
             if (!message['players'].includes("{{ session['name'] }}")) {
                 $('#buzzer').toggleClass('disabled btn-danger btn-success');
@@ -79,8 +84,7 @@
         });
 
         socket.on('reset_buzzers-s>p', function(message) {
-            $('#buzzer').removeClass('btn-success');
-            $('#buzzer').addClass('disabled btn-danger');
+            disableBuzzer();
         });
 
         socket.on('update_scores-s>bph', function(message) {
@@ -124,6 +128,9 @@
                     'name': '{{ session["name"] }}',
                     'time': buzzerStopTime.valueOf() - buzzerStartTime.valueOf()
                 });
+
+                disableBuzzer();
+                
             } else if (this.id == 'wager_submit') {
                 if ($('#alert').text().trim().length != 46) {
                     wager = parseInt($('#wager_value').val());
