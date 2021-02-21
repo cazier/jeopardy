@@ -118,13 +118,9 @@ def route_host():
             game.make_board()
 
             if game.board.build_error:
-                flash(
-                    message=game.board.message, category="error"
-                )
+                flash(message=game.board.message, category="error")
 
                 return redirect(url_for("routing.route_new"))
-
-            
 
             storage.push(
                 room=game_settings["room"],
