@@ -32,7 +32,7 @@ class Game(object):
 
         self.score = Scoreboard()
 
-        self.buzz_order: list = list()
+        self.buzz_order: dict = dict()
 
         self.current_set = None
 
@@ -147,7 +147,7 @@ class Game(object):
         name (str) -- The name of the player that buzzed in.
         """
         if data["name"] in self.score:
-            self.buzz_order.append(data)
+            self.buzz_order[data["name"]] = {"time": data["time"], "allowed": True}
 
     def heading(self) -> str:
         if self.round < 2:
@@ -215,7 +215,9 @@ class Scoreboard(object):
 
     def update(self, game, correct: int) -> None:
         if self.wagerer is None:
-            player = game.buzz_order[-1]
+            valid_players = {k: v for k, v in game.buzz_order.items() if v["allowed"]}
+            player = sorted(valid_players.items(), key=lambda item: item[1]["time"])[0][0]
+            game.buzz_order[player]["allowed"] = False
 
             value = ((game.current_set.value + 1) * (game.round + 1) * 200) * (-1 + (2 * correct))
 
