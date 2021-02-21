@@ -31,6 +31,8 @@ if not db_file.exists():
 else:
     api_db = f"sqlite:///{db_file}"
 
+buzzer_time = 2
+
 ### DEBUG SETTINGS ###
 debug = bool(os.getenv(key="DEBUG", default=False))
 

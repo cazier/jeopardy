@@ -1,3 +1,5 @@
+import asyncio
+
 from flask import Blueprint, request, Markup
 
 try:
@@ -90,14 +92,23 @@ def player_buzzed_in(data):
     room = get_room(sid=request.sid)
 
     game = storage.pull(room)
-    game.buzz(data = data)
+    game.buzz(data=data)
+
+    if len(game.buzz_order) == 1:
+        asyncio.run(wait_to_emit(room=room))
+
+
+async def wait_to_emit(room: str):
+    game = storage.pull(room)
+
+    await asyncio.sleep(config.buzzer_time)
 
     socketio.emit(event="reset_buzzers-s>p", data={"room": room}, room=room)
 
     socketio.emit(
         event="player_buzzed-s>h",
         data={
-            "name": sorted(game.buzz_order, key=lambda k: k['time'])[0]['name'],
+            "name": sorted(game.buzz_order, key=lambda k: k["time"])[0]["name"],
         },
         room=room,
     )
