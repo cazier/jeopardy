@@ -1,3 +1,5 @@
+import asyncio
+
 from flask import Blueprint, request, Markup
 
 try:
@@ -90,14 +92,25 @@ def player_buzzed_in(data):
     room = get_room(sid=request.sid)
 
     game = storage.pull(room)
-    game.buzz(data["name"])
+    game.buzz(data=data)
+
+    if len([k for k, v in game.buzz_order.items() if v["allowed"]]) == 1:
+        asyncio.run(wait_to_emit(room=room))
+
+
+async def wait_to_emit(room: str):
+    game = storage.pull(room)
+
+    await asyncio.sleep(config.buzzer_time)
 
     socketio.emit(event="reset_buzzers-s>p", data={"room": room}, room=room)
 
+    valid_players = {k: v for k, v in game.buzz_order.items() if v["allowed"]}
+    player = sorted(valid_players.items(), key=lambda item: item[1]["time"])[0][0]
     socketio.emit(
         event="player_buzzed-s>h",
         data={
-            "name": game.buzz_order[-1],
+            "name": player,
         },
         room=room,
     )
@@ -119,11 +132,12 @@ def response_given(data):
 
     socketio.emit(event="update_scores-s>bph", data={"scores": game.score.emit()}, room=room)
 
-    if data["correct"] or len(game.score) == len(game.buzz_order):
+    if data["correct"] or len(game.score) == len([k for k, v in game.buzz_order.items() if not v["allowed"]]):
         end_set(room)
 
     else:
-        enable_buzzers(incorrect_players=game.buzz_order)
+        game.buzz_order = {k: v for k, v in game.buzz_order.items() if not v["allowed"]}
+        enable_buzzers(incorrect_players=list(game.buzz_order.keys()))
 
 
 @socketio.on("start_next_round-h>s")
@@ -145,7 +159,7 @@ def end_set(room: str):
     """
     game = storage.pull(room)
 
-    game.buzz_order = list()
+    game.buzz_order = dict()
     game.current_set = None
 
     socketio.emit(event="clear_modal-s>bh", room=room)

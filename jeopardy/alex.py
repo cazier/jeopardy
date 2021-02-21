@@ -28,11 +28,11 @@ class Game(object):
         self.size: int = self.game_settings["size"]
         self.room: str = self.game_settings["room"]
 
-        self.round: int = config.start_round
+        self.round: int = config.start_round if config.debug else 0
 
         self.score = Scoreboard()
 
-        self.buzz_order: list = list()
+        self.buzz_order: dict = dict()
 
         self.current_set = None
 
@@ -138,7 +138,7 @@ class Game(object):
             print("An error has occurred....")
             return False
 
-    def buzz(self, name: str):
+    def buzz(self, data: dict):
         """Method tracking that a player has "buzzed in". Because the method `.appends()` the player name,
         the game uses the `index` -1 to get the _first_ buzzer.
 
@@ -146,8 +146,8 @@ class Game(object):
 
         name (str) -- The name of the player that buzzed in.
         """
-        if name in self.score:
-            self.buzz_order.append(name)
+        if data["name"] in self.score:
+            self.buzz_order[data["name"]] = {"time": data["time"], "allowed": True}
 
     def heading(self) -> str:
         if self.round < 2:
@@ -215,7 +215,9 @@ class Scoreboard(object):
 
     def update(self, game, correct: int) -> None:
         if self.wagerer is None:
-            player = game.buzz_order[-1]
+            valid_players = {k: v for k, v in game.buzz_order.items() if v["allowed"]}
+            player = sorted(valid_players.items(), key=lambda item: item[1]["time"])[0][0]
+            game.buzz_order[player]["allowed"] = False
 
             value = ((game.current_set.value + 1) * (game.round + 1) * 200) * (-1 + (2 * correct))
 
@@ -246,27 +248,29 @@ class Board(object):
 
         try:
             api_data = urllib.request.urlopen(base_url + params)
-            
+
             game = json.loads(api_data.read().decode("utf-8"))
-            
+
             for index, details in enumerate(game):
                 self.categories.append(Category(index=index, name=details["category"]["name"], sets=details["sets"]))
-            
+
             self.build_error = False
 
         except urllib.error.HTTPError as error_data:
             if error_data.code == 400:
                 data = json.loads(error_data.read().decode("utf-8"))
-                self.message = data['message']
-            
+                self.message = data["message"]
+
             elif error_data.code == 404:
-                self.message = "An error occurred finding the API. Please try restarting the server, or check your configuration."
+                self.message = (
+                    "An error occurred finding the API. Please try restarting the server, or check your configuration."
+                )
 
             else:
                 self.message = "An unknown error occurred. Please submit a bug report with details!"
-            
+
             self.build_error = True
-        
+
     def add_wagers(self) -> None:
         """Randomly assign the "Daily Double" to the correct number of sets per round."""
         doubles = itertools.product(range(len(self.categories)), range(len(self.categories[0].sets)))
