@@ -12,16 +12,6 @@ API_VERSION = config.api_version
 
 
 @pytest.fixture
-def testclient():
-    jeopardy = web.create_app()
-    jeopardy.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{pathlib.Path('tests/files/test-full.db').absolute()}"
-    jeopardy.config["TESTING"] = True
-
-    with jeopardy.test_client() as client:
-        yield client
-
-
-@pytest.fixture
 def api_emptyclient():
     jeopardy = web.create_app()
     jeopardy.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{pathlib.Path('tests/files/test-empty.db').absolute()}"
@@ -142,12 +132,16 @@ def test_sets_by_show(testclient, test_data):
     rv = testclient.get(f"/api/v{API_VERSION}/set/show/number/100")
 
     assert rv.status_code == 400
-    assert rv.get_json() == {"message": "Unfortunately, there is no show in the database with that number. Please double check your values."}
+    assert rv.get_json() == {
+        "message": "Unfortunately, there is no show in the database with that number. Please double check your values."
+    }
 
     rv = testclient.get(f"/api/v{API_VERSION}/set/show/id/100")
 
     assert rv.status_code == 400
-    assert rv.get_json() == {"message": "Unfortunately, there is no show in the database with that ID. Please double check your values."}
+    assert rv.get_json() == {
+        "message": "Unfortunately, there is no show in the database with that ID. Please double check your values."
+    }
 
 
 def test_sets_by_date(testclient, test_data):
@@ -427,12 +421,16 @@ def test_categories_by_show(testclient, test_data):
     rv = testclient.get(f"/api/v{API_VERSION}/category/show/number/100")
 
     assert rv.status_code == 400
-    assert rv.get_json() == {"message": "Unfortunately, there is no show in the database with that number. Please double check your values."}
+    assert rv.get_json() == {
+        "message": "Unfortunately, there is no show in the database with that number. Please double check your values."
+    }
 
     rv = testclient.get(f"/api/v{API_VERSION}/category/show/id/100")
 
     assert rv.status_code == 400
-    assert rv.get_json() == {"message": "Unfortunately, there is no show in the database with that ID. Please double check your values."}
+    assert rv.get_json() == {
+        "message": "Unfortunately, there is no show in the database with that ID. Please double check your values."
+    }
 
 
 def test_categories_by_round(testclient, test_data):
@@ -549,7 +547,9 @@ def test_game_resource(testclient, test_data):
     rv = testclient.get(f"/api/v{API_VERSION}/game", query_string={"round": 4})
 
     assert rv.status_code == 400
-    assert rv.get_json() == {"message": "The round number must be one of 0 (Jeopardy!), 1 (Double Jeopardy!), or 2 (Final Jeopardy!)"}
+    assert rv.get_json() == {
+        "message": "The round number must be one of 0 (Jeopardy!), 1 (Double Jeopardy!), or 2 (Final Jeopardy!)"
+    }
 
     rv = testclient.get(f"/api/v{API_VERSION}/game", query_string={"size": 30})
 
