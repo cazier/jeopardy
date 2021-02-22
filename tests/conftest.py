@@ -101,7 +101,7 @@ def testclient():
 @pytest.fixture(scope="function")
 def samplecontent(testclient, single: bool = True):
     data = testclient.get(f"/api/v{config.api_version}/game").get_json()[0]["sets"][0]
-    data |= {"year": datetime.datetime.fromisoformat(data["date"]).strftime("%Y"), "wager": False}
+    data.update({"year": datetime.datetime.fromisoformat(data["date"]).strftime("%Y"), "wager": False})
 
     return data, {k: v for k, v in data.items() if k in ("year", "wager", "answer", "question")}
 
