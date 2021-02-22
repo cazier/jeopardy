@@ -88,6 +88,16 @@ def PatchedRequests(monkeypatch):
 
 
 @pytest.fixture
+def testclient():
+    jeopardy = web.create_app()
+    jeopardy.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{pathlib.Path('tests/files/test-full.db').absolute()}"
+    jeopardy.config["TESTING"] = True
+
+    with jeopardy.test_client() as client:
+        yield client
+
+
+@pytest.fixture
 def complete_file():
     with open("tests/files/complete.json", "r") as sample_file:
         return json.load(sample_file)
