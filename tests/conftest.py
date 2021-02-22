@@ -2,11 +2,12 @@ import os
 import json
 import shutil
 import pathlib
+import datetime
 
 import pytest
 import requests
 
-from jeopardy import web
+from jeopardy import web, config
 from jeopardy.api import models
 
 
@@ -95,6 +96,33 @@ def testclient():
 
     with jeopardy.test_client() as client:
         yield client
+
+
+@pytest.fixture(scope="function")
+def samplecontent(testclient, single: bool = True):
+    data = testclient.get(f"/api/v{config.api_version}/game").get_json()[0]["sets"][0]
+    data |= {"year": datetime.datetime.fromisoformat(data["date"]).strftime("%Y"), "wager": False}
+
+    return data, {k: v for k, v in data.items() if k in ("year", "wager", "answer", "question")}
+
+
+@pytest.fixture(scope="function")
+def samplecategory(testclient):
+    data = list()
+    category = testclient.get(f"/api/v{config.api_version}/game").get_json()[0]
+
+    for content in category["sets"]:
+        data.append(
+            {
+                "year": datetime.datetime.fromisoformat(content["date"]).strftime("%Y"),
+                "wager": False,
+                "answer": content["answer"],
+                "question": content["answer"],
+                "value": content["value"],
+            }
+        )
+
+    return category, data
 
 
 @pytest.fixture
