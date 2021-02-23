@@ -99,11 +99,18 @@ def testclient():
 
 
 @pytest.fixture(scope="function")
-def samplecontent(testclient, single: bool = True):
+def samplecontent(testclient, clean_content):
     data = testclient.get(f"/api/v{config.api_version}/game").get_json()[0]["sets"][0]
-    data.update({"year": datetime.datetime.fromisoformat(data["date"]).strftime("%Y"), "wager": False})
 
-    return data, {k: v for k, v in data.items() if k in ("year", "wager", "answer", "question")}
+    return data, clean_content(data = data)
+
+@pytest.fixture()
+def clean_content():
+    def _clean(data: dict) -> dict:
+        data.update({"year": datetime.datetime.fromisoformat(data["date"]).strftime("%Y"), "wager": False})
+        return {k: v for k, v in data.items() if k in ("year", "wager", "answer", "question")}
+    
+    return _clean
 
 
 @pytest.fixture(scope="function")
