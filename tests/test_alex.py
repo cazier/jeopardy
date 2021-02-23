@@ -155,3 +155,101 @@ def test_board_creation_500(testclient):
 
     assert board.build_error == True
     assert board.message == "An unknown error occurred. Please submit a bug report with details!"
+
+
+def test_game_creation(testclient, clean_content):
+    obj = testclient.get(f"/api/v{config.api_version}/game?round=0&size=6").get_json()
+    data, cleaned = json.dumps(obj), obj
+    content = clean_content(cleaned[0]["sets"][0])
+
+    game = alex.Game(game_settings={"size": 6, "room": "ABCD"})
+
+    assert game.score.players == {}
+    game.add_player("Test")
+    assert game.score.players == {"Test": {"score": 0, "wager": {"amount": 0, "question": ""}}}
+
+    assert game.round_text() == f"{config.game_name}!"
+    assert game.round_text(upcoming=True) == f"Double {config.game_name}!"
+    assert game.heading() == "Daily Double!"
+
+    with pytest.raises(AttributeError):
+        game.board
+        game.remaining_content
+
+    with patch("urllib.request.urlopen") as mock_urlopen:
+        mock_urlopen.return_value.read.return_value.decode.return_value = data
+
+        game.make_board()
+
+    assert (len(game.board.categories) == 6) & (len(game.board.categories) * 5 == game.remaining_content)
+
+    # In case random wager assignment went to `q_0_0`
+    assert (game.get("q_0_0") == content) or (game.get("q_0_0") == {**content, ** {"wager": True}})
+
+    assert game.round == 0
+
+    # Second Round
+    obj = testclient.get(f"/api/v{config.api_version}/game?round=1&size=6").get_json()
+    data, cleaned = json.dumps(obj), obj
+    content = clean_content(cleaned[0]["sets"][0])
+
+    with patch("urllib.request.urlopen") as mock_urlopen:
+        mock_urlopen.return_value.read.return_value.decode.return_value = data
+
+        game.start_next_round()
+
+    assert game.round == 1
+    assert game.round_text() == f"Double {config.game_name}!"
+    assert game.round_text(upcoming=True) == f"Final {config.game_name}!"
+
+    html_board = list(game.html_board())
+    assert (len(game.board.categories) == 6) & (len(game.board.categories[0].sets) == 5)
+    assert (len(html_board) == 5) & (len(html_board[0]) == 6)
+
+    assert game.get("a_0_0") == False
+
+    assert game.buzz_order == dict()
+    game.buzz({"name": "Test", "time": 1000})
+    game.buzz({"name": "False", "time": 2000})
+    assert game.buzz_order == {"Test": {"time": 1000, "allowed": True}}
+
+    obj = testclient.get(f"/api/v{config.api_version}/game?round=2&size=1").get_json()
+    data, cleaned = json.dumps(obj), obj
+
+    with patch("urllib.request.urlopen") as mock_urlopen:
+        mock_urlopen.return_value.read.return_value.decode.return_value = data
+
+        game.start_next_round()
+
+    assert game.round == 2
+    assert game.round_text() == f"Final {config.game_name}!"
+    assert game.round_text(upcoming=True) == f"Tiebreaker {config.game_name}!"
+    assert game.heading() == f"Final {config.game_name}!"
+
+    with patch("urllib.request.urlopen") as mock_urlopen:
+        mock_urlopen.return_value.read.return_value.decode.return_value = data
+
+        game.start_next_round()
+
+    assert game.round == 3
+    assert game.round_text(upcoming=True) == "An error has occurred...."
+
+def test_game_creation_debug(testclient):
+    config.debug = True
+
+    obj = testclient.get(f"/api/v{config.api_version}/game?round=0&size=6").get_json()
+    data, cleaned = json.dumps(obj), obj
+
+    game = alex.Game(game_settings={"size": 6, "room": "ABCD"})
+    
+    with patch("urllib.request.urlopen") as mock_urlopen:
+        mock_urlopen.return_value.read.return_value.decode.return_value = data
+
+        game.make_board()
+
+    assert game.score.players == {
+        "Alex": {"score": 1500, "wager": {"amount": 0, "question": ""}},
+        "Brad": {"score": 500, "wager": {"amount": 0, "question": ""}},
+        "Carl": {"score": 750, "wager": {"amount": 0, "question": ""}}}
+
+    assert game.board.categories[0].sets[0].wager == True
