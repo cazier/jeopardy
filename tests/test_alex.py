@@ -257,3 +257,57 @@ def test_game_creation_debug(testclient):
     }
 
     assert game.board.categories[0].sets[0].wager == True
+
+
+def test_scoreboard_creation():
+    board = alex.Scoreboard()
+    assert board.add("test") == True
+    assert board.add("test") == False
+
+    assert len(board) == 1
+    assert board["test"] == 0
+    assert board.add("second") == True
+
+    assert board.emit() == {"test": 0, "second": 0}
+
+
+def test_scoreboard_updates():
+    names = ["first", "second"]
+
+    game = mock.Mock()
+    game.round = 0
+    game.current_set.value = 0
+    game.buzz_order = {j: {"time": 1000 * i, "allowed": True} for i, j in enumerate(names)}
+
+    score = alex.Scoreboard()
+    assert all(score.add(i) for i in names)
+    assert score.keys() == names
+
+    assert score.players["first"]["score"] == 0
+    score.update(game=game, correct=0)
+
+    assert score.players["first"]["score"] == -200
+
+    score.wagerer = "second"
+    score.players["second"]["wager"]["amount"] = 1000
+    score.update(game=game, correct=1)
+
+    assert score.players["second"]["score"] == 1000
+
+
+def test_scoreboard_methods():
+    names = ["first", "second"]
+
+    score = alex.Scoreboard()
+    assert all(score.add(i) for i in names)
+    assert score.keys() == names
+
+    score.players["first"]["score"] = 500
+    assert score.sort() == names[::-1]
+
+    score.players["second"]["score"] = 1000
+    assert score.sort() == names
+
+    score["first"] = ("amount", 1000)
+    score["first"] = ("question", "response")
+    assert score.wager("first") == {"amount": 1000, "player": "first", "question": "response", "score": 500}
