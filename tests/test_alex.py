@@ -2,7 +2,7 @@ import json
 import urllib
 import datetime
 from io import BytesIO
-from unittest.mock import patch
+from unittest import mock
 
 
 import pytest
@@ -48,7 +48,7 @@ def test_board_creation_r0(testclient):
     obj = testclient.get(f"/api/v{config.api_version}/game?round=0").get_json()
     data, cleaned = json.dumps(obj), obj
 
-    with patch("urllib.request.urlopen") as mock_urlopen:
+    with mock.patch("urllib.request.urlopen") as mock_urlopen:
         mock_urlopen.return_value.read.return_value.decode.return_value = data
 
         board = alex.Board(round_=0, settings={})
@@ -64,7 +64,7 @@ def test_board_creation_r1(testclient):
     obj = testclient.get(f"/api/v{config.api_version}/game?round=1").get_json()
     data, cleaned = json.dumps(obj), obj
 
-    with patch("urllib.request.urlopen") as mock_urlopen:
+    with mock.patch("urllib.request.urlopen") as mock_urlopen:
         mock_urlopen.return_value.read.return_value.decode.return_value = data
 
         board = alex.Board(round_=1, settings={})
@@ -78,7 +78,7 @@ def test_board_creation_r2(testclient):
     obj = testclient.get(f"/api/v{config.api_version}/game?round=2&size=1").get_json()
     data, cleaned = json.dumps(obj), obj
 
-    with patch("urllib.request.urlopen") as mock_urlopen:
+    with mock.patch("urllib.request.urlopen") as mock_urlopen:
         mock_urlopen.return_value.read.return_value.decode.return_value = data
 
         board = alex.Board(round_=2, settings={})
@@ -92,7 +92,7 @@ def test_board_creation_debug(testclient):
 
     config.debug = True
 
-    with patch("urllib.request.urlopen") as mock_urlopen:
+    with mock.patch("urllib.request.urlopen") as mock_urlopen:
         mock_urlopen.return_value.read.return_value.decode.return_value = data
 
         board = alex.Board(round_=1, settings={})
@@ -110,7 +110,7 @@ def test_board_creation_400(testclient):
     obj = testclient.get(f"/api/v{config.api_version}/game?round=3").get_json()
     data, cleaned = json.dumps(obj), obj
 
-    with patch("urllib.request.urlopen") as mock_urlopen:
+    with mock.patch("urllib.request.urlopen") as mock_urlopen:
         mock_urlopen.side_effect = urllib.error.HTTPError(
             url="", msg="", hdrs="", fp=BytesIO(data.encode("utf-8")), code=400
         )
@@ -126,7 +126,7 @@ def test_board_creation_404(testclient):
     obj = testclient.get(f"/api/v{config.api_version}/404").get_json()
     data, cleaned = json.dumps(obj), obj
 
-    with patch("urllib.request.urlopen") as mock_urlopen:
+    with mock.patch("urllib.request.urlopen") as mock_urlopen:
         mock_urlopen.side_effect = urllib.error.HTTPError(
             url="", msg="", hdrs="", fp=BytesIO(data.encode("utf-8")), code=404
         )
@@ -145,7 +145,7 @@ def test_board_creation_500(testclient):
     obj = testclient.get(f"/api/v{config.api_version}/500").get_json()
     data, cleaned = json.dumps(obj), obj
 
-    with patch("urllib.request.urlopen") as mock_urlopen:
+    with mock.patch("urllib.request.urlopen") as mock_urlopen:
         mock_urlopen.side_effect = urllib.error.HTTPError(
             url="", msg="", hdrs="", fp=BytesIO(data.encode("utf-8")), code=500
         )
@@ -176,7 +176,7 @@ def test_game_creation(testclient, clean_content):
         game.board
         game.remaining_content
 
-    with patch("urllib.request.urlopen") as mock_urlopen:
+    with mock.patch("urllib.request.urlopen") as mock_urlopen:
         mock_urlopen.return_value.read.return_value.decode.return_value = data
 
         game.make_board()
@@ -193,7 +193,7 @@ def test_game_creation(testclient, clean_content):
     data, cleaned = json.dumps(obj), obj
     content = clean_content(cleaned[0]["sets"][0])
 
-    with patch("urllib.request.urlopen") as mock_urlopen:
+    with mock.patch("urllib.request.urlopen") as mock_urlopen:
         mock_urlopen.return_value.read.return_value.decode.return_value = data
 
         game.start_next_round()
@@ -217,7 +217,7 @@ def test_game_creation(testclient, clean_content):
     data, cleaned = json.dumps(obj), obj
 
     # Final Round
-    with patch("urllib.request.urlopen") as mock_urlopen:
+    with mock.patch("urllib.request.urlopen") as mock_urlopen:
         mock_urlopen.return_value.read.return_value.decode.return_value = data
 
         game.start_next_round()
@@ -228,7 +228,7 @@ def test_game_creation(testclient, clean_content):
     assert game.heading() == f"Final {config.game_name}!"
 
     # Checking for no round 4
-    with patch("urllib.request.urlopen") as mock_urlopen:
+    with mock.patch("urllib.request.urlopen") as mock_urlopen:
         mock_urlopen.return_value.read.return_value.decode.return_value = data
 
         game.start_next_round()
@@ -245,7 +245,7 @@ def test_game_creation_debug(testclient):
 
     game = alex.Game(game_settings={"size": 6, "room": "ABCD"})
 
-    with patch("urllib.request.urlopen") as mock_urlopen:
+    with mock.patch("urllib.request.urlopen") as mock_urlopen:
         mock_urlopen.return_value.read.return_value.decode.return_value = data
 
         game.make_board()
