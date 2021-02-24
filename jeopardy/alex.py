@@ -13,10 +13,6 @@ except ImportError:
     from jeopardy import config
 
 
-if config.debug:
-    from pprint import pprint
-
-
 class Game(object):
     """Class definining the game itself, containing each player and the board itself. """
 
