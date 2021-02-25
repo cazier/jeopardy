@@ -171,6 +171,10 @@ def test_sets_by_years(testclient, test_data):
     assert rv.status_code == 200
     assert len(rv.get_json()["data"]) == len(matching)
 
+    rv = testclient.get(f"/api/v{API_VERSION}/set/years/1995/1996")
+    assert rv.status_code == 400
+    assert "Unfortunately, there are no data in the database within that year span." in rv.get_json()["message"]
+
     rv = testclient.get(f"/api/v{API_VERSION}/set/years/1994/1992")
     assert rv.status_code == 400
     assert "The stop year must come after the starting year." in rv.get_json()["message"]
@@ -293,6 +297,10 @@ def test_shows_by_years(testclient, test_data):
     assert rv.status_code == 200
     assert rv.get_json()["data"] == [{"date": "1992-08-13", "id": 1, "number": 1}]
 
+    rv = testclient.get(f"/api/v{API_VERSION}/show/years/1995/1996")
+    assert rv.status_code == 400
+    assert "Unfortunately, there are no data in the database within that year span." in rv.get_json()["message"]
+
     rv = testclient.get(f"/api/v{API_VERSION}/show/years/1994/1992")
     assert rv.status_code == 400
     assert "The stop year must come after the starting year." in rv.get_json()["message"]
@@ -348,6 +356,10 @@ def test_category_by_years(testclient, test_data):
     rv = testclient.get(f"/api/v{API_VERSION}/category/years/1991/1992")
     assert rv.status_code == 200
     assert len(rv.get_json()["data"]) == len(expected)
+
+    rv = testclient.get(f"/api/v{API_VERSION}/category/years/1995/1996")
+    assert rv.status_code == 400
+    assert "Unfortunately, there are no data in the database within that year span." in rv.get_json()["message"]
 
     rv = testclient.get(f"/api/v{API_VERSION}/category/years/1994/1992")
     assert rv.status_code == 400
