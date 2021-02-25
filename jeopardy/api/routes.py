@@ -241,9 +241,9 @@ class CategoryMultiple(Resource):
         return paginate(model=Category.query, schema=categories_schema.dump, indices=request.args)
 
 
-class BlankResource(Resource):
-    def get(self) -> dict:
-        return {"message": "hello!"}
+# class BlankResource(Resource):
+#     def get(self) -> dict:
+#         return {"message": "hello!"}
 
 
 class GameResource(Resource):
@@ -489,5 +489,4 @@ api.add_resource(CategoryByShowId, "/category/show/id/<int:show_id>")
 
 api.add_resource(DetailsResource, "/details")
 api.add_resource(GameResource, "/game")
-api.add_resource(BlankResource, "/")
-# # api_base = ""  # /api/v1/"
+# api.add_resource(BlankResource, "/")
