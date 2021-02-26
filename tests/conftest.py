@@ -1,14 +1,13 @@
 import pytest
 import requests
 
-
 import os
 import json
 import shutil
 import pathlib
 import datetime
 
-from jeopardy import web, config
+from jeopardy import web, config, sockets
 from jeopardy.api import models
 
 
@@ -143,3 +142,17 @@ def complete_file():
 def incomplete_file():
     with open("tests/files/incomplete.json", "r") as sample_file:
         return json.load(sample_file)
+
+@pytest.fixture
+def webclient():
+    app = web.create_app()
+    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{pathlib.Path('tests/files/test-full.db').absolute()}"
+    app.config["TESTING"] = True
+
+    socketio = sockets.socketio
+    socketio.init_app(app)
+
+    flask = app.test_client()
+
+    yield socketio.test_client(app, flask_test_client=flask), flask
+
