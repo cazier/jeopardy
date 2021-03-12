@@ -4,7 +4,7 @@ import pytest
 from flask import request, session
 from unittest import mock
 
-from jeopardy import config, storage
+from jeopardy import config, storage, alex
 
 def test_home(webclient):
     _, flask = webclient
@@ -40,7 +40,7 @@ def test_test(webclient, testclient):
         with flask as c:
             rv = c.get('/test/', follow_redirects = True)
             assert request.path == '/test/'
-            assert "iframe" in rv.get_data(as_text=True)
+            assert rv.get_data(as_text=True).count('</iframe>') == 5
     
     config.debug = False
     storage.GAMES = dict()
@@ -74,6 +74,34 @@ def test_join(webclient, testclient):
     rv = flask.get('/join/ABCD')
     assert rv.status_code == 200
     assert 'readonly' in rv.get_data(as_text = True)
+
+
+def test_host_error(webclient):
+    _, flask = webclient
+
+    rv = flask.get('/host/')
+    assert rv.status_code == 500
+    assert "An error occurred..." in rv.get_data(as_text=True)
+
+    rv = flask.get('/host/?room=BCDE')
+    assert rv.status_code == 500
+
+
+def test_host_get(webclient, testclient):
+    _, flask = webclient
+    
+    obj = testclient.get(f"/api/v{config.api_version}/game?round=0").get_json()
+    data, cleaned = json.dumps(obj), obj
+
+    with mock.patch("urllib.request.urlopen") as mock_urlopen:
+        mock_urlopen.return_value.read.return_value.decode.return_value = data
+
+        
+
+
+        # rv = flask.get('/host/')
+
+
 
 
 # def test_board(webclient, testclient):

@@ -123,10 +123,9 @@ def route_host():
             abort(500)
 
     elif request.method == "GET":
-        if room := request.args.get(key="room", default=False):
-            if "/test/" in request.headers["Referer"]:
-                session["name"] = "Host"
-                session["room"] = room
+        if room := request.args.get(key="room", default=False) and "/test/" in request.headers.get("Referer", []):
+            session["name"] = "Host"
+            session["room"] = room
 
         else:
             abort(500)
