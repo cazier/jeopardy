@@ -4,6 +4,8 @@ import itertools
 import datetime
 import urllib
 import json
+import hashlib
+import re
 
 
 try:
@@ -36,14 +38,14 @@ class Game(object):
 
         self.current_set = None
 
-    def add_player(self, name: str):
+    def add_player(self, name: str, check_exists: bool = False):
         """Add a player to the game with a starting score of zero (0).
 
         Required Arguments:
 
         name (str) -- The player's name
         """
-        self.score.add(name)
+        self.score.add(name, check_exists=check_exists)
 
     def make_board(self):
         """Create a game board.
@@ -157,14 +159,17 @@ class Scoreboard(object):
     def __contains__(self, item: str) -> bool:
         return item in self.players.keys()
 
-    def add(self, other: str) -> bool:
-        if other not in self:
-            self.players[other] = {"score": 0, "wager": {"amount": 0, "question": ""}}
+    def add(self, other: str, check_exists: bool) -> bool:
+        name = "".join(re.findall(r"[A-z0-9 \.\-\_]", other))
+        safe = hashlib.md5(name.encode("utf-8")).hexdigest()
 
-            return True
+        if check_exists:
+            return (name in self) or (safe in (i["safe"] for i in self.players.values()))
 
         else:
-            return False
+            self.players[name] = {"safe": safe, "score": 0, "wager": {"amount": 0, "question": ""}}
+
+            return name
 
     def __len__(self) -> int:
         return len(self.players.keys())
@@ -180,7 +185,7 @@ class Scoreboard(object):
         self.num += 1
 
     def emit(self) -> dict:
-        return {i: self.players[i]["score"] for i in self.players.keys()}
+        return {i: {"safe": self.players[i]["safe"], "score": self.players[i]["score"]} for i in self.players.keys()}
 
     def keys(self) -> list:
         return list(self.players.keys())

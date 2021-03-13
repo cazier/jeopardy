@@ -182,7 +182,7 @@ def route_player():
             error_occurred = True
             error_room = ""
 
-        if name in storage.pull(room=room).score:
+        if storage.pull(room=room).add_player(name, check_exists=True):
             flash(
                 message="The name you selected already exists. Please choose another one!",
                 category="error",
@@ -202,7 +202,7 @@ def route_player():
             return redirect(url_for("routing.route_join", room=error_room))
 
         else:
-            storage.pull(room=room).add_player(name)
+            name = storage.pull(room=room).add_player(name)
 
             socketio.emit(event="add_player_to_board-s>b", data={"player": name}, room=room)
 
