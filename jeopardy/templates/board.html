@@ -204,7 +204,6 @@
 
 
                 socket.on('update_scores-s>bph', function(message) {
-                    console.log(message['scores']);
                     for (player in message['scores']) {
                         $('#' + message['scores'][player]['safe']).text(message['scores'][player]['score']);
 
