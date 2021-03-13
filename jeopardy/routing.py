@@ -297,9 +297,9 @@ def route_test():
         game = alex.Game(game_settings=game_settings)
         game.make_board()
 
-        game.add_player("Alex")
-        game.add_player("Brad")
-        game.add_player("Carl")
+        for score, name in enumerate(("Alex", "Brad", "Carl")):
+            game.add_player(name)
+            game.score.players[name]["score"] = (score + 1) * 500 
 
         storage.push(room=game_settings["room"], value=game)
 
