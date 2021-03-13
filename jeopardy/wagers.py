@@ -46,7 +46,7 @@ def wager_submittal(data):
 
     game = storage.pull(room=room)
 
-    socketio.emit(event="wager_submitted-s>h", data={"updates": {"name": data["name"]}}, room=room)
+    socketio.emit(event="wager_submitted-s>h", data={"updates": {"safe": game.score.players[data["name"]]['safe']}}, room=room)
 
     if "wager" in data.keys():
         game.score[data["name"]] = ("amount", int(data["wager"]))
@@ -68,7 +68,7 @@ def wager_submittal(data):
                 }
 
                 socketio.emit(
-                    event="reset_wager_names-s>h", data={"players": list(game.score.players.keys())}, room=room
+                    event="reset_wager_names-s>h", data={"players": list(game.score.players.values())}, room=room
                 )
 
                 reveal_wager(game=game, updates=updates)

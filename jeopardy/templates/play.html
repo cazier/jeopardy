@@ -89,7 +89,7 @@
 
         socket.on('update_scores-s>bph', function(message) {
             for (item of document.getElementsByClassName('score')) {
-                item.innerText = message['scores']['{{ session["name"] }}'];
+                item.innerText = message['scores']['{{ session["name"] }}']['score'];
             }
         });
 

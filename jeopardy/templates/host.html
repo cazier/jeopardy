@@ -144,7 +144,7 @@
         <div class="btn-toolbar" role="toolbar">
             <div class="btn-group" role="group" id="wagerers">
                 {% for name in game.score.keys() %}
-                <button class="btn btn-danger wager_names" id="{{ name }}_wagered">{{ name
+                <button class="btn btn-danger wager_names" id="{{ game.score.players[name]['safe'] }}">{{ name
                                 }}</button>
                 {% endfor %}
             </div>
@@ -392,13 +392,15 @@
 
         socket.on('reset_wager_names-s>h', function(message) {
             names = message['players'];
+            console.log(names);
             for (name in names) {
-                $('#' + names[name] + '_wagered').toggleClass('btn-danger btn-success');
+                $('#' + names[name]['safe']).toggleClass('btn-danger btn-success');
             }
         });
 
         socket.on('wager_submitted-s>h', function(message) {
-            $('#' + message['updates']['name'] + '_wagered').toggleClass('btn-danger btn-success');
+            console.log(message);
+            $('#' + message['updates']['safe']).toggleClass('btn-danger btn-success');
         });
 
         socket.on('enable_show_responses-s>h', function(message) {
@@ -429,7 +431,7 @@
         socket.on('update_scores-s>bph', function(message) {
             var player = $("#player").text();
 
-            $('#final_score').text(message['scores'][player]);
+            $('#final_score').text(message['scores'][player]['score']);
 
             $('#wagering').toggle();
         });
