@@ -392,14 +392,12 @@
 
         socket.on('reset_wager_names-s>h', function(message) {
             names = message['players'];
-            console.log(names);
             for (name in names) {
                 $('#' + names[name]['safe']).toggleClass('btn-danger btn-success');
             }
         });
 
         socket.on('wager_submitted-s>h', function(message) {
-            console.log(message);
             $('#' + message['updates']['safe']).toggleClass('btn-danger btn-success');
         });
 
