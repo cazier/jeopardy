@@ -23,7 +23,7 @@
             <div class="input-group-prepend">
                 <span class="input-group-text">Current Score:
                     {{ currency }}
-                    <span id="score">{{ game.score[session['name']] }}</span>
+                    <span class="score" id="score">{{ game.score[session['name']] }}</span>
                 </span>
             </div>
         </div>
@@ -38,7 +38,7 @@
                     <div class="modal-text">
                         <div class="modal-custom" id="wager_title">{{ game.heading() }}</div>
                         <div class="modal-custom small">You currently have {{ currency }}<span
-                              id="scores">{{ game.score[session['name']] }}</span>!</div>
+                            class="score">{{ game.score[session['name']] }}</span>!</div>
                         <div class="alert alert-danger collapse tiny" role="alert" id="alert">
                             This is an invalid wager. Please try again!<br>(Click <a
                               href="https://www.j-archive.com/help.php#dailydouble" target="_blank">
@@ -88,8 +88,9 @@
         });
 
         socket.on('update_scores-s>bph', function(message) {
-            $('#score').text(message['scores']['{{ session["name"] }}']);
-            $('#scores').text(message['scores']['{{ session["name"] }}']);
+            for (item of document.getElementsByClassName('score')) {
+                item.innerText = message['scores']['{{ session["name"] }}']['score'];
+            }
         });
 
         socket.on('wager_amount_prompt-s>p', function(message) {

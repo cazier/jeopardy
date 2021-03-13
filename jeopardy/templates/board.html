@@ -69,7 +69,7 @@
                 {% for name in game.score.keys() %}
                 <td style="text-align: center;">
                     <span>{{ currency }}</span>
-                    <span id="{{ name }}_score">{{ game.score[name] }}</span>
+                    <span id="{{ game.score.players[name]['safe'] }}">{{ game.score[name] }}</span>
                 </td>
                 {% endfor %}
             </tr>
@@ -205,10 +205,10 @@
 
                 socket.on('update_scores-s>bph', function(message) {
                     for (player in message['scores']) {
-                        $('#' + player + '_score').text(message['scores'][player]);
+                        $('#' + message['scores'][player]['safe']).text(message['scores'][player]['score']);
 
                         if (player = $("#player").text()) {
-                            $('#final_score').text(message['scores'][player]);
+                            $('#final_score').text(message['scores'][player]['score']);
 
                             $('#wagering').toggle();
                         };
