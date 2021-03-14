@@ -45,7 +45,7 @@ class Game(object):
 
         name (str) -- The player's name
         """
-        self.score.add(name, check_exists=check_exists)
+        return self.score.add(name, check_exists=check_exists)
 
     def make_board(self):
         """Create a game board.
