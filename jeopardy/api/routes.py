@@ -1,16 +1,15 @@
-from sqlalchemy import and_, or_
-from flask import jsonify, request
-from flask_restful import Resource, abort
-import flask_sqlalchemy
-
-from . import api, KEYS
-from . import database
-from .models import *
-from .schemas import *
-
 import zlib
 import random
 import datetime
+
+import flask_sqlalchemy
+from flask import jsonify, request
+from sqlalchemy import or_, and_
+from flask_restful import Resource, abort
+
+from . import KEYS, api, database
+from .models import *
+from .schemas import *
 
 
 class DetailsResource(Resource):
@@ -197,7 +196,7 @@ class CategoryByCompletion(Resource):
             results = Category.query.filter(Category.complete == False)
 
         else:
-            abort(400, message="The completion status must be one of either \"True/False\" or \"Complete/Incomplete\"")
+            abort(400, message='The completion status must be one of either "True/False" or "Complete/Incomplete"')
 
         results = results.join(Date, Date.id == Category.date_id).join(Round, Round.id == Category.round_id)
         results = results.order_by(Date.date, Round.number, Category.name)
@@ -268,7 +267,10 @@ class GameResource(Resource):
             categories = Category.query.filter(Category.round.has(number=round_))
 
         else:
-            abort(400, message="The round number must be one of 0 (Jeopardy!), 1 (Double Jeopardy!), or 2 (Final Jeopardy!)")
+            abort(
+                400,
+                message="The round number must be one of 0 (Jeopardy!), 1 (Double Jeopardy!), or 2 (Final Jeopardy!)",
+            )
 
         if (start != -1) and (stop != -1):
             categories = date_query(model=Category, start=start, stop=stop, chained_results=categories)
@@ -304,7 +306,9 @@ class GameResource(Resource):
                 category = categories[numbers.pop(0)]
 
             except IndexError:
-                abort(400, message=f"Unfortunately only {number_results} categories were found. Please reduce the size.")
+                abort(
+                    400, message=f"Unfortunately only {number_results} categories were found. Please reduce the size."
+                )
 
             if category.name not in (i["category"]["name"] for i in game):
                 sets = Set.query.filter(Set.category_id == category.id)
@@ -376,7 +380,10 @@ def date_query(
             abort(400, message="year range must be between 0001 and 9999")
 
         if Date.query.filter(and_(start <= Date.year, Date.year <= stop)).count() == 0:
-            abort(400, message="Unfortunately, there are no data in the database within that year span. Please double check your values.")
+            abort(
+                400,
+                message="Unfortunately, there are no data in the database within that year span. Please double check your values.",
+            )
 
         results = results.join(Date, Date.id == model.date_id).filter(and_(start <= Date.year, Date.year <= stop))
 
@@ -402,13 +409,19 @@ def show_query(model, identifier: str, value: int, chained_results=None) -> flas
 
     if identifier == "number":
         if Show.query.filter_by(number=value).count() == 0:
-            abort(400, message="Unfortunately, there is no show in the database with that number. Please double check your values.")
+            abort(
+                400,
+                message="Unfortunately, there is no show in the database with that number. Please double check your values.",
+            )
 
         results = results.filter(model.show.has(number=value))
 
-    elif identifier == 'id':
+    elif identifier == "id":
         if Show.query.filter_by(id=value).count() == 0:
-            abort(400, message="Unfortunately, there is no show in the database with that ID. Please double check your values.")
+            abort(
+                400,
+                message="Unfortunately, there is no show in the database with that ID. Please double check your values.",
+            )
 
         results = results.filter(model.show.has(id=value))
 

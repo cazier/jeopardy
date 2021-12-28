@@ -1,6 +1,5 @@
-from flask_sqlalchemy import SQLAlchemy
-
 from sqlalchemy import extract
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.hybrid import hybrid_property
 
 db = SQLAlchemy()

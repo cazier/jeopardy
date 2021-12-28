@@ -36,7 +36,7 @@ python jeopardy/web.py
 ```
 Note, per the [Flask-SocketIO documentation](https://flask-socketio.readthedocs.io/en/latest/#embedded-server), if using either eventlet or gevent web servers, running that above command is enough for a production environment. If that's not the case, see the documentation for other deployment methods
 
-There's also a Docker image you can use too! Just make sure to forward the port, as needed, and make sure that you're providing a database file, via a bind mount, if you want to use more than the sample. 
+There's also a Docker image you can use too! Just make sure to forward the port, as needed, and make sure that you're providing a database file, via a bind mount, if you want to use more than the sample.
 
 ```docker
 docker run -p 5000:5000 --env DB_FILE=questions.db -v ${PWD}/questions.db:/home/jeopardy/app/questions.db --env APP_URL=https://<your_domain_here> -it -d cazier/jeopardy:latest

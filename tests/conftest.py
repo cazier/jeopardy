@@ -1,11 +1,10 @@
-import pytest
-import requests
-
-
 import os
 import json
 import shutil
 import pathlib
+
+import pytest
+import requests
 
 from jeopardy import web
 from jeopardy.api import models

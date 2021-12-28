@@ -120,6 +120,7 @@ dmypy.json
 !incomplete.json
 !complete.json
 !test-full.db
+!sample.db
 
 storage/
 output/

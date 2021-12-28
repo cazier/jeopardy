@@ -1,5 +1,5 @@
-import pathlib
 import json
+import pathlib
 
 import pytest
 

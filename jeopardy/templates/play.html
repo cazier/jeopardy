@@ -6,7 +6,7 @@
 
     {% include "scripts_meta.html" %}
     {% include "socketio_connect.html" %}
-    
+
     <script>
         var type = 'player';
     </script>
@@ -131,7 +131,7 @@
                 });
 
                 disableBuzzer();
-                
+
             } else if (this.id == 'wager_submit') {
                 if ($('#alert').text().trim().length != 46) {
                     wager = parseInt($('#wager_value').val());
