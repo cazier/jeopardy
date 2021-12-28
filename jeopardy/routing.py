@@ -1,31 +1,18 @@
-from flask import (
-    Blueprint,
-    render_template,
-    request,
-    session,
-    redirect,
-    url_for,
-    abort,
-    flash,
-    get_flashed_messages,
-    current_app,
-)
-
 import random
+
+from flask import (Blueprint, abort, flash, request, session, url_for,
+                   redirect, current_app, render_template,
+                   get_flashed_messages)
 
 try:
     import alex
     import config
     import storage
-
-    from sockets import socketio, get_room, join_room
+    from sockets import get_room, socketio, join_room
 
 except ImportError:
-    from jeopardy import alex
-    from jeopardy import config
-    from jeopardy import storage
-
-    from jeopardy.sockets import socketio, get_room, join_room
+    from jeopardy import alex, config, storage
+    from jeopardy.sockets import get_room, socketio, join_room
 
 
 routing = Blueprint(name="routing", import_name=__name__)
@@ -84,7 +71,7 @@ def route_host():
     # Typical (Production) routing will use a POST request.
     if request.method == "POST":
         # If the request has a room code supplied, the host is `/join`ing the game.
-        if (room := request.form.get("room")) :
+        if room := request.form.get("room"):
             room = room
 
         # If the method has a size supplied (because it's a required field), the host is starting a
@@ -136,7 +123,7 @@ def route_host():
             abort(500)
 
     elif request.method == "GET":
-        if (room := request.args.get(key="room", default=False)) :
+        if room := request.args.get(key="room", default=False):
             if "/test/" in request.headers["Referer"]:
                 session["name"] = "Host"
                 session["room"] = room
@@ -299,7 +286,7 @@ def route_test():
 
         for score, name in enumerate(("Alex", "Brad", "Carl")):
             game.add_player(name)
-            game.score.players[name]["score"] = (score + 1) * 500 
+            game.score.players[name]["score"] = (score + 1) * 500
 
         storage.push(room=game_settings["room"], value=game)
 

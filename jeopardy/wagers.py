@@ -1,18 +1,14 @@
-from flask import request, Markup
+from flask import Markup, request
 
 try:
     import config
     import rounds
     import storage
-
-    from sockets import socketio, get_room
+    from sockets import get_room, socketio
 
 except ImportError:
-    from jeopardy import config
-    from jeopardy import rounds
-    from jeopardy import storage
-
-    from jeopardy.sockets import socketio, get_room
+    from jeopardy import config, rounds, storage
+    from jeopardy.sockets import get_room, socketio
 
 
 def start_wager(game):
@@ -46,7 +42,9 @@ def wager_submittal(data):
 
     game = storage.pull(room=room)
 
-    socketio.emit(event="wager_submitted-s>h", data={"updates": {"safe": game.score.players[data["name"]]['safe']}}, room=room)
+    socketio.emit(
+        event="wager_submitted-s>h", data={"updates": {"safe": game.score.players[data["name"]]["safe"]}}, room=room
+    )
 
     if "wager" in data.keys():
         game.score[data["name"]] = ("amount", int(data["wager"]))

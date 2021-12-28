@@ -19,4 +19,3 @@
 - Wager
 - Updated Score
 - Repeat
-

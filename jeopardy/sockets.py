@@ -1,5 +1,5 @@
-from flask_socketio import SocketIO, join_room, rooms
 from flask import request
+from flask_socketio import SocketIO, rooms, join_room
 
 try:
     import config

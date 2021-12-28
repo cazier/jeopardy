@@ -6,18 +6,14 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 try:
-    import config
     import api
+    import config
     import rounds
     import routing
     import sockets
 
 except ImportError:
-    from jeopardy import config
-    from jeopardy import api
-    from jeopardy import rounds
-    from jeopardy import routing
-    from jeopardy import sockets
+    from jeopardy import api, config, rounds, routing, sockets
 
 
 def create_app():

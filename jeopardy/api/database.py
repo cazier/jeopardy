@@ -1,8 +1,8 @@
 import zlib
 import datetime
 
-from .models import *
 from . import KEYS
+from .models import *
 
 
 class SetAlreadyExistsError(Exception):

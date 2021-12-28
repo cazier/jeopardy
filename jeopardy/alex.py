@@ -1,12 +1,11 @@
-import sqlite3
-import random
-import itertools
-import datetime
-import urllib
-import json
-import hashlib
 import re
-
+import json
+import random
+import urllib
+import hashlib
+import sqlite3
+import datetime
+import itertools
 
 try:
     import config
@@ -20,7 +19,7 @@ if config.debug:
 
 
 class Game(object):
-    """Class definining the game itself, containing each player and the board itself. """
+    """Class definining the game itself, containing each player and the board itself."""
 
     def __init__(self, game_settings: dict):
         self.game_name: str = config.game_name
