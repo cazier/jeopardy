@@ -116,3 +116,12 @@ def emptyclient():
     with app.app_context():
         with app.test_client() as client:
             yield client
+
+
+@pytest.fixture
+def dataclient(webclient):
+    def _func(endpoint: str, method: str):
+        call = getattr(webclient.flask_test_client, method)
+        return call(endpoint).get_json()
+
+    return _func

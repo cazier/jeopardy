@@ -13,6 +13,12 @@ def test_safe_name():
     name = "Test"
     assert alex.safe_name(name) == hashlib.md5(name.encode("utf-8")).hexdigest()
 
+    name = "Test With Spaces"
+    assert " " not in alex.safe_name(name)
+
+    name = "Test %20 Special Characters $%^&;"
+    assert alex.safe_name(name).isalnum()
+
 
 def test_content_creation(samplecontent):
     data, cleaned = samplecontent
@@ -48,28 +54,26 @@ def test_category_creation(samplecategory):
     assert (category.sets[0].value == 0) & (category.sets[-1].value == 4)
 
 
-def test_board_creation_r0(webclient):
-    obj = webclient.flask_test_client.get(f"/api/v{config.api_version}/game?round=0").get_json()
-    data, cleaned = json.dumps(obj), obj
+def test_board_creation_r0(dataclient):
+    data = dataclient(f"/api/v{config.api_version}/game?round=0", "get")
 
     with mock.patch("urllib.request.urlopen") as mock_urlopen:
-        mock_urlopen.return_value.read.return_value.decode.return_value = data
+        mock_urlopen.return_value.read.return_value.decode.return_value = json.dumps(data)
 
         board = alex.Board(round_=0, settings={})
 
     board.add_wagers()
 
     assert board.round == 0
-    assert set({i.category for i in board.categories}) == {i["category"]["name"] for i in cleaned}
+    assert set({i.category for i in board.categories}) == {i["category"]["name"] for i in data}
     assert sum([j.wager for i in board.categories for j in i.sets]) == 1
 
 
-def test_board_creation_r1(webclient):
-    obj = webclient.flask_test_client.get(f"/api/v{config.api_version}/game?round=1").get_json()
-    data, cleaned = json.dumps(obj), obj
+def test_board_creation_r1(dataclient):
+    data = dataclient(f"/api/v{config.api_version}/game?round=1", "get")
 
     with mock.patch("urllib.request.urlopen") as mock_urlopen:
-        mock_urlopen.return_value.read.return_value.decode.return_value = data
+        mock_urlopen.return_value.read.return_value.decode.return_value = json.dumps(data)
 
         board = alex.Board(round_=1, settings={})
 
@@ -78,26 +82,24 @@ def test_board_creation_r1(webclient):
     assert sum([j.wager for i in board.categories for j in i.sets]) == 2
 
 
-def test_board_creation_r2(webclient):
-    obj = webclient.flask_test_client.get(f"/api/v{config.api_version}/game?round=2&size=1").get_json()
-    data, cleaned = json.dumps(obj), obj
+def test_board_creation_r2(dataclient):
+    data = dataclient(f"/api/v{config.api_version}/game?round=2&size=1", "get")
 
     with mock.patch("urllib.request.urlopen") as mock_urlopen:
-        mock_urlopen.return_value.read.return_value.decode.return_value = data
+        mock_urlopen.return_value.read.return_value.decode.return_value = json.dumps(data)
 
         board = alex.Board(round_=2, settings={})
 
     assert len(board.categories) == 1
 
 
-def test_board_creation_debug(webclient):
-    obj = webclient.flask_test_client.get(f"/api/v{config.api_version}/game?round=1").get_json()
-    data, cleaned = json.dumps(obj), obj
+def test_board_creation_debug(dataclient):
+    data = dataclient(f"/api/v{config.api_version}/game?round=1", "get")
 
     config.debug = True
 
     with mock.patch("urllib.request.urlopen") as mock_urlopen:
-        mock_urlopen.return_value.read.return_value.decode.return_value = data
+        mock_urlopen.return_value.read.return_value.decode.return_value = json.dumps(data)
 
         board = alex.Board(round_=1, settings={})
 
@@ -110,31 +112,29 @@ def test_board_creation_debug(webclient):
     config.debug = False
 
 
-def test_board_creation_400(webclient):
-    obj = webclient.flask_test_client.get(f"/api/v{config.api_version}/game?round=3").get_json()
-    data, cleaned = json.dumps(obj), obj
+def test_board_creation_400(dataclient):
+    data = dataclient(f"/api/v{config.api_version}/game?round=3", "get")
 
     with mock.patch("urllib.request.urlopen") as mock_urlopen:
         mock_urlopen.side_effect = urllib.error.HTTPError(
-            url="", msg="", hdrs="", fp=BytesIO(data.encode("utf-8")), code=400
+            url="", msg="", hdrs="", fp=BytesIO(json.dumps(data).encode("utf-8")), code=400
         )
-        mock_urlopen.return_value.read.return_value.decode.return_value = data
+        mock_urlopen.return_value.read.return_value.decode.return_value = json.dumps(data)
 
         board = alex.Board(round_=0, settings={})
 
     assert board.build_error == True
-    assert board.message == cleaned["message"]
+    assert board.message == data["message"]
 
 
-def test_board_creation_404(webclient):
-    obj = webclient.flask_test_client.get(f"/api/v{config.api_version}/404").get_json()
-    data, cleaned = json.dumps(obj), obj
+def test_board_creation_404(dataclient):
+    data = dataclient(f"/api/v{config.api_version}/404", "get")
 
     with mock.patch("urllib.request.urlopen") as mock_urlopen:
         mock_urlopen.side_effect = urllib.error.HTTPError(
-            url="", msg="", hdrs="", fp=BytesIO(data.encode("utf-8")), code=404
+            url="", msg="", hdrs="", fp=BytesIO(json.dumps(data).encode("utf-8")), code=404
         )
-        mock_urlopen.return_value.read.return_value.decode.return_value = data
+        mock_urlopen.return_value.read.return_value.decode.return_value = json.dumps(data)
 
         board = alex.Board(round_=0, settings={})
 
@@ -145,15 +145,14 @@ def test_board_creation_404(webclient):
     )
 
 
-def test_board_creation_500(webclient):
-    obj = webclient.flask_test_client.get(f"/api/v{config.api_version}/500").get_json()
-    data, cleaned = json.dumps(obj), obj
+def test_board_creation_500(dataclient):
+    data = dataclient(f"/api/v{config.api_version}/500", "get")
 
     with mock.patch("urllib.request.urlopen") as mock_urlopen:
         mock_urlopen.side_effect = urllib.error.HTTPError(
-            url="", msg="", hdrs="", fp=BytesIO(data.encode("utf-8")), code=500
+            url="", msg="", hdrs="", fp=BytesIO(json.dumps(data).encode("utf-8")), code=500
         )
-        mock_urlopen.return_value.read.return_value.decode.return_value = data
+        mock_urlopen.return_value.read.return_value.decode.return_value = json.dumps(data)
 
         board = alex.Board(round_=0, settings={})
 
@@ -161,10 +160,9 @@ def test_board_creation_500(webclient):
     assert board.message == "An unknown error occurred. Please submit a bug report with details!"
 
 
-def test_game_creation(webclient, clean_content):
-    obj = webclient.flask_test_client.get(f"/api/v{config.api_version}/game?round=0&size=6").get_json()
-    data, cleaned = json.dumps(obj), obj
-    content = clean_content(cleaned[0]["sets"][0])
+def test_game_creation(dataclient, clean_content):
+    data = dataclient(f"/api/v{config.api_version}/game?round=0&size=6", "get")
+    content = clean_content(data[0]["sets"][0])
 
     game = alex.Game(game_settings={"size": 6, "room": "ABCD"})
 
@@ -187,7 +185,7 @@ def test_game_creation(webclient, clean_content):
         game.remaining_content
 
     with mock.patch("urllib.request.urlopen") as mock_urlopen:
-        mock_urlopen.return_value.read.return_value.decode.return_value = data
+        mock_urlopen.return_value.read.return_value.decode.return_value = json.dumps(data)
 
         game.make_board()
 
@@ -199,12 +197,11 @@ def test_game_creation(webclient, clean_content):
     assert game.round == 0
 
     # Second Round
-    obj = webclient.flask_test_client.get(f"/api/v{config.api_version}/game?round=1&size=6").get_json()
-    data, cleaned = json.dumps(obj), obj
-    content = clean_content(cleaned[0]["sets"][0])
+    data = dataclient(f"/api/v{config.api_version}/game?round=1&size=6", "get")
+    content = clean_content(data[0]["sets"][0])
 
     with mock.patch("urllib.request.urlopen") as mock_urlopen:
-        mock_urlopen.return_value.read.return_value.decode.return_value = data
+        mock_urlopen.return_value.read.return_value.decode.return_value = json.dumps(data)
 
         game.start_next_round()
 
@@ -223,12 +220,11 @@ def test_game_creation(webclient, clean_content):
     game.buzz({"name": "False", "time": 2000})
     assert game.buzz_order == {"Test": {"time": 1000, "allowed": True}}
 
-    obj = webclient.flask_test_client.get(f"/api/v{config.api_version}/game?round=2&size=1").get_json()
-    data, cleaned = json.dumps(obj), obj
+    data = dataclient(f"/api/v{config.api_version}/game?round=2&size=1", "get")
 
     # Final Round
     with mock.patch("urllib.request.urlopen") as mock_urlopen:
-        mock_urlopen.return_value.read.return_value.decode.return_value = data
+        mock_urlopen.return_value.read.return_value.decode.return_value = json.dumps(data)
 
         game.start_next_round()
 
@@ -239,7 +235,7 @@ def test_game_creation(webclient, clean_content):
 
     # Checking for no round 4
     with mock.patch("urllib.request.urlopen") as mock_urlopen:
-        mock_urlopen.return_value.read.return_value.decode.return_value = data
+        mock_urlopen.return_value.read.return_value.decode.return_value = json.dumps(data)
 
         game.start_next_round()
 
@@ -247,16 +243,15 @@ def test_game_creation(webclient, clean_content):
     assert game.round_text(upcoming=True) == "An error has occurred...."
 
 
-def test_game_creation_debug(webclient):
+def test_game_creation_debug(dataclient):
     config.debug = True
 
-    obj = webclient.flask_test_client.get(f"/api/v{config.api_version}/game?round=0&size=6").get_json()
-    data, cleaned = json.dumps(obj), obj
+    data = dataclient(f"/api/v{config.api_version}/game?round=0&size=6", "get")
 
     game = alex.Game(game_settings={"size": 6, "room": "ABCD"})
 
     with mock.patch("urllib.request.urlopen") as mock_urlopen:
-        mock_urlopen.return_value.read.return_value.decode.return_value = data
+        mock_urlopen.return_value.read.return_value.decode.return_value = json.dumps(data)
 
         game.make_board()
 
@@ -338,16 +333,15 @@ def test_scoreboard_methods():
     assert score.wager("first") == {"amount": 1000, "player": "first", "question": "response", "score": 500}
 
 
-def test_game_reset(webclient):
+def test_game_reset(dataclient):
     config.debug = True
 
-    obj = webclient.flask_test_client.get(f"/api/v{config.api_version}/game?round=0&size=6").get_json()
-    data, cleaned = json.dumps(obj), obj
+    data = dataclient(f"/api/v{config.api_version}/game?round=0&size=6", "get")
 
     game = alex.Game(game_settings={"size": 6, "room": "ABCD"})
 
     with mock.patch("urllib.request.urlopen") as mock_urlopen:
-        mock_urlopen.return_value.read.return_value.decode.return_value = data
+        mock_urlopen.return_value.read.return_value.decode.return_value = json.dumps(data)
 
         game.make_board()
 

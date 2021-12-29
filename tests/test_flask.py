@@ -19,7 +19,7 @@ def test_test(webclient):
     config.debug = False
 
     obj = webclient.flask_test_client.get(f"/api/v{config.api_version}/game?round=0").get_json()
-    data, cleaned = json.dumps(obj), obj
+    data = json.dumps(obj)
 
     with webclient.flask_test_client as c:
         rv = c.get("/test/")
@@ -31,6 +31,7 @@ def test_test(webclient):
 
     config.debug = True
 
+    # Because the test page loads the 5 inner iframes as a separate function call, the urlopen must be mocked
     with mock.patch("urllib.request.urlopen") as mock_urlopen:
         mock_urlopen.return_value.read.return_value.decode.return_value = data
 
