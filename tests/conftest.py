@@ -14,7 +14,7 @@ from jeopardy.api import models
 @pytest.fixture(scope="module")
 def emptyclient():
     jeopardy = web.create_app()
-    jeopardy.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{pathlib.Path('tests/files/test-empty.db').absolute()}"
+    jeopardy.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{pathlib.Path('tests/_files/test-empty.db').absolute()}"
     jeopardy.config["TESTING"] = True
 
     with jeopardy.app_context():
@@ -30,7 +30,7 @@ def emptyclient():
 def empty_cache_upon_completion():
     yield
 
-    path = pathlib.Path(os.getcwd(), "tests/files/cache").absolute()
+    path = pathlib.Path(os.getcwd(), "tests/_files/cache").absolute()
 
     if path.exists():
         shutil.rmtree(path=path)
@@ -41,7 +41,7 @@ def empty_cache_upon_completion():
 
 @pytest.fixture
 def empty_cache_after_test():
-    path = pathlib.Path(os.getcwd(), "tests/files/cache").absolute()
+    path = pathlib.Path(os.getcwd(), "tests/_files/cache").absolute()
 
     if path.exists():
         shutil.rmtree(path=path)
@@ -52,10 +52,10 @@ def empty_cache_after_test():
 
 @pytest.fixture
 def test_data():
-    with open("tests/files/complete.json", "r") as sample_file:
+    with open("tests/_files/complete.json", "r") as sample_file:
         data = json.load(sample_file)
 
-    with open("tests/files/incomplete.json", "r") as sample_file:
+    with open("tests/_files/incomplete.json", "r") as sample_file:
         data.extend(json.load(sample_file))
 
     return data
@@ -66,7 +66,7 @@ def PatchedRequests(monkeypatch):
     def localGet(uri, *args, **kwargs):
         file = uri.split("/")[-1].replace("?", "_")
 
-        path = pathlib.Path(os.getcwd(), "tests/files/mock_get", file).absolute()
+        path = pathlib.Path(os.getcwd(), "tests/_files/mock_get", file).absolute()
 
         if path.exists():
             status_code = 200
@@ -91,7 +91,7 @@ def PatchedRequests(monkeypatch):
 @pytest.fixture
 def testclient():
     jeopardy = web.create_app()
-    jeopardy.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{pathlib.Path('tests/files/test-full.db').absolute()}"
+    jeopardy.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{pathlib.Path('tests/_files/test-full.db').absolute()}"
     jeopardy.config["TESTING"] = True
 
     with jeopardy.test_client() as client:
@@ -102,14 +102,15 @@ def testclient():
 def samplecontent(testclient, clean_content):
     data = testclient.get(f"/api/v{config.api_version}/game").get_json()[0]["sets"][0]
 
-    return data, clean_content(data = data)
+    return data, clean_content(data=data)
+
 
 @pytest.fixture()
 def clean_content():
     def _clean(data: dict) -> dict:
         data.update({"year": datetime.datetime.fromisoformat(data["date"]).strftime("%Y"), "wager": False})
         return {k: v for k, v in data.items() if k in ("year", "wager", "answer", "question")}
-    
+
     return _clean
 
 
@@ -134,19 +135,20 @@ def samplecategory(testclient):
 
 @pytest.fixture
 def complete_file():
-    with open("tests/files/complete.json", "r") as sample_file:
+    with open("tests/_files/complete.json", "r") as sample_file:
         return json.load(sample_file)
 
 
 @pytest.fixture
 def incomplete_file():
-    with open("tests/files/incomplete.json", "r") as sample_file:
+    with open("tests/_files/incomplete.json", "r") as sample_file:
         return json.load(sample_file)
+
 
 @pytest.fixture
 def webclient():
     app = web.create_app()
-    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{pathlib.Path('tests/files/test-full.db').absolute()}"
+    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{pathlib.Path('tests/_files/test-full.db').absolute()}"
     app.config["TESTING"] = True
 
     socketio = sockets.socketio
@@ -155,4 +157,3 @@ def webclient():
     flask = app.test_client()
 
     yield socketio.test_client(app, flask_test_client=flask), flask
-

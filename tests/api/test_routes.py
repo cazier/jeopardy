@@ -13,7 +13,7 @@ API_VERSION = config.api_version
 @pytest.fixture
 def api_emptyclient():
     jeopardy = web.create_app()
-    jeopardy.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{pathlib.Path('tests/files/test-empty.db').absolute()}"
+    jeopardy.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{pathlib.Path('tests/_files/test-empty.db').absolute()}"
     jeopardy.config["TESTING"] = True
 
     with jeopardy.app_context():
