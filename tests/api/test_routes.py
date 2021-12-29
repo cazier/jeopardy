@@ -1,11 +1,4 @@
-import json
-import pathlib
-
-import pytest
-import requests
-
-from jeopardy import web, config
-from jeopardy.api import models
+from jeopardy import config
 
 API_VERSION = config.api_version
 
