@@ -2,6 +2,7 @@ import os
 import json
 import shutil
 import pathlib
+import sqlite3
 import datetime
 
 import pytest
@@ -9,6 +10,22 @@ import requests
 
 from jeopardy import web, config, sockets
 from jeopardy.api import models
+
+
+@pytest.fixture(scope="session", autouse=True)
+def populate_databses():
+    dbs = (pathlib.Path("tests/_files/test-empty"), pathlib.Path("tests/_files/test-full"))
+
+    for db in dbs:
+        sql = db.with_suffix(".db.sqlite").read_text()
+
+        if db.with_suffix(".db").exists():
+            db.with_suffix(".db").unlink()
+
+        con = sqlite3.connect(db.with_suffix(".db").absolute())
+        cur = con.cursor()
+        cur.executescript(sql)
+        con.close()
 
 
 @pytest.fixture(scope="module")
