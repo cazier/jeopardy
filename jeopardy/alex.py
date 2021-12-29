@@ -33,14 +33,23 @@ class Game(object):
 
         self.current_set = None
 
-    def add_player(self, name: str, check_exists: bool = False):
+        if config.debug:
+            self.add_player("Alex")
+            self.add_player("Brad")
+            self.add_player("Carl")
+
+            self.score.players["Alex"]["score"] = 1500
+            self.score.players["Brad"]["score"] = 500
+            self.score.players["Carl"]["score"] = 750
+
+    def add_player(self, name: str):
         """Add a player to the game with a starting score of zero (0).
 
         Required Arguments:
 
         name (str) -- The player's name
         """
-        return self.score.add(name, check_exists=check_exists)
+        self.score.add(name)
 
     def make_board(self):
         """Create a game board.
@@ -154,17 +163,11 @@ class Scoreboard(object):
     def __contains__(self, item: str) -> bool:
         return item in self.players.keys()
 
-    def add(self, other: str, check_exists: bool) -> bool:
-        name = "".join(re.findall(r"[A-z0-9 \.\-\_]", other))
-        safe = hashlib.md5(name.encode("utf-8")).hexdigest()
+    def add(self, name: str) -> bool:
+        self.players[name] = {"safe": safe_name(name), "score": 0, "wager": {"amount": 0, "question": ""}}
 
-        if check_exists:
-            return (name in self) or (safe in (i["safe"] for i in self.players.values()))
-
-        else:
-            self.players[name] = {"safe": safe, "score": 0, "wager": {"amount": 0, "question": ""}}
-
-            return name
+    def player_exists(self, name: str) -> bool:
+        return (name in self) or (safe_name(name) in (i["safe"] for i in self.players.values()))
 
     def __len__(self) -> int:
         return len(self.players.keys())
@@ -333,3 +336,8 @@ class Content(object):
     def get_content(self):
         """Gets the set, as done within the Jinja loading of the webpage"""
         return self
+
+
+def safe_name(name: str) -> str:
+    clean = "".join(re.findall(r"[A-z0-9 \.\-\_]", name))
+    return hashlib.md5(clean.encode("utf-8")).hexdigest()

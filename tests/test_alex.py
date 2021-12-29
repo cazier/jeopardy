@@ -1,9 +1,8 @@
 import json
 import urllib
-import datetime
+import hashlib
 from io import BytesIO
 from unittest import mock
-
 
 import pytest
 
@@ -166,7 +165,13 @@ def test_game_creation(testclient, clean_content):
 
     assert game.score.players == {}
     game.add_player("Test")
-    assert game.score.players == {"Test": {"score": 0, "wager": {"amount": 0, "question": ""}}}
+    assert game.score.players == {
+        "Test": {
+            "safe": hashlib.md5("Test".encode("utf-8")).hexdigest(),
+            "score": 0,
+            "wager": {"amount": 0, "question": ""},
+        }
+    }
 
     assert game.round_text() == f"{config.game_name}!"
     assert game.round_text(upcoming=True) == f"Double {config.game_name}!"
@@ -251,9 +256,21 @@ def test_game_creation_debug(testclient):
         game.make_board()
 
     assert game.score.players == {
-        "Alex": {"score": 1500, "wager": {"amount": 0, "question": ""}},
-        "Brad": {"score": 500, "wager": {"amount": 0, "question": ""}},
-        "Carl": {"score": 750, "wager": {"amount": 0, "question": ""}},
+        "Alex": {
+            "safe": hashlib.md5("Alex".encode("utf-8")).hexdigest(),
+            "score": 1500,
+            "wager": {"amount": 0, "question": ""},
+        },
+        "Brad": {
+            "safe": hashlib.md5("Brad".encode("utf-8")).hexdigest(),
+            "score": 500,
+            "wager": {"amount": 0, "question": ""},
+        },
+        "Carl": {
+            "safe": hashlib.md5("Carl".encode("utf-8")).hexdigest(),
+            "score": 750,
+            "wager": {"amount": 0, "question": ""},
+        },
     }
 
     assert game.board.categories[0].sets[0].wager == True
@@ -261,14 +278,15 @@ def test_game_creation_debug(testclient):
 
 def test_scoreboard_creation():
     board = alex.Scoreboard()
-    assert board.add("test") == True
-    assert board.add("test") == False
+    assert board.player_exists("test") == False
+    board.add("test")
+    assert board.player_exists("test") == True
 
     assert len(board) == 1
     assert board["test"] == 0
-    assert board.add("second") == True
+    board.add("second")
 
-    assert board.emit() == {"test": 0, "second": 0}
+    assert {k: v["score"] for k, v in board.emit().items()} == {"test": 0, "second": 0}
 
 
 def test_scoreboard_updates():
@@ -280,7 +298,8 @@ def test_scoreboard_updates():
     game.buzz_order = {j: {"time": 1000 * i, "allowed": True} for i, j in enumerate(names)}
 
     score = alex.Scoreboard()
-    assert all(score.add(i) for i in names)
+    for i in names:
+        score.add(i)
     assert score.keys() == names
 
     assert score.players["first"]["score"] == 0
@@ -299,7 +318,8 @@ def test_scoreboard_methods():
     names = ["first", "second"]
 
     score = alex.Scoreboard()
-    assert all(score.add(i) for i in names)
+    for i in names:
+        score.add(i)
     assert score.keys() == names
 
     score.players["first"]["score"] = 500

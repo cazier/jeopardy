@@ -1,8 +1,17 @@
 import random
 
-from flask import (Blueprint, abort, flash, request, session, url_for,
-                   redirect, current_app, render_template,
-                   get_flashed_messages)
+from flask import (
+    Blueprint,
+    abort,
+    flash,
+    request,
+    session,
+    url_for,
+    redirect,
+    current_app,
+    render_template,
+    get_flashed_messages
+)
 
 try:
     import alex
@@ -168,7 +177,7 @@ def route_player():
             error_occurred = True
             error_room = ""
 
-        if storage.pull(room=room).add_player(name, check_exists=True):
+        if storage.pull(room=room).score.player_exists(name):
             flash(
                 message="The name you selected already exists. Please choose another one!",
                 category="error",
