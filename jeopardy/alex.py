@@ -64,22 +64,6 @@ class Game(object):
         if not self.board.build_error:
             self.board.add_wagers()
 
-    def reset(self, reset_score: bool = False, reset_players: bool = False):
-        """Reset the game to play again!
-
-        Required Arguments:
-
-        `reset_score` (bool) -- Keep the players, but set score to zero. (Basically, rematch)
-        `reset_players` (bool) -- Reset both players and score (Basically, a whole new game)
-        """
-        if reset_players:
-            self.score.reset(type_="players")
-
-        elif reset_score:
-            self.score.reset(type_="score")
-
-        self.round = 0
-
     def round_text(self, upcoming: bool = False) -> str:
         """Return the text describing the title of the, by default, current round.
 
@@ -199,13 +183,20 @@ class Scoreboard(object):
         }
 
     def reset(self, type_: str) -> None:
-        # TODO: This won't work, for score, because the wager dictionary has been refactored.
-        #       Need to fix this, and possibly (ideally), clean up this super deep dict traversal
+        """
+        `reset_score` (bool) -- Keep the players, but set score to zero. (Basically, rematch)
+        `reset_players` (bool) -- Reset both players and score (Basically, a whole new game)
+        """
         if type_ == "players":
             self.players = dict()
 
-        elif type_ == "score":
-            self.players = {i: {"score": 0, "wager": 0} for i in self.players}
+            return
+
+        if type_ == "score":
+            for name in self.players.keys():
+                self.add(name)
+
+            return
 
     def update(self, game, correct: int) -> None:
         if self.wagerer is None:

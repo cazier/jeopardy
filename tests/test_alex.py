@@ -9,6 +9,11 @@ import pytest
 from jeopardy import alex, config
 
 
+def test_safe_name():
+    name = "Test"
+    assert alex.safe_name(name) == hashlib.md5(name.encode("utf-8")).hexdigest()
+
+
 def test_content_creation(samplecontent):
     data, cleaned = samplecontent
     content = alex.Content(details=data, category_index=0)
@@ -167,7 +172,7 @@ def test_game_creation(testclient, clean_content):
     game.add_player("Test")
     assert game.score.players == {
         "Test": {
-            "safe": hashlib.md5("Test".encode("utf-8")).hexdigest(),
+            "safe": alex.safe_name("Test"),
             "score": 0,
             "wager": {"amount": 0, "question": ""},
         }
@@ -257,17 +262,17 @@ def test_game_creation_debug(testclient):
 
     assert game.score.players == {
         "Alex": {
-            "safe": hashlib.md5("Alex".encode("utf-8")).hexdigest(),
+            "safe": alex.safe_name("Alex"),
             "score": 1500,
             "wager": {"amount": 0, "question": ""},
         },
         "Brad": {
-            "safe": hashlib.md5("Brad".encode("utf-8")).hexdigest(),
+            "safe": alex.safe_name("Brad"),
             "score": 500,
             "wager": {"amount": 0, "question": ""},
         },
         "Carl": {
-            "safe": hashlib.md5("Carl".encode("utf-8")).hexdigest(),
+            "safe": alex.safe_name("Carl"),
             "score": 750,
             "wager": {"amount": 0, "question": ""},
         },
@@ -331,3 +336,41 @@ def test_scoreboard_methods():
     score["first"] = ("amount", 1000)
     score["first"] = ("question", "response")
     assert score.wager("first") == {"amount": 1000, "player": "first", "question": "response", "score": 500}
+
+
+def test_game_reset(testclient):
+    config.debug = True
+
+    obj = testclient.get(f"/api/v{config.api_version}/game?round=0&size=6").get_json()
+    data, cleaned = json.dumps(obj), obj
+
+    game = alex.Game(game_settings={"size": 6, "room": "ABCD"})
+
+    with mock.patch("urllib.request.urlopen") as mock_urlopen:
+        mock_urlopen.return_value.read.return_value.decode.return_value = data
+
+        game.make_board()
+
+    game.score.reset("score")
+
+    assert game.score.players == {
+        "Alex": {
+            "safe": alex.safe_name("Alex"),
+            "score": 0,
+            "wager": {"amount": 0, "question": ""},
+        },
+        "Brad": {
+            "safe": alex.safe_name("Brad"),
+            "score": 0,
+            "wager": {"amount": 0, "question": ""},
+        },
+        "Carl": {
+            "safe": alex.safe_name("Carl"),
+            "score": 0,
+            "wager": {"amount": 0, "question": ""},
+        },
+    }
+
+    game.score.reset("players")
+
+    assert game.score.players == {}
