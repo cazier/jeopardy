@@ -19,7 +19,7 @@ class Set(db.Model):
     answer = db.Column(db.String(1000))
     question = db.Column(db.String(255))
 
-    def __repr__(self): # pragma: no cover
+    def __repr__(self):
         return f"<Set {self.id}, (Hash={self.hash})>"
 
 
@@ -32,7 +32,7 @@ class Category(db.Model):
     complete = db.Column(db.Boolean, nullable=False)
     sets = db.relationship("Set", backref="category")
 
-    def __repr__(self): # pragma: no cover
+    def __repr__(self):
         return f"<Category {self.name}>"
 
 
@@ -44,7 +44,7 @@ class Date(db.Model):
     categories = db.relationship("Category", backref="date")
 
     @hybrid_property
-    def year(self): # pragma: no cover
+    def year(self):
         return self.date.year
 
     @year.expression
@@ -52,7 +52,7 @@ class Date(db.Model):
         return extract("year", cls.date)
 
     @hybrid_property
-    def month(self): # pragma: no cover
+    def month(self):
         return self.date.month
 
     @month.expression
@@ -60,14 +60,14 @@ class Date(db.Model):
         return extract("month", cls.date)
 
     @hybrid_property
-    def day(self): # pragma: no cover
+    def day(self):
         return self.date.day
 
     @day.expression
     def day(cls):
         return extract("day", cls.date)
 
-    def __repr__(self): # pragma: no cover
+    def __repr__(self):
         return f"<Date {self.date}>"
 
 
@@ -78,7 +78,7 @@ class Show(db.Model):
     sets = db.relationship("Set", backref="show")
     categories = db.relationship("Category", backref="show")
 
-    def __repr__(self): # pragma: no cover
+    def __repr__(self):
         return f"<Show {self.number}>"
 
 
@@ -89,7 +89,7 @@ class Round(db.Model):
     categories = db.relationship("Category", backref="round")
     values = db.relationship("Value", backref="round")
 
-    def __repr__(self): # pragma: no cover
+    def __repr__(self):
         return f"<Round {self.number}>"
 
 
@@ -99,5 +99,5 @@ class Value(db.Model):
     round_id = db.Column(db.Integer, db.ForeignKey("round.id"), nullable=False)
     sets = db.relationship("Set", backref="value")
 
-    def __repr__(self): # pragma: no cover
+    def __repr__(self):
         return f"<Value {self.amount}>"
