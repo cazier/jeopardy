@@ -1,6 +1,23 @@
 import datetime
 
+import pytest
+from flask import Flask
+
 from jeopardy.api.models import *
+
+
+@pytest.fixture
+def session():
+    app = Flask("test")
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    db.init_app(app)
+
+    with app.app_context():
+        db.create_all()
+        yield
+
+        db.drop_all()
 
 
 def test_model_round():
@@ -11,11 +28,13 @@ def test_model_round():
     assert repr(round_) == f"<Round {number}>"
 
 
-def test_model_date():
+def test_model_date(session):
     year, month, day = 1964, 3, 30
     date_string = f"{str(year).zfill(4)}-{str(month).zfill(2)}-{str(day).zfill(2)}"
 
     date = Date(date=datetime.datetime.fromisoformat(date_string))
+
+    db.session.add(date)
 
     assert date.date == datetime.datetime.fromisoformat(date_string)
 
@@ -23,6 +42,10 @@ def test_model_date():
     assert date.month == month
     assert date.day == day
     assert repr(date) == f"<Date {date_string} 00:00:00>"
+
+    assert Date.query.filter_by(year=year).first() == date
+    assert Date.query.filter_by(month=month).first() == date
+    assert Date.query.filter_by(day=day).first() == date
 
 
 def test_model_value():
