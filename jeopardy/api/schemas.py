@@ -1,79 +1,63 @@
-from flask_marshmallow import fields
+from marshmallow import fields
+from marshmallow_sqlalchemy import SQLAlchemySchema
+from marshmallow_sqlalchemy.schema import auto_field
 
-from . import ma
-from .models import *
-
-
-class DateSchema(ma.SQLAlchemySchema):
-    # date = fields.fields.Function(lambda obj: obj.date.strftime("%Y-%d"))
-    class Meta:
-        model = Date
-        fields = ("date",)
+from . import models
 
 
-class ShowSchema(ma.SQLAlchemySchema):
-    date = fields.fields.Pluck("DateSchema", "date")
-    length = fields.fields.Function()
+class RoundSchema(SQLAlchemySchema):
+    model = models.Round
 
-    class Meta:
-        model = Show
-        fields = (
-            "id",
-            "date",
-            "number",
-        )
+    number = fields.Integer(required=True)
 
 
-class RoundSchema(ma.SQLAlchemySchema):
-    class Meta:
-        model = Round
-        fields = ("number",)
+class ValueSchema(SQLAlchemySchema):
+    model = models.Value
+
+    amount = fields.Integer(required=True)
 
 
-class ValueSchema(ma.SQLAlchemySchema):
-    class Meta:
-        model = Value
-        fields = ("amount",)
+class DateSchema(SQLAlchemySchema):
+    model = models.Date
+
+    date = fields.Date(format="iso", required=True)
 
 
-class CategorySchema(ma.SQLAlchemySchema):
-    date = fields.fields.Pluck("DateSchema", "date")
-    show = fields.fields.Pluck("ShowSchema", "number")
-    round = fields.fields.Pluck("RoundSchema", "number")
+class ShowSchema(SQLAlchemySchema):
+    model = models.Show
 
-    class Meta:
-        model = Category
-        fields = (
-            "id",
-            "name",
-            "show",
-            "date",
-            "round",
-            "complete",
-        )
+    id = fields.Integer(required=True)
+    number = fields.Integer(required=True)
+
+    date = fields.Pluck("DateSchema", "date", required=True)
 
 
-class SetSchema(ma.SQLAlchemySchema):
-    category = fields.fields.Pluck("CategorySchema", "name")
-    date = fields.fields.Pluck("DateSchema", "date")
-    show = fields.fields.Pluck("ShowSchema", "number")
-    round = fields.fields.Pluck("RoundSchema", "number")
-    value = fields.fields.Pluck("ValueSchema", "amount")
+class CategorySchema(SQLAlchemySchema):
+    model = models.Category
 
-    class Meta:
-        model = Set
-        fields = (
-            "id",
-            "category",
-            "date",
-            "show",
-            "round",
-            "answer",
-            "question",
-            "value",
-            "external",
-            "complete",
-        )
+    id = fields.Integer(required=True)
+    name = fields.String(required=True)
+    complete = fields.Boolean(required=True)
+
+    date = fields.Pluck("DateSchema", "date")
+    show = fields.Pluck("ShowSchema", "number")
+    round = fields.Pluck("RoundSchema", "number")
+
+
+class SetSchema(SQLAlchemySchema):
+    model = models.Set
+
+    id = fields.Integer(required=True)
+    answer = fields.String(required=True)
+    question = fields.String(required=True)
+    external = fields.Boolean(required=True)
+    complete = fields.Boolean(required=True)
+
+    category = fields.Pluck("CategorySchema", "name")
+    date = fields.Pluck("DateSchema", "date")
+    show = fields.Pluck("ShowSchema", "number")
+    round = fields.Pluck("RoundSchema", "number")
+    value = fields.Pluck("ValueSchema", "amount")
 
 
 set_schema = SetSchema()
