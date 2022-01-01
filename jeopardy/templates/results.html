@@ -8,6 +8,7 @@
 
 <body>
     {% include "header.html" %}
+    <canvas id="confetti" style="position: absolute;"></canvas>
     <div class="jumbotron">
         <h1>
             {% if you == results[0][0] %}
@@ -55,10 +56,12 @@
         </div>
     </div>
 </body>
-<script src="https://cdn.jsdelivr.net/gh/mathusummut/confetti.js/confetti.min.js"></script>
+<script src="{{ url_for('static', filename='confetti.min.js') }}"></script>
 <script>
+    var confetti = new ConfettiGenerator({ target: 'confetti' });
+
     if ("{{ you }}" == "{{ results[0][0] }}") {
-        confetti.start(10000);
+        confetti.render();
     };
 </script>
 
