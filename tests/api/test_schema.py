@@ -1,9 +1,7 @@
-import datetime
-
 import pytest
 from marshmallow.exceptions import ValidationError
 
-from jeopardy.api import models, schemas
+from jeopardy.api import schemas
 
 
 def test_round_schema():

@@ -1,6 +1,5 @@
 from marshmallow import fields
 from marshmallow_sqlalchemy import SQLAlchemySchema
-from marshmallow_sqlalchemy.schema import auto_field
 
 from . import models
 
