@@ -6,6 +6,7 @@ import sqlite3
 import datetime
 
 import pytest
+from flask import request
 
 from jeopardy import web, config, sockets
 
@@ -98,7 +99,7 @@ def _app(db):
 
 
 @pytest.fixture
-def webclient():
+def webclient(patch_socketio):
     app = _app("full")
 
     socketio = sockets.socketio
@@ -106,7 +107,9 @@ def webclient():
 
     flask = app.test_client()
 
-    yield socketio.test_client(app, flask_test_client=flask)
+    with app.test_request_context() as ctx:
+        patch_socketio()
+        yield socketio.test_client(app, flask_test_client=flask)
 
 
 @pytest.fixture(scope="module")
@@ -125,3 +128,15 @@ def dataclient(webclient):
         return call(endpoint).get_json()
 
     return _func
+
+
+@pytest.fixture
+def patch_socketio():
+    def func():
+        @sockets.socketio.on("connect")
+        def on_connect(json):
+            sockets.socketio.sid = request.sid
+
+        request.namespace = "/"
+
+    return func
