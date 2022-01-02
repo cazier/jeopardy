@@ -122,15 +122,6 @@ def emptyclient():
 
 
 @pytest.fixture
-def dataclient(webclient):
-    def _func(endpoint: str, method: str):
-        call = getattr(webclient.flask_test_client, method)
-        return call(endpoint).get_json()
-
-    return _func
-
-
-@pytest.fixture
 def patch_socketio():
     def func():
         @sockets.socketio.on("connect")
