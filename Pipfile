@@ -30,8 +30,12 @@ werkzeug = "*"
 [dev-packages]
 pytest = "*"
 requests = "*"
-coverage = "*"
 pre-commit = "*"
+ipython = "*"
+coverage = {extras = ["toml"], version = "*"}
+playwright = "*"
+pytest-cov = "*"
+pytest-playwright = "*"
 
 [requires]
 python_version = "3.9"
