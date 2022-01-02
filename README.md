@@ -50,3 +50,6 @@ Without this website, this project wouldn't have happened. I couldn't find any t
 
 ## Jeopardy!
 Obviously the idea of Jeopardy!, the trivia data, all of that is property of Jeopardy!, and I claim no ownership of it. It's all theirs.
+
+## Thanks
+https://github.com/Agezao/confetti-js
