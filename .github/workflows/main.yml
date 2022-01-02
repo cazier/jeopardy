@@ -70,7 +70,7 @@ jobs:
       env:
         PIPENV_DEFAULT_PYTHON_VERSION: ${{ matrix.python-version }}
       run: |
-        pipenv run coverage run -m pytest; pipenv run coverage xml --include="jeopardy/*"
+        pipenv run pytest
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v2.1.0
