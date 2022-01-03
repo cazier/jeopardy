@@ -1,17 +1,6 @@
 import random
 
-from flask import (
-    Blueprint,
-    abort,
-    flash,
-    request,
-    session,
-    url_for,
-    redirect,
-    current_app,
-    render_template,
-    get_flashed_messages
-)
+from flask import Blueprint, flash, request, session, url_for, redirect, render_template, get_flashed_messages
 
 try:
     import alex
@@ -59,13 +48,12 @@ def route_join(room: str = ""):
 
     Only allows GET requests.
     """
-    if room != "" and room in storage.rooms():
-        room = room
+    room = room.upper()
 
-    else:
+    if not (room and room in storage.rooms()):
         room = ""
 
-    return render_template(template_name_or_list="join.html", errors=get_flashed_messages(), room_code=room.upper())
+    return render_template(template_name_or_list="join.html", errors=get_flashed_messages(), room_code=room)
 
 
 @routing.route("/host/", methods=["GET", "POST"])
@@ -80,70 +68,88 @@ def route_host():
     # Typical (Production) routing will use a POST request.
     if request.method == "POST":
         # If the request has a room code supplied, the host is `/join`ing the game.
-        if room := request.form.get("room"):
-            room = room
+        if url_for("routing.route_join") in request.headers.get("Referer", ()):
+            if room := request.form.get("room"):
+                room = room.upper()
+
+            else:
+                flash(message="An error occurred joining the room. Please try again!", category="error")
+                return redirect(url_for("routing.route_join"))
 
         # If the method has a size supplied (because it's a required field), the host is starting a
         # `/new` game.
-        elif request.form.get("size", False):
-            game_settings: dict = {"room": generate_room_code()}
+        elif url_for("routing.route_new") in request.headers.get("Referer", ()):
+            if size := request.form.get("size"):
+                game_settings: dict = {"room": generate_room_code()}
 
-            game_settings["size"] = int(request.form.get("size"))
+                if not size.isnumeric():
+                    flash(
+                        message="The board size must be a number",
+                        category="error",
+                    )
+                    return redirect(url_for("routing.route_new"))
 
-            start = request.form.get("start")
-            stop = request.form.get("stop")
+                game_settings["size"] = int(size)
 
-            if start != "" and stop != "":
-                game_settings["start"] = int(start)
-                game_settings["stop"] = int(stop)
+                start = request.form.get("start", "")
+                stop = request.form.get("stop", "")
 
-            elif start == "" and stop == "":
-                pass
+                if start != "" and stop != "":
+                    game_settings["start"] = int(start)
+                    game_settings["stop"] = int(stop)
+
+                elif start == "" and stop == "":
+                    pass
+
+                else:
+                    flash(
+                        message="If specifying years to get games, you must include both a start and stop year.",
+                        category="error",
+                    )
+                    return redirect(url_for("routing.route_new"))
+
+                if (style := request.form.get("qualifier")) != "":
+                    game_settings[style] = int(show if (show := request.form.get("show", "")) else -1)
+
+                game = alex.Game(game_settings=game_settings)
+                game.make_board()
+
+                if game.board.build_error:
+                    flash(message=game.board.message, category="error")
+
+                    return redirect(url_for("routing.route_new"))
+
+                storage.push(
+                    room=game_settings["room"],
+                    value=game,
+                )
+
+                room = game_settings["room"]
+
+                session["name"] = "Host"
+                session["room"] = room
 
             else:
-                flash(
-                    message="If specifying years to get games, you must include both a start and stop year.",
-                    category="error",
-                )
+                flash(message="An error occurred creating the game. Please try again!", category="error")
                 return redirect(url_for("routing.route_new"))
-
-            if (style := request.form.get("qualifier")) != "":
-                game_settings[style] = int(show if (show := request.form.get("show")) != "" else -1)
-
-            game = alex.Game(game_settings=game_settings)
-            game.make_board()
-
-            if game.board.build_error:
-                flash(message=game.board.message, category="error")
-
-                return redirect(url_for("routing.route_new"))
-
-            storage.push(
-                room=game_settings["room"],
-                value=game,
-            )
-
-            room = game_settings["room"]
-
-            session["name"] = "Host"
-            session["room"] = room
 
         else:
-            abort(500)
+            # This is likely never to show up, unless someone modifies the /page HTML.
+            flash(message="An error occurred trying to access a game! Please try again!", category="error")
+            return redirect(url_for("routing.route_new"))
 
     elif request.method == "GET":
-        if room := request.args.get(key="room", default=False) and "/test/" in request.headers.get("Referer", []):
-            session["name"] = "Host"
-            session["room"] = room
+        if "/test/" in request.headers.get("Referer", []):
+            if room := request.args.get("room"):
+                session["name"] = "Host"
+                session["room"] = room
 
         else:
-            abort(500)
+            return redirect(url_for("routing.route_join"))
 
-        room = session["room"]
-
-    if room not in storage.rooms():
+    if room not in storage.rooms() or not room:
         flash(
-            message="The room code you entered was invalid. Please try again!",
+            message="The room code you entered was invalid or missing. Please try again!",
             category="error",
         )
         return redirect(url_for("routing.route_join"))

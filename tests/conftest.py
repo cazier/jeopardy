@@ -131,3 +131,23 @@ def patch_socketio():
         request.namespace = "/"
 
     return func
+
+
+@pytest.fixture
+def patch_urlopen(webclient):
+    class MonkeyPatch_urlopen:
+        def __init__(self, url: str) -> None:
+            self.page = webclient.flask_test_client.get(url)
+
+        def read(self):
+            return bytes(self.page.get_data(as_text=True), encoding="utf-8")
+
+    from urllib import request
+
+    backup = request.urlopen
+
+    request.urlopen = MonkeyPatch_urlopen
+
+    yield
+
+    request.urlopen = backup

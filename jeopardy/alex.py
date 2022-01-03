@@ -236,6 +236,12 @@ class Board(object):
 
             game = json.loads(api_data.read().decode("utf-8"))
 
+            if isinstance(game, dict) and (error := game.get("message")):
+                self.message = error
+                self.build_error = True
+
+                return
+
             for index, details in enumerate(game):
                 self.categories.append(Category(index=index, name=details["category"]["name"], sets=details["sets"]))
 
