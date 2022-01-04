@@ -10,13 +10,7 @@
     {% include "header.html" %}
     <canvas id="confetti" style="position: absolute;"></canvas>
     <div class="jumbotron">
-        <h1>
-            {% if you == results[0][0] %}
-            Congratulations {{ you }}!
-            {% else %}
-            Congratulations!
-            {% endif %}
-        </h1>
+        <h1>Congratulations!</h1>
         <hr>
         <table class="table table-striped" style="margin-left:auto;margin-right:auto;">
             <tr style="font-size: 2.5rem;">
@@ -56,6 +50,7 @@
         </div>
     </div>
 </body>
+<<<<<<< HEAD
 <script src="{{ url_for('static', filename='confetti.min.js') }}"></script>
 <script>
     var confetti = new ConfettiGenerator({ target: 'confetti' });
@@ -63,6 +58,14 @@
     if ("{{ you }}" == "{{ results[0][0] }}") {
         confetti.render();
     };
+=======
+<script src="https://cdn.jsdelivr.net/gh/mathusummut/confetti.js/confetti.min.js"></script>
+{% if confetti %}
+<script>
+    // Start spraying confetti
+    confetti.start(10000);
+>>>>>>> ebccbde... Finished up static routing tests
 </script>
+{% endif %}
 
 </html>

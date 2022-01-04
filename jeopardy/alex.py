@@ -42,14 +42,14 @@ class Game(object):
             self.score.players["Brad"]["score"] = 500
             self.score.players["Carl"]["score"] = 750
 
-    def add_player(self, name: str):
+    def add_player(self, name: str) -> dict[str, str]:
         """Add a player to the game with a starting score of zero (0).
 
         Required Arguments:
 
         name (str) -- The player's name
         """
-        self.score.add(name)
+        return self.score.add(name)
 
     def make_board(self):
         """Create a game board.
@@ -147,8 +147,10 @@ class Scoreboard(object):
     def __contains__(self, item: str) -> bool:
         return item in self.players.keys()
 
-    def add(self, name: str) -> bool:
+    def add(self, name: str) -> dict[str, str]:
         self.players[name] = {"safe": safe_name(name), "score": 0, "wager": {"amount": 0, "question": ""}}
+
+        return {"name": name, "safe": self.players[name]["safe"]}
 
     def player_exists(self, name: str) -> bool:
         return (name in self) or (safe_name(name) in (i["safe"] for i in self.players.values()))
