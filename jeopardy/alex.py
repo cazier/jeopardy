@@ -3,7 +3,6 @@ import json
 import random
 import urllib
 import hashlib
-import sqlite3
 import datetime
 import itertools
 
@@ -111,9 +110,8 @@ class Game(object):
         entry, category, value = identifier.split("_")
 
         if entry == "q":
-            response = self.board.categories[int(category)].sets[int(value)]
-            self.current_set = response.get_content()
-            return response.get()
+            self.current_set = self.board.categories[int(category)].sets[int(value)].get()
+            return self.current_set
 
         else:
             print("An error has occurred....")
@@ -224,6 +222,7 @@ class Board(object):
     def __init__(self, round_: int, settings: dict):
         self.round: int = round_
         self.categories: list = list()
+        self.daily_doubles: list = list()
 
         settings["round"] = self.round
 
@@ -272,7 +271,9 @@ class Board(object):
             if config.debug:
                 daily_double = (0, 0)
 
-            self.categories[daily_double[0]].sets[daily_double[1]].wager = True
+            self.daily_doubles.append(daily_double)
+
+            self.categories[daily_double[0]].sets[daily_double[1]].is_wager = True
 
 
 class Category(object):
@@ -304,7 +305,7 @@ class Content(object):
         self.category_index = category_index
         self.shown = False
 
-        self.wager = False
+        self.is_wager = False
 
         self.answer = details["answer"]
         self.question = details["question"]
@@ -328,13 +329,10 @@ class Content(object):
 
     def get(self):
         """Gets the set, as done within the Jinja loading of the webpage"""
-        self.shown = True
+        if not self.shown:
+            self.shown = True
 
-        return {"question": self.question, "answer": self.answer, "wager": self.wager, "year": self.year}
-
-    def get_content(self):
-        """Gets the set, as done within the Jinja loading of the webpage"""
-        return self
+            return self
 
 
 def safe_name(name: str) -> str:

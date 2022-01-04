@@ -28,34 +28,38 @@ def host_clicked_answer(data):
     room = get_room(sid=request.sid)
 
     game = storage.pull(room)
-    info = game.get(data["identifier"])
+    content = game.get(data["identifier"])
 
-    socketio.emit(
-        event="disable_question-s>b",
-        data={
-            "identifier": f'#{data[u"identifier"]}',
-        },
-        room=room,
-    )
+    if not content:
+        error(room=room, message="The selection has already been revealed.")
 
-    # If the set is not a Daily Double or Final Round (which would require a wager!)
-    if not info["wager"]:
+    else:
         socketio.emit(
-            event="reveal_standard_set-s>bh",
+            event="disable_question-s>b",
             data={
-                "updates": {
-                    "question": Markup(info["question"]),
-                    "answer": Markup(info["answer"]),
-                    "year": info["year"],
-                },
+                "identifier": f'#{data[u"identifier"]}',
             },
             room=room,
         )
 
-    # If the set is a DD or in one of the final rounds, need to request a wager prior to
-    # showing the
-    else:
-        wagers.start_wager(game=game)
+        # If the set is not a Daily Double or Final Round (which would require a wager!)
+        if not content.is_wager:
+            socketio.emit(
+                event="reveal_standard_set-s>bh",
+                data={
+                    "updates": {
+                        "question": Markup(content.question),
+                        "answer": Markup(content.answer),
+                        "year": content.year,
+                    },
+                },
+                room=room,
+            )
+
+        # If the set is a DD or in one of the final rounds, need to request a wager prior to
+        # showing the
+        else:
+            wagers.start_wager(game=game)
 
 
 @socketio.on("finished_reading-h>s")
@@ -181,3 +185,7 @@ def end_set(room: str):
 
     elif game.round >= 2:
         socketio.emit(event="results-page-s>bph", room=room)
+
+
+def error(room: str, message: str = "a failure of some kind occurred"):
+    socketio.emit("error-s>bph", data={"message": message}, room=room)

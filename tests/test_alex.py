@@ -29,10 +29,8 @@ def test_content_creation(samplecontent):
     assert content.id() == f"{0}_{data['value']}"
 
     assert content.shown == False
-    assert content.get() == cleaned
+    assert content.get().question == cleaned["question"]
     assert content.shown == True
-
-    assert content.get_content() == content
 
     class Sample(object):
         value = content.value + 200
@@ -66,7 +64,7 @@ def test_board_creation_r0(webclient):
 
     assert board.round == 0
     assert set({i.category for i in board.categories}) == {i["category"]["name"] for i in data}
-    assert sum([j.wager for i in board.categories for j in i.sets]) == 1
+    assert sum([j.is_wager for i in board.categories for j in i.sets]) == 1
 
 
 def test_board_creation_r1(webclient):
@@ -79,7 +77,7 @@ def test_board_creation_r1(webclient):
 
     board.add_wagers()
 
-    assert sum([j.wager for i in board.categories for j in i.sets]) == 2
+    assert sum([j.is_wager for i in board.categories for j in i.sets]) == 2
 
 
 def test_board_creation_r2(webclient):
@@ -106,8 +104,8 @@ def test_board_creation_debug(webclient):
     board.add_wagers()
 
     assert board.round == 1
-    assert sum([j.wager for i in board.categories for j in i.sets]) == 1
-    assert board.categories[0].sets[0].wager == True
+    assert sum([j.is_wager for i in board.categories for j in i.sets]) == 1
+    assert board.categories[0].sets[0].is_wager == True
 
 
 def test_board_creation_400(webclient):
@@ -189,8 +187,7 @@ def test_game_creation(webclient, clean_content):
 
     assert (len(game.board.categories) == 6) & (len(game.board.categories) * 5 == game.remaining_content)
 
-    # In case random wager assignment went to `q_0_0`
-    assert (game.get("q_0_0") == content) or (game.get("q_0_0") == {**content, **{"wager": True}})
+    assert game.get("q_0_0").question == content["question"]
 
     assert game.round == 0
 
@@ -271,7 +268,7 @@ def test_game_creation_debug(webclient):
         },
     }
 
-    assert game.board.categories[0].sets[0].wager == True
+    assert game.board.categories[0].sets[0].is_wager == True
 
 
 def test_scoreboard_creation():
