@@ -42,7 +42,7 @@ class Game(object):
             self.score.players["Brad"]["score"] = 500
             self.score.players["Carl"]["score"] = 750
 
-    def add_player(self, name: str) -> dict[str, str]:
+    def add_player(self, name: str) -> dict:
         """Add a player to the game with a starting score of zero (0).
 
         Required Arguments:
