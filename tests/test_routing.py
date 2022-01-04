@@ -8,13 +8,9 @@ from jeopardy import config, routing, storage
 
 @pytest.fixture(scope="function", autouse=True)
 def _setup():
-    config.debug = False
-    storage.GAMES.clear()
-
     yield
 
     storage.GAMES.clear()
-    config.debug = False
 
 
 @pytest.fixture
@@ -43,7 +39,7 @@ def test_route_index(webclient):
     assert rv.status_code == 405
 
 
-def test_route_test(webclient, patch_urlopen):
+def test_route_test(webclient):
     rv = webclient.flask_test_client.get(url_for("routing.route_test"))
     assert rv.status_code == 302
     assert rv.request.path == "/test/"
@@ -85,7 +81,7 @@ def test_route_join(webclient):
     assert "readonly" in rv.get_data(as_text=True)  # Lowercase good magic link
 
 
-def test_route_host_post(webclient, gen_room, patch_urlopen):
+def test_route_host_post(webclient, gen_room):
     rv = webclient.flask_test_client.post(
         url_for("routing.route_host"), headers={"Referer": "/new/"}, data={"size": 6}, follow_redirects=True
     )
@@ -111,7 +107,7 @@ def test_route_host_post(webclient, gen_room, patch_urlopen):
     assert rv.get_data(as_text=True).count('class="card-header" id="category_') == 6
 
 
-def test_route_host_get(webclient, patch_urlopen):
+def test_route_host_get(webclient):
     rv = webclient.flask_test_client.get(url_for("routing.route_host"), follow_redirects=True)
     assert rv.history[-1].request.path == "/host/"
     assert rv.request.path == "/join/"
@@ -127,7 +123,7 @@ def test_route_host_get(webclient, patch_urlopen):
     assert rv.get_data(as_text=True).count('class="card-header" id="category_') == 6
 
 
-def test_route_host_error(webclient, patch_urlopen):
+def test_route_host_error(webclient):
     rv = webclient.flask_test_client.post(
         url_for("routing.route_host"), headers={"Referer": "/join/"}, data={"room": "    "}, follow_redirects=True
     )
@@ -192,7 +188,7 @@ def test_route_play_post(webclient, gen_room):
     assert "<h2>Hey Player!</h2>" in rv.get_data(as_text=True)
 
 
-def test_route_play_get(webclient, patch_urlopen):
+def test_route_play_get(webclient):
     rv = webclient.flask_test_client.get(url_for("routing.route_play"), follow_redirects=True)
     assert rv.history[-1].request.path == "/play/"
     assert rv.request.path == "/join/"
@@ -292,7 +288,7 @@ def test_route_results_post(webclient, gen_room):
     assert "// Start spraying confetti" not in rv.get_data(as_text=True)
 
 
-def test_route_results_get(webclient, patch_urlopen):
+def test_route_results_get(webclient):
     rv = webclient.flask_test_client.get(url_for("routing.route_results"), follow_redirects=True)
     assert rv.history[-1].request.path == url_for("routing.route_results")
     assert rv.request.path == url_for("routing.route_index")

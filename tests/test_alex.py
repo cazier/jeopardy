@@ -109,8 +109,6 @@ def test_board_creation_debug(webclient):
     assert sum([j.wager for i in board.categories for j in i.sets]) == 1
     assert board.categories[0].sets[0].wager == True
 
-    config.debug = False
-
 
 def test_board_creation_400(webclient):
     data = webclient.flask_test_client.get(f"/api/v{config.api_version}/game?round=3").get_json()

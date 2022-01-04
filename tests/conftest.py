@@ -4,9 +4,10 @@ import shutil
 import pathlib
 import sqlite3
 import datetime
+from urllib import request as urllib_request
 
 import pytest
-from flask import request, url_for
+from flask import request, url_for, wrappers
 
 from jeopardy import web, config, sockets, storage
 
@@ -90,17 +91,32 @@ def samplecategory(webclient):
     return category, data
 
 
-def _app(db):
-    app = web.create_app()
-    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{pathlib.Path('tests/_files/test').absolute()}-{db}.db"
-    app.config["TESTING"] = True
+@pytest.fixture(scope="session")
+def app_factory():
+    def func(db):
+        app = web.create_app()
+        app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{pathlib.Path('tests/_files/test').absolute()}-{db}.db"
+        app.config["TESTING"] = True
 
-    return app
+        return app
+
+    return func
 
 
 @pytest.fixture
-def webclient(patch_socketio):
-    app = _app("full")
+def webclient(app_factory):
+    backup = urllib_request.urlopen
+
+    class mocked_urlopen:
+        def __init__(self, url: str) -> None:
+            self.page = client.flask_test_client.get(url)
+
+        def read(self):
+            return bytes(self.page.get_data(as_text=True), encoding="utf-8")
+
+    urllib_request.urlopen = mocked_urlopen
+
+    app = app_factory("full")
 
     socketio = sockets.socketio
     socketio.init_app(app)
@@ -108,53 +124,46 @@ def webclient(patch_socketio):
     flask = app.test_client()
 
     with app.test_request_context() as ctx:
-        patch_socketio()
-        yield socketio.test_client(app, flask_test_client=flask)
+        client = socketio.test_client(app, flask_test_client=flask)
+
+        yield client
+
+    urllib_request.urlopen = backup
 
 
-@pytest.fixture(scope="module")
-def emptyclient():
-    app = _app("empty")
+@pytest.fixture
+def emptyclient(app_factory):
+    app = app_factory("empty")
 
     with app.app_context():
         with app.test_client() as client:
             yield client
 
 
-@pytest.fixture
+@pytest.fixture(scope="session", autouse=True)
 def patch_socketio():
-    def func():
-        @sockets.socketio.on("connect")
-        def on_connect(json):
-            sockets.socketio.sid = request.sid
+    class mocked_request(wrappers.Request):
+        def __init__(self, *args, **kwargs):
+            self.namespace = "/"
+            super().__init__(*args, **kwargs)
 
-        request.namespace = "/"
+    @sockets.socketio.on("connect")
+    def on_connect(json):
+        sockets.socketio.sid = request.sid
 
-    return func
+    import flask
 
+    backup = wrappers.Request
 
-@pytest.fixture
-def patch_urlopen(webclient):
-    class MonkeyPatch_urlopen:
-        def __init__(self, url: str) -> None:
-            self.page = webclient.flask_test_client.get(url)
-
-        def read(self):
-            return bytes(self.page.get_data(as_text=True), encoding="utf-8")
-
-    from urllib import request
-
-    backup = request.urlopen
-
-    request.urlopen = MonkeyPatch_urlopen
+    flask.Flask.request_class = mocked_request
 
     yield
 
-    request.urlopen = backup
+    flask.Flask.request_class = backup
 
 
-@pytest.fixture(scope="function")
-def gen_room(webclient, patch_urlopen):
+@pytest.fixture
+def gen_room(webclient):
     def func():
         _rooms = set(storage.GAMES.keys())
 
@@ -167,3 +176,10 @@ def gen_room(webclient, patch_urlopen):
         return [i for i in storage.GAMES.keys() if i not in _rooms][0]
 
     return func
+
+
+@pytest.fixture(scope="function", autouse=True)
+def _setup_teardown():
+    yield
+
+    config.debug = False
