@@ -147,7 +147,7 @@ class Scoreboard(object):
     def __contains__(self, item: str) -> bool:
         return item in self.players.keys()
 
-    def add(self, name: str) -> dict[str, str]:
+    def add(self, name: str) -> dict:
         self.players[name] = {"safe": safe_name(name), "score": 0, "wager": {"amount": 0, "question": ""}}
 
         return {"name": name, "safe": self.players[name]["safe"]}

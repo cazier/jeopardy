@@ -6,9 +6,9 @@ import sqlite3
 import datetime
 
 import pytest
-from flask import request
+from flask import request, url_for
 
-from jeopardy import web, config, sockets
+from jeopardy import web, config, sockets, storage
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -151,3 +151,19 @@ def patch_urlopen(webclient):
     yield
 
     request.urlopen = backup
+
+
+@pytest.fixture(scope="function")
+def gen_room(webclient, patch_urlopen):
+    def func():
+        _rooms = set(storage.GAMES.keys())
+
+        rv = webclient.flask_test_client.post(
+            url_for("routing.route_host"), headers={"Referer": "/new/"}, data={"size": 6}, follow_redirects=True
+        )
+        assert rv.status_code == 200
+        assert len(storage.GAMES) > 0
+
+        return [i for i in storage.GAMES.keys() if i not in _rooms][0]
+
+    return func
