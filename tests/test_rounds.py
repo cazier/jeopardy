@@ -1,7 +1,6 @@
-from enum import auto
+import concurrent.futures
 
 import pytest
-from flask import request
 
 from jeopardy import config, storage
 from tests.conftest import gen_room, webclient
@@ -74,7 +73,7 @@ class TestRounds:
         identifier = f"q_{num[0]}_{num[1]}"
         content = get_qa(game, num)
 
-        client.emit("host_clicked_answer-h>s", {"room": room, "identifier": identifier})
+        client.emit("host_clicked_answer-h>s", {"identifier": identifier}, to=room)
         messages = client.get_received()
 
         assert (
@@ -86,7 +85,7 @@ class TestRounds:
             and messages[1]["args"][0]["updates"]["question"] == content.question
         )
 
-        client.emit("host_clicked_answer-h>s", {"room": room, "identifier": identifier})
+        client.emit("host_clicked_answer-h>s", {"identifier": identifier}, to=room)
         messages = client.get_received()
 
         assert (
@@ -94,13 +93,51 @@ class TestRounds:
             and {"message": "The selection has already been revealed."} in messages[0]["args"]
         )
 
+    def test_enable_buzzers(self, client, room):
+        client.emit("finished_reading-h>s", to=room)
+
+        messages = client.get_received()
+
+        assert messages[0]["name"] == "enable_buzzers-s>p" and messages[0]["args"][0]["except_players"] == []
+
+    def test_dismiss(self, client, room):
+        client.emit("dismiss-h>s", to=room)
+
+        messages = client.get_received()
+
+        assert messages[0]["name"] == "reset_buzzers-s>p"
+        assert messages[1]["name"] == "clear_modal-s>bh"
+
+    def test_player_buzzed_in(self, client, room, players):
+        client.emit("buzz_in-p>s", {"name": list(players)[0], "time": 0.1}, to=room)
+
+        messages = client.get_received()
+
+        assert messages[0]["name"] == "reset_buzzers-s>p"
+        assert messages[1]["name"] == "player_buzzed-s>h" and messages[1]["args"][0]["name"] == list(players)[0]
+
+    def test_players_buzzed_in(self, client, room, players):
+        def buzz(name, time):
+            client.emit("buzz_in-p>s", {"name": name, "time": time}, to=room)
+
+        def done(results):
+            return concurrent.futures.wait(results, return_when="ALL_COMPLETED")
+
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            results = [executor.submit(buzz, player, time) for time, player in enumerate(players)]
+
+        done(results)
+
+        messages = client.get_received()
+        assert messages[1]["name"] == "player_buzzed-s>h" and messages[1]["args"][0]["name"] == list(players)[0]
+
     def test_host_selected_wager(self, client, room, players, ids):
         assert len(ids["wager"]) > 0
         num = ids["wager"].pop()
 
         identifier = f"q_{num[0]}_{num[1]}"
 
-        client.emit("host_clicked_answer-h>s", {"room": room, "identifier": identifier})
+        client.emit("host_clicked_answer-h>s", {"identifier": identifier}, to=room)
         messages = client.get_received()
 
         assert (

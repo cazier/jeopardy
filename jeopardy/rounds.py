@@ -35,8 +35,8 @@ def host_clicked_answer(data):
 
     else:
         socketio.emit(
-            event="disable_question-s>b",
-            data={
+            "disable_question-s>b",
+            {
                 "identifier": f'#{data[u"identifier"]}',
             },
             room=room,
@@ -45,8 +45,8 @@ def host_clicked_answer(data):
         # If the set is not a Daily Double or Final Round (which would require a wager!)
         if not content.is_wager:
             socketio.emit(
-                event="reveal_standard_set-s>bh",
-                data={
+                "reveal_standard_set-s>bh",
+                {
                     "updates": {
                         "question": Markup(content.question),
                         "answer": Markup(content.answer),
@@ -72,7 +72,7 @@ def enable_buzzers(incorrect_players: list = list()):
     """
     room = get_room(sid=request.sid)
 
-    socketio.emit(event="enable_buzzers-s>p", data={"players": incorrect_players}, room=room)
+    socketio.emit("enable_buzzers-s>p", {"except_players": incorrect_players}, room=room)
 
 
 @socketio.on("dismiss-h>s")
@@ -81,7 +81,7 @@ def dismiss():
 
     room = get_room(sid=request.sid)
 
-    socketio.emit(event="reset_buzzers-s>p", room=room)
+    socketio.emit("reset_buzzers-s>p", room=room)
 
     end_set(room=room)
 
@@ -105,13 +105,13 @@ async def wait_to_emit(room: str):
 
     await asyncio.sleep(config.buzzer_time)
 
-    socketio.emit(event="reset_buzzers-s>p", data={"room": room}, room=room)
+    socketio.emit("reset_buzzers-s>p", room=room)
 
     valid_players = {k: v for k, v in game.buzz_order.items() if v["allowed"]}
     player = sorted(valid_players.items(), key=lambda item: item[1]["time"])[0][0]
     socketio.emit(
-        event="player_buzzed-s>h",
-        data={
+        "player_buzzed-s>h",
+        {
             "name": player,
         },
         room=room,
@@ -132,7 +132,7 @@ def response_given(data):
 
     game.score.update(game=game, correct=int(data["correct"]))
 
-    socketio.emit(event="update_scores-s>bph", data={"scores": game.score.emit()}, room=room)
+    socketio.emit("update_scores-s>bph", {"scores": game.score.emit()}, room=room)
 
     if data["correct"] or len(game.score) == len([k for k, v in game.buzz_order.items() if not v["allowed"]]):
         end_set(room)
@@ -152,7 +152,7 @@ def start_next_round():
 
     game.start_next_round()
 
-    socketio.emit(event="next_round_started-s>bh", room=room)
+    socketio.emit("next_round_started-s>bh", room=room)
 
 
 def end_set(room: str):
@@ -164,7 +164,7 @@ def end_set(room: str):
     game.buzz_order = dict()
     game.current_set = None
 
-    socketio.emit(event="clear_modal-s>bh", room=room)
+    socketio.emit("clear_modal-s>bh", room=room)
 
     if config.debug:
         print(game.remaining_content)
@@ -173,8 +173,8 @@ def end_set(room: str):
 
     if (game.remaining_content <= 0) and (game.round < 2):
         socketio.emit(
-            event="round_complete-s>bh",
-            data={
+            "round_complete-s>bh",
+            {
                 "updates": {
                     "current_round": game.round_text(),
                     "next_round": game.round_text(upcoming=True),
@@ -184,8 +184,8 @@ def end_set(room: str):
         )
 
     elif game.round >= 2:
-        socketio.emit(event="results-page-s>bph", room=room)
+        socketio.emit("results-page-s>bph", room=room)
 
 
 def error(room: str, message: str = "a failure of some kind occurred"):
-    socketio.emit("error-s>bph", data={"message": message}, room=room)
+    socketio.emit("error-s>bph", {"message": message}, room=room)

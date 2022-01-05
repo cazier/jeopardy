@@ -70,7 +70,7 @@
         }
 
         socket.on('enable_buzzers-s>p', function(message) {
-            if (!message['players'].includes("{{ session['name'] }}")) {
+            if (!message['except_players'].includes("{{ session['name'] }}")) {
                 $('#buzzer').toggleClass('disabled btn-danger btn-success');
             }
 
