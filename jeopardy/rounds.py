@@ -166,9 +166,6 @@ def end_set(room: str):
 
     socketio.emit("clear_modal-s>bh", room=room)
 
-    if config.debug:
-        print(game.remaining_content)
-
     socketio.sleep(0.5)
 
     if (game.remaining_content <= 0) and (game.round < 2):
@@ -185,6 +182,9 @@ def end_set(room: str):
 
     elif game.round >= 2:
         socketio.emit("results-page-s>bph", room=room)
+
+    else:
+        pass  # Ready for next question to be selected
 
 
 def error(room: str, message: str = "a failure of some kind occurred"):
