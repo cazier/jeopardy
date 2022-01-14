@@ -5,6 +5,7 @@ import urllib
 import hashlib
 import datetime
 import itertools
+import dataclasses
 
 try:
     import config
@@ -110,7 +111,7 @@ class Game(object):
         entry, category, value = identifier.split("_")
 
         if entry == "q":
-            self.current_set = self.board.categories[int(category)].sets[int(value)].get()
+            self.current_set = self.board.categories[int(category)].sets[int(value)]
             return self.current_set
 
         else:
@@ -285,7 +286,7 @@ class Category(object):
         self.sets: list = list()
 
         for set_ in sets:
-            self.sets.append(Content(details=set_, category_index=index))
+            self.sets.append(Content(set_["value"], set_["answer"], set_["question"], set_["date"], index))
 
         self.sets.sort()
 
@@ -298,41 +299,30 @@ class Category(object):
         return str(self)
 
 
-class Content(object):
-    """Class to hold a single answer/question set"""
+@dataclasses.dataclass(eq=True, order=True)
+class Content:
+    value: int
+    answer: str
+    question: str
+    year: str
 
-    def __init__(self, details: dict, category_index: int):
-        self.category_index = category_index
-        self.shown = False
+    category_index: int
 
-        self.is_wager = False
-
-        self.answer = details["answer"]
-        self.question = details["question"]
-        self.value = details["value"]
-        self.year = datetime.datetime.fromisoformat(details["date"]).strftime("%Y")
-
-    def __lt__(self, other):
-        return self.value < other.value
-
-    # def __str__(self):
-    #     """Creates a string representation of the set's value"""
-    #     return str(self.value)
-
-    # def __repr__(self):
-    #     """Duplicates `__str__`"""
-    #     return str(self)
-
+    @property
     def id(self):
-        """Returns the unique identifier of the set"""
         return f"{self.category_index}_{self.value}"
 
-    def get(self):
-        """Gets the set, as done within the Jinja loading of the webpage"""
-        if not self.shown:
-            self.shown = True
+    @property
+    def shown(self):
 
-            return self
+        resp = self._shown
+        self._shown = True
+        return resp
+
+    def __post_init__(self):
+        self._shown = False
+        self.is_wager = False
+        self.year = datetime.datetime.fromisoformat(self.year).strftime("%Y")
 
 
 def safe_name(name: str) -> str:

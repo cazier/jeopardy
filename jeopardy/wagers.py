@@ -56,12 +56,12 @@ def wager_submittal(data):
                 game.score.num = 0
 
                 game.get(u"q_0_0")
-                info = game.current_set.get()
+                info = game.current_set
 
                 updates = {
-                    "wager_question": Markup(info["question"]),
-                    "wager_answer": Markup(info["answer"]),
-                    "wager_year": info["year"],
+                    "wager_question": Markup(info.question),
+                    "wager_answer": Markup(info.answer),
+                    "wager_year": info.year,
                     "displayedInModal": "#wager_round",
                 }
 
@@ -79,12 +79,12 @@ def wager_submittal(data):
         elif game.round < 2:
             game.score.num = 0
 
-            info = game.current_set.get()
+            info = game.current_set
 
             updates = {
-                "wager_question": Markup(info["question"]),
-                "wager_answer": Markup(info["answer"]),
-                "wager_year": info["year"],
+                "wager_question": Markup(info.question),
+                "wager_answer": Markup(info.answer),
+                "wager_year": info.year,
             }
 
             reveal_wager(game=game, updates=updates)

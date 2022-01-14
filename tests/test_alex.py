@@ -22,20 +22,18 @@ def test_safe_name():
 
 def test_content_creation(samplecontent):
     data, cleaned = samplecontent
-    content = alex.Content(details=data, category_index=0)
+
+    content = alex.Content(data["value"], data["answer"], data["question"], data["date"], 0)
 
     assert content.value == data["value"]
 
-    assert content.id() == f"{0}_{data['value']}"
+    assert content.id == f"{0}_{data['value']}"
 
     assert content.shown == False
-    assert content.get().question == cleaned["question"]
+    assert content.question == cleaned["question"]
     assert content.shown == True
 
-    class Sample(object):
-        value = content.value + 200
-
-    sample = Sample()
+    sample = alex.Content(content.value + 200, data["answer"], data["question"], data["date"], 0)
 
     assert content < sample
 

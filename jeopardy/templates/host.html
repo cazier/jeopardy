@@ -37,8 +37,8 @@
                             <div class="row">
                                 {% for answer in name.sets %}
                                 <button
-                                  class="btn btn-primary col-sm show-answer {% if answer.shown %}disabled{% endif %} spaced"
-                                  type="button" id="q_{{ answer.id() }}">
+                                  class="btn btn-primary col-sm show-answer {% if answer._shown %}disabled{% endif %} spaced"
+                                  type="button" id="q_{{ answer.id }}">
                                     {{ currency }}{{ (answer.value + 1) * (game.round + 1) * 200 }}
                                 </button>
                                 {% endfor %}

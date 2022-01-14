@@ -30,7 +30,7 @@ def host_clicked_answer(data):
     game = storage.pull(room)
     content = game.get(data["identifier"])
 
-    if not content:
+    if content.shown:
         error(room=room, message="The selection has already been revealed.")
 
     else:
