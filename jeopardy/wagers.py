@@ -71,11 +71,6 @@ def wager_submittal(data):
 
                 reveal_wager(game=game, updates=updates)
 
-            # socketio.emit(
-            #     "wager_submitted-s>h",
-            #     {"room": game.room, "updates": {"name": data["name"]}},
-            # )
-
         elif game.round < 2:
             game.score.num = 0
 
@@ -108,8 +103,8 @@ def wager_submittal(data):
 
 def reveal_wager(game, updates: dict) -> None:
     socketio.emit(
-        event="reveal_wager-s>bh",
-        data={
+        "reveal_wager-s>bh",
+        {
             "updates": updates,
         },
         room=game.room,
@@ -136,8 +131,6 @@ def wager_responded(data):
         socketio.emit(
             event="reset_wagers_modals-s>bh", data={"updates": {"wager_answer": "", "wager_question": ""}}, room=room
         )
-
-        socketio.emit(event="clear_modal-s>bh", room=room)
 
         rounds.end_set(room)
 

@@ -178,9 +178,10 @@ class Scoreboard(object):
 
     def wager(self, player: str) -> dict:
         return {
-            **self.players[player]["wager"],
             "player": player,
-            "score": self[player],
+            "amount": self.players[player]["wager"]["amount"],
+            "question": self.players[player]["wager"]["question"],
+            "score": self.players[player]["score"],
         }
 
     def reset(self, type_: str) -> None:
@@ -230,11 +231,10 @@ class Board(object):
         if self.round == 2:
             settings["size"] = 1
 
-        base_url = f"{config.api_endpoint}?"
         params = urllib.parse.urlencode(settings)
 
         try:
-            api_data = urllib.request.urlopen(base_url + params)
+            api_data = urllib.request.urlopen(f"{config.api_endpoint}?{params}")
 
             game = json.loads(api_data.read().decode("utf-8"))
 
