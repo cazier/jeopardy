@@ -166,7 +166,7 @@ def test_game_creation(webclient, clean_content):
         "Test": {
             "safe": alex.safe_name("Test"),
             "score": 0,
-            "wager": {"amount": 0, "question": ""},
+            "wager": {"amount": 0, "question": "", "pre": 0},
         }
     }
 
@@ -252,17 +252,17 @@ def test_game_creation_debug(webclient):
         "Alex": {
             "safe": alex.safe_name("Alex"),
             "score": 1500,
-            "wager": {"amount": 0, "question": ""},
+            "wager": {"amount": 0, "question": "", "pre": 0},
         },
         "Brad": {
             "safe": alex.safe_name("Brad"),
             "score": 500,
-            "wager": {"amount": 0, "question": ""},
+            "wager": {"amount": 0, "question": "", "pre": 0},
         },
         "Carl": {
             "safe": alex.safe_name("Carl"),
             "score": 750,
-            "wager": {"amount": 0, "question": ""},
+            "wager": {"amount": 0, "question": "", "pre": 0},
         },
     }
 
@@ -344,17 +344,17 @@ def test_game_reset(webclient):
         "Alex": {
             "safe": alex.safe_name("Alex"),
             "score": 0,
-            "wager": {"amount": 0, "question": ""},
+            "wager": {"amount": 0, "question": "", "pre": 0},
         },
         "Brad": {
             "safe": alex.safe_name("Brad"),
             "score": 0,
-            "wager": {"amount": 0, "question": ""},
+            "wager": {"amount": 0, "question": "", "pre": 0},
         },
         "Carl": {
             "safe": alex.safe_name("Carl"),
             "score": 0,
-            "wager": {"amount": 0, "question": ""},
+            "wager": {"amount": 0, "question": "", "pre": 0},
         },
     }
 

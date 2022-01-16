@@ -1,8 +1,9 @@
 import concurrent.futures
 
 import pytest
+from werkzeug.datastructures import MultiDict
 
-from jeopardy import config, rounds, storage
+from jeopardy import alex, config, rounds, storage
 from tests.conftest import gen_room, webclient
 
 
@@ -34,7 +35,7 @@ def game(room):
     return storage.pull(room)
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope="function")
 def ids(client, room):
     game = storage.pull(room)
 
@@ -42,10 +43,11 @@ def ids(client, room):
 
     for category in range(6):
         for value in range(5):
-            if (_id := (category, value)) in game.board.daily_doubles:
-                _ids["wager"].append(_id)
-            else:
-                _ids["standard"].append(_id)
+            if not game.board.categories[category].sets[value]._shown:
+                if (_id := (category, value)) in game.board.daily_doubles:
+                    _ids["wager"].append(_id)
+                else:
+                    _ids["standard"].append(_id)
 
     return _ids
 
@@ -54,10 +56,10 @@ def get_qa(game, identifier) -> dict:
     return game.board.categories[identifier[0]].sets[identifier[1]]
 
 
-def get_messages(client) -> dict:
+def get_messages(client) -> MultiDict:
     messages = client.get_received()
 
-    return {message["name"]: True if (args := message.get("args")) == [] else args for message in messages}
+    return MultiDict((message["name"], True if (args := message.get("args")) == [] else args) for message in messages)
 
 
 @pytest.mark.incremental
@@ -241,14 +243,12 @@ class TestRounds:
         assert game.round > game_round
         assert messages.get("next_round_started-s>bh")
 
-    def test_run_wager_round(self, game, client, room, players):
+    def test_run_standard_wager_round(self, game, client, room, players, ids):
         amount = 1000
         score = game.score[players[0]]
 
-        _ids = ids.__wrapped__(client, room)
-        assert len(_ids["wager"]) == 2
-
-        num = _ids["wager"].pop()
+        assert len(ids["wager"]) == 2
+        num = ids["wager"].pop()
 
         identifier = f"q_{num[0]}_{num[1]}"
         client.emit("host_clicked_answer-h>s", {"identifier": identifier}, to=room)
@@ -274,3 +274,68 @@ class TestRounds:
 
         assert messages.get("reset_wagers_modals-s>bh")
         assert messages.get("clear_modal-s>bh")
+
+    def test_run_final_round(self, ids, game, client, room, players):
+        assert game.round == 1
+
+        game.remaining_content = 1
+        num = ids["standard"].pop()
+
+        identifier = f"q_{num[0]}_{num[1]}"
+        client.emit("host_clicked_answer-h>s", {"identifier": identifier}, to=room)
+        client.emit("dismiss-h>s", to=room)
+        client.emit("start_next_round-h>s", to=room)
+
+        get_messages(client)
+        content = get_qa(game, (0, 0))
+
+        client.emit("get_wager-h>s", {"name": None}, to=room)
+        messages = get_messages(client)
+
+        assert (m := messages.get("wager_amount_prompt-s>p"))
+        assert m[0]["players"] == players and m[0].get("round")
+
+        for name in players:
+            client.emit("wager_submitted-p>s", {"name": name, "wager": 500}, to=room)
+
+        messages = get_messages(client)
+
+        assert len(messages.getlist("wager_submitted-s>h")) == len(players)
+        for message, name in zip(messages.getlist("wager_submitted-s>h"), players):
+            assert message[0]["updates"]["safe"] == alex.safe_name(name)
+
+        assert messages.get("reset_wager_names-s>h")
+        assert (m := messages.get("reveal_wager-s>bh")) and m[0]["updates"]["wager_answer"] == content.answer
+
+        client.emit("get_responses-h>s", to=room)
+
+        for name in players:
+            client.emit("wager_submitted-p>s", {"name": name, "question": name}, to=room)
+
+        messages = get_messages(client)
+
+        assert len(messages.getlist("wager_submitted-s>h")) == len(players)
+
+        for message, name in zip(messages.getlist("wager_submitted-s>h"), players):
+            assert message[0]["updates"]["safe"] == alex.safe_name(name)
+
+        assert messages.get("enable_show_responses-s>h")
+
+        for name in game.score.sort():
+            client.emit("show_responses-h>s", to=room)
+            assert name in players
+
+            messages = get_messages(client)
+            assert (m := messages.get("display_final_response-s>bph"))
+            assert m[0].get("updates") == {"player": name, "amount": 500, "question": name, "score": game.score[name]}
+
+            client.emit("wager_responded-h>s", {"correct": True}, to=room)
+
+            messages = get_messages(client)
+            assert messages.get("update_scores-s>bph")
+
+        client.emit("show_responses-h>s", to=room)
+
+        messages = get_messages(client)
+        assert messages.get("clear_modal-s>bh")
+        assert messages.get("results-page-s>bph")

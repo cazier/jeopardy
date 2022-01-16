@@ -156,7 +156,7 @@ def show_responses():
         rounds.end_set(room)
 
     else:
-        player = game.score.sort()[game.score.num]
+        player = game.score.sort(wager=True)[game.score.num]
         game.score.wagerer = player
 
         socketio.emit(event="display_final_response-s>bph", data={"updates": game.score.wager(player)}, room=room)

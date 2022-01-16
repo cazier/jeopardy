@@ -147,7 +147,7 @@ class Scoreboard(object):
         return item in self.players.keys()
 
     def add(self, name: str) -> dict:
-        self.players[name] = {"safe": safe_name(name), "score": 0, "wager": {"amount": 0, "question": ""}}
+        self.players[name] = {"safe": safe_name(name), "score": 0, "wager": {"amount": 0, "question": "", "pre": 0}}
 
         return {"name": name, "safe": self.players[name]["safe"]}
 
@@ -164,6 +164,7 @@ class Scoreboard(object):
         k, v = wager
 
         self.players[player]["wager"][k] = v
+        self.players[player]["wager"]["pre"] = self.players[player]["score"]
 
         self.num += 1
 
@@ -173,8 +174,12 @@ class Scoreboard(object):
     def keys(self) -> list:
         return list(self.players.keys())
 
-    def sort(self, **kwargs) -> list:
-        return [i[0] for i in sorted(self.players.items(), key=lambda k: k[1]["score"], **kwargs)]
+    def sort(self, reverse: bool = False, wager: bool = False) -> list:
+        if wager:
+            key = lambda k: k[1]["wager"]["pre"]
+        else:
+            key = lambda k: k[1]["score"]
+        return [i[0] for i in sorted(self.players.items(), key=key, reverse=reverse)]
 
     def wager(self, player: str) -> dict:
         return {
