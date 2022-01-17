@@ -1,14 +1,7 @@
 from flask import Markup, request
 
-try:
-    import config
-    import rounds
-    import storage
-    from sockets import get_room, socketio
-
-except ImportError:
-    from jeopardy import config, rounds, storage
-    from jeopardy.sockets import get_room, socketio
+from jeopardy import rounds, storage
+from jeopardy.sockets import get_room, socketio
 
 
 def start_wager(game):

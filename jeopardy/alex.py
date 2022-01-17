@@ -7,11 +7,8 @@ import datetime
 import itertools
 import dataclasses
 
-try:
-    import config
-
-except ImportError:
-    from jeopardy import config
+# TODO: Move config stuff out of here. This should just be game logic
+from jeopardy import config
 
 
 class Game(object):

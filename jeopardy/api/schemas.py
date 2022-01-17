@@ -1,7 +1,7 @@
 from marshmallow import fields
 from marshmallow_sqlalchemy import SQLAlchemySchema
 
-from . import models
+from jeopardy.api import models
 
 
 class RoundSchema(SQLAlchemySchema):

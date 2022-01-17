@@ -1,4 +1,3 @@
-import zlib
 import random
 import datetime
 
@@ -7,9 +6,9 @@ from flask import jsonify, request
 from sqlalchemy import or_, and_
 from flask_restful import Resource, abort
 
-from . import KEYS, api, database
-from .models import *
-from .schemas import *
+from jeopardy.api import KEYS, api, database
+from jeopardy.api.models import *
+from jeopardy.api.schemas import *
 
 
 class DetailsResource(Resource):

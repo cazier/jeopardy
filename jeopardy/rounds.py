@@ -2,16 +2,8 @@ import asyncio
 
 from flask import Markup, Blueprint, request
 
-try:
-    import config
-    import wagers
-    import storage
-    from sockets import get_room, socketio
-
-except ImportError:
-    from jeopardy import config, wagers, storage
-    from jeopardy.sockets import get_room, socketio
-
+from jeopardy import config, wagers, storage
+from jeopardy.sockets import get_room, socketio
 
 rounds = Blueprint(name="rounds", import_name=__name__)
 

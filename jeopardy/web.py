@@ -3,17 +3,8 @@ import eventlet
 eventlet.monkey_patch()
 
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 
-try:
-    import api
-    import config
-    import rounds
-    import routing
-    import sockets
-
-except ImportError:
-    from jeopardy import api, config, rounds, routing, sockets
+from jeopardy import api, config, rounds, routing, sockets
 
 
 def create_app():

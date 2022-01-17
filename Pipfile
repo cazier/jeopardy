@@ -28,14 +28,15 @@ sqlalchemy = "*"
 werkzeug = "*"
 
 [dev-packages]
-pytest = "*"
-requests = "*"
-pre-commit = "*"
-ipython = "*"
 coverage = {extras = ["toml"], version = "*"}
+ipython = "*"
+jeopardy = {editable = true, path = "."}
 playwright = "*"
+pre-commit = "*"
+pytest = "*"
 pytest-cov = "*"
 pytest-playwright = "*"
+requests = "*"
 
 [requires]
 python_version = "3.9"

@@ -2,15 +2,7 @@ import random
 
 from flask import Blueprint, flash, request, session, url_for, redirect, render_template, get_flashed_messages
 
-try:
-    import alex
-    import config
-    import sockets
-    import storage
-
-except ImportError:
-    from jeopardy import alex, config, sockets, storage
-
+from jeopardy import alex, config, sockets, storage
 
 routing = Blueprint(name="routing", import_name=__name__)
 

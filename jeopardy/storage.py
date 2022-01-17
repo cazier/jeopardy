@@ -1,12 +1,14 @@
+from jeopardy import alex
+
 GAMES: dict = dict()
 
 
-def pull(room: str):
-    return GAMES[room]
+def pull(room: str) -> alex.Game:
+    return GAMES[room.upper()]
 
 
 def push(room: str, value) -> None:
-    GAMES[room] = value
+    GAMES[room.upper()] = value
 
 
 def rooms():
