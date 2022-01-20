@@ -35,8 +35,8 @@ playwright = "*"
 pre-commit = "*"
 pytest = "*"
 pytest-cov = "*"
-pytest-playwright = "*"
 requests = "*"
+nest-asyncio = "*"
 
 [requires]
 python_version = "3.9"

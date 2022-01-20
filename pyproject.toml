@@ -10,7 +10,8 @@ include_trailing_comma = true
 [tool.pytest.ini_options]
 addopts = "--cov=jeopardy --cov-report html --cov-report xml --import-mode importlib"
 testpaths = [ "tests" ]
-markers = "incremental"
+markers = [ "incremental", "browser" ]
+filterwarnings = [ "ignore::DeprecationWarning" ]
 
 [tool.pylint.'FORMAT']
 max-line-length = 119
