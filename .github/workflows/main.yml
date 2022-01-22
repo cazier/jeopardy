@@ -109,7 +109,7 @@ jobs:
       env:
         PIPENV_DEFAULT_PYTHON_VERSION: ${{ matrix.python-version }}
       run: |
-        pipenv run pytest
+        pipenv run pytest -m "not browser"
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v2.1.0
