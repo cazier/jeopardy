@@ -11,7 +11,7 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ['3.8', '3.9', '3.10']
+        python-version: ['3.9', '3.10']
         os: [ubuntu-latest]
 
     steps:
@@ -47,8 +47,8 @@ jobs:
 
     strategy:
       matrix:
-        python-version: ['3.8', ] #'3.9', '3.10']
-        browser: ['firefox', ] #'chromium', 'webkit']
+        python-version: ['3.9', '3.10']
+        browser: ['firefox', 'chromium', 'webkit']
         os: [ubuntu-latest]
 
     steps:
