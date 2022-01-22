@@ -58,6 +58,8 @@ def wager_submittal(data):
                     "displayedInModal": "#wager_round",
                 }
 
+                socketio.sleep(0.5)
+
                 socketio.emit(
                     event="reset_wager_names-s>h", data={"players": list(game.score.players.values())}, room=room
                 )

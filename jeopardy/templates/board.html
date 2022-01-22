@@ -142,8 +142,8 @@
                 socket.on('add_player_to_board-s>b', function(message) {
                     $('#players').append('<th style="text-align: center;">' + message['name'] + '</th>');
                     $('#scores').append(
-                        '<td style="text-align: center;"><span>{{ currency }}</span><span id="' + message[
-                            'safe'] + '_score">0</span></td>');
+                        '<td style="text-align: center;"><span>{{ currency }}</span><span id="' +
+                            message['safe'] + '">0</span></td>');
                 })
 
                 socket.on('reveal_standard_set-s>bh', function(message) {

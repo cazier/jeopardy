@@ -59,7 +59,9 @@ def route_host():
     # Typical (Production) routing will use a POST request.
     if request.method == "POST":
         # If the request has a room code supplied, the host is `/join`ing the game.
-        if url_for("routing.route_join") in request.headers.get("Referer", ()):
+        if url_for("routing.route_join") in request.headers.get("Referer", ()) or url_for(
+            "routing.route_host"
+        ) in request.headers.get("Referer", ()):
             if room := request.form.get("room"):
                 room = room.upper()
 

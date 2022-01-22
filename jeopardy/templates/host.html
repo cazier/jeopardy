@@ -421,14 +421,16 @@
             });
 
         });
-
+        {% if game.round >= 2 %}
         socket.on('update_scores-s>bph', function(message) {
             var player = $("#player").text();
 
             $('#final_score').text(message['scores'][player]['score']);
+            console.log(message['scores']);
 
             $('#wagering').toggle();
         });
+        {% endif %}
 
         socket.on('results-page-s>bph', function(message) {
             $("<form method='POST' action='" + window.location.origin +

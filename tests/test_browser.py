@@ -1,8 +1,3 @@
-import nest_asyncio
-
-nest_asyncio.apply()
-
-
 import os
 import time
 import random
@@ -13,26 +8,17 @@ from playwright.sync_api import Page, Playwright, BrowserType, sync_playwright
 
 from jeopardy import web, alex, config, sockets
 
-pytestmark = pytest.mark.browser
-SHOW = not bool(os.getenv("SHOW", False))
-
-
-def get_browser(_playwright: Playwright) -> BrowserType:
-    name = os.getenv("PLAYWRIGHT_BROWSER_NAME", "firefox")
-
-    return getattr(_playwright, name, "firefox")
-
-
-BASE_URL = "http://127.0.0.1:5001"
+BASE_URL = "http://192.168.1.220:5001"
 
 
 @pytest.fixture(scope="module", autouse=True)
 def _run():
     def start():
+        config.buzzer_time = 0.1
         app = web.create_app()
         socketio = sockets.socketio
         socketio.init_app(app)
-        socketio.run(app, port=5001)
+        socketio.run(app, host="0.0.0.0", port=5001)
 
     thread = threading.Thread(target=start)
     thread.daemon = True
@@ -46,18 +32,6 @@ def players(player1: Page, player2: Page, player3: Page) -> dict[str, Page]:
     return {"Alex": player1, "Brad": player2, "Carl": player3}
 
 
-# @pytest.fixture(scope='module', autouse=True)
-# def _run():
-#     path = pathlib.Path().cwd().joinpath('jeopardy', 'web.py')
-#     assert path.exists()
-
-#     process = subprocess.Popen(f'PORT=5001 python {str(path)}', shell=True)
-#     print(process.pid)
-#     yield
-
-#     os.kill(process.pid, signal.SIGTERM)
-
-
 @pytest.fixture(scope="module")
 def playwright():
     p = sync_playwright().start()
@@ -67,36 +41,52 @@ def playwright():
 
 @pytest.fixture(scope="module")
 def browser_fix(playwright):
-    _browser = get_browser(playwright).launch(headless=SHOW)
+    _browser = get_browser(playwright).launch()
+    # _browser = get_browser(playwright).connect('ws://192.168.1.171:55000/page')
     yield _browser
     _browser.close()
 
 
 @pytest.fixture(scope="module")
-def host(browser_fix):
-    yield browser_fix.new_context().new_page()
+def host(playwright: Playwright, browser_fix):
+    phone = playwright.devices["iPhone XR"]
+    yield browser_fix.new_context(**phone).new_page()
 
 
 @pytest.fixture(scope="module")
 def board(browser_fix):
-    yield browser_fix.new_context().new_page()
+    yield browser_fix.new_context(viewport={"width": 1440, "height": 450}).new_page()
 
 
 @pytest.fixture(scope="module")
-def player1(browser_fix):
-    yield browser_fix.new_context().new_page()
+def player1(playwright: Playwright, browser_fix):
+    phone = playwright.devices["iPhone XR"]
+    yield browser_fix.new_context(**phone).new_page()
 
 
 @pytest.fixture(scope="module")
-def player2(browser_fix):
-    yield browser_fix.new_context().new_page()
+def player2(playwright: Playwright, browser_fix):
+    phone = playwright.devices["iPhone XR"]
+    yield browser_fix.new_context(**phone).new_page()
 
 
 @pytest.fixture(scope="module")
-def player3(browser_fix):
-    yield browser_fix.new_context().new_page()
+def player3(playwright: Playwright, browser_fix):
+    phone = playwright.devices["iPhone XR"]
+    yield browser_fix.new_context(**phone).new_page()
 
 
+def get_browser(_playwright: Playwright) -> BrowserType:
+    name = os.getenv("PLAYWRIGHT_BROWSER_NAME", "chromium")
+
+    return getattr(_playwright, name, "chromium")
+
+
+def pid(id: str) -> str:
+    return f"css=[id='{id}']"
+
+
+@pytest.mark.browser
 @pytest.mark.incremental
 class TestBrowsers:
     def test_index(self, host: Page):
@@ -114,15 +104,18 @@ class TestBrowsers:
     def test_new(self, host: Page):
         host.goto(f"{BASE_URL}/new/")
 
+        # Match "Start" year field hidden by accordion
         locator = host.locator('css=[name="Start"]')
         assert not locator.is_visible()
 
     def test_join(self, host: Page):
         host.goto(f"{BASE_URL}/join/")
 
+        # Match "board" action field hidden by accordion (Used when joining a game as the board)
         locator = host.locator('css=[action="/board/"]')
         assert not locator.is_visible()
 
+        # Match "host" action field hidden by accordion (Used when joining a game as the host)
         locator = host.locator('css=[action="/host/"]')
         assert not locator.is_visible()
 
@@ -130,7 +123,9 @@ class TestBrowsers:
         host.goto(f"{BASE_URL}/new/")
         host.click("text='Let's Get Started!'")
 
-        room = host.locator('css=[id="magic_link"]').text_content().replace("Room:", "").strip()
+        (locator := host.locator(pid("magic_link"))).wait_for(state="visible")
+
+        room = locator.text_content().replace("Room:", "").strip()
 
         for name, page in players.items():
             page.goto(f"{BASE_URL}/join/{room}")
@@ -166,69 +161,163 @@ class TestBrowsers:
             assert alex.safe_name(name) in board.content()
 
     def test_game_play(self, host: Page, board: Page, players: dict[str, Page]):
-        for category in range(6):
-            host.click(f'css=[id="category_{category}"]')
-            for set_ in range(5):
-                assert host.locator(f'css=[id="q_{category}_{set_}"]').is_visible()
+        for _ in range(2):
+            for category in range(6):
+                host.click(pid(f"category_{category}"))
 
-                host.click(f'css=[id="q_{category}_{set_}"]')
+                for set_ in range(5):
+                    assert host.locator(pid(f"q_{category}_{set_}")).is_visible()
 
-                if host.locator("css=[id='wager_round']").is_visible():
-                    name, page = random.choice(players)
+                    host.click(pid(f"q_{category}_{set_}"))
+                    time.sleep(0.2)
 
-                    host.click(f"text='{name}'")
-                    assert False
+                    if host.locator(pid("wager_round")).is_visible():
+                        name, page = random.choice(list(players.items()))
 
-                else:
-                    host.click("text='Finished Reading!'")
+                        host.click(f"text='{name}'")
 
-                    for page in players.values():
-                        assert "btn-success" in page.locator('css=[id="buzzer"]').get_attribute("class")
+                        for (other_name, other_page) in players.items():
+                            if other_name != name:
+                                assert other_page.locator(pid("wager_amount")).is_hidden()
 
-                    # Get the _round_status:
-                    #  - 0 -> The first player to buzz gets the correct answer
-                    #  - 1 -> The second player to buzz gets the correct answer
-                    #  - 2 -> The third player to buzz  gets the correct answer
-                    #  - 3 -> No player gets the correct answer (the host dimisses)
+                        score = int(page.locator(pid("score")).text_content().strip())
+                        wager = (max(score, 1000) // 100) * 100
 
-                    _round_status = random.choice(range(4))
+                        page.fill(pid("wager_value"), str(wager))
+                        page.click("text='Submit!'")
 
-                    print(_round_status)
+                        host.locator(pid("wager_footer")).wait_for(state="visible")
 
-                    # No one answered
-                    if _round_status == 3:
-                        host.click("text='Dismiss'")
-
-                        for page in players.values():
-                            assert "btn-success" not in page.locator('css=[id="buzzer"]').get_attribute("class")
-                            assert "disabled btn-danger" in page.locator('css=[id="buzzer"]').get_attribute("class")
+                        result = random.choice(["correct_wager", "incorrect_wager"])
+                        host.click(pid(f"{result}"))
 
                     else:
-                        for index, (name, page) in enumerate(random.sample(list(players.items()), k=len(players))):
-                            print(index, name, page)
-                            page.click("css=[id='buzzer']")
-                            time.sleep(3)
+                        host.click("text='Finished Reading!'")
+                        time.sleep(0.2)
 
-                            assert host.locator("css=[id='player']").text_content().strip() == name
+                        for page in players.values():
+                            assert "btn-success" in page.locator(pid("buzzer")).get_attribute("class")
 
-                            if index != _round_status:
-                                host.click("css=[id='incorrect_response']")
+                        # Get the _round_status:
+                        #  - 0 -> The first player to buzz gets the correct answer
+                        #  - 1 -> The second player to buzz gets the correct answer
+                        #  - 2 -> The third player to buzz  gets the correct answer
+                        #  - 3 -> No player gets the correct answer (the host dimisses)
 
-                            else:
-                                host.click("css=[id='correct_response']")
-                                break
+                        _round_status = random.choice(range(4))
 
-                    page.click('css=[id="buzzer"]')
-                    assert "btn-success" not in page.locator('css=[id="buzzer"]').get_attribute("class")
-                    assert "disabled btn-danger" in page.locator('css=[id="buzzer"]').get_attribute("class")
+                        # No one answered
+                        if _round_status == 3:
+                            host.click("text='Dismiss'")
+                            time.sleep(0.2)
 
-                board.wait_for_load_state()
+                            for page in players.values():
+                                assert "btn-success" not in page.locator(pid("buzzer")).get_attribute("class")
+                                assert "disabled btn-danger" in page.locator(pid("buzzer")).get_attribute("class")
 
-                for name, page in players.items():
-                    player = int(page.locator("css=[id='score']").text_content().strip())
-                    print(alex.safe_name(name))
-                    print(name)
-                    board.pause()
-                    assert player == int(board.locator(f"css=[id='{alex.safe_name(name)}']").text_content().strip())
+                        else:
+                            guess_order = random.sample(list(players.items()), k=len(players))
+                            for index, (name, page) in enumerate(guess_order):
+                                for (other_name, other_page) in guess_order[:index]:
+                                    assert "btn-success" not in other_page.locator(pid("buzzer")).get_attribute(
+                                        "class"
+                                    )
+                                    assert "disabled btn-danger" in other_page.locator(pid("buzzer")).get_attribute(
+                                        "class"
+                                    )
 
-                assert True
+                                page.click(pid("buzzer"))
+                                time.sleep(0.2)
+
+                                assert host.locator(pid("player")).text_content().strip() == name
+
+                                if index != _round_status:
+                                    host.click(pid("incorrect_response"))
+
+                                else:
+                                    host.click(pid("correct_response"))
+                                    break
+
+                    time.sleep(0.2)
+
+                    for name, page in players.items():
+                        player_score = int(page.locator(pid("score")).text_content().strip())
+                        board_score = int(board.locator(pid(alex.safe_name(name))).text_content().strip())
+
+                        assert player_score == board_score
+
+            host.locator(pid("round_transition")).wait_for(state="visible")
+            host.click(pid("start_next_round"))
+
+            host.wait_for_load_state()
+            board.wait_for_load_state()
+
+        host.locator(pid("get_wager")).wait_for(state="visible")
+        host.click(pid("get_wager"))
+
+        assert not page.locator(pid("show_0")).is_visible()
+
+        reveal_prep = dict()
+
+        for name, page in players.items():
+            assert "btn-success" not in host.locator(pid(alex.safe_name(name))).get_attribute("class")
+            assert "btn-danger" in host.locator(pid(alex.safe_name(name))).get_attribute("class")
+
+            bg_score = int(page.locator(pid("score")).text_content().strip())
+            fg_score = int(page.locator(f"{pid('wager_amount')} >> .score").text_content().strip())
+
+            assert bg_score == fg_score
+
+            wager = (max(fg_score, 1000) // 100) * 100
+            page.fill(pid("wager_value"), str(wager))
+            page.click("text='Submit!'")
+
+            time.sleep(0.2)
+
+            assert "btn-success" in host.locator(pid(alex.safe_name(name))).get_attribute("class")
+            assert "btn-danger" not in host.locator(pid(alex.safe_name(name))).get_attribute("class")
+
+            reveal_prep[name] = {"pre": fg_score, "wager": wager}
+
+        host.locator(pid("show_0")).wait_for(state="visible")
+
+        host.locator(pid("get_questions")).wait_for(state="visible")
+        host.click(pid("get_questions"))
+
+        for name, page in players.items():
+            assert "btn-success" not in host.locator(pid(alex.safe_name(name))).get_attribute("class")
+            assert "btn-danger" in host.locator(pid(alex.safe_name(name))).get_attribute("class")
+
+            page.fill(pid("question_value"), f"{name}'s answer")
+            page.click("text='Submit!'")
+
+            time.sleep(0.2)
+
+            assert "btn-success" in host.locator(pid(alex.safe_name(name))).get_attribute("class")
+            assert "btn-danger" not in host.locator(pid(alex.safe_name(name))).get_attribute("class")
+
+        host.locator(pid("show_responses")).wait_for(state="visible")
+        host.click(pid("show_responses"))
+
+        for (name, scoring) in sorted(reveal_prep.items(), key=lambda k: k[1]["pre"]):
+            for screen in (host, board):
+                assert screen.locator(pid("player")).text_content() == name
+                assert screen.locator(pid("question")).text_content() == f"{name}'s answer"
+                assert int(screen.locator(pid("score")).text_content().strip()) == scoring["pre"]
+
+            result = random.choice([("correct_fj", 1), ("incorrect_fj", -1)])
+            host.click(pid(f"{result[0]}"))
+
+            final_score = scoring["pre"] + (scoring["wager"] * result[1])
+            reveal_prep[name]["final"] = final_score
+
+            assert int(host.locator(pid("amount")).text_content().strip()) == scoring["wager"]
+            assert int(host.locator(pid("final_score")).text_content().strip()) == final_score
+            assert int(players[name].locator(pid("score")).text_content().strip()) == final_score
+
+            host.click(pid("next"))
+            time.sleep(0.2)
+
+        for page in (host, board, *players.values()):
+            page.wait_for_load_state()
+            assert page.url.endswith("/results/")

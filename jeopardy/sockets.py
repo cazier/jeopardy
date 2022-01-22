@@ -2,7 +2,7 @@ from flask_socketio import SocketIO, rooms, join_room
 
 from jeopardy import config
 
-socketio = SocketIO(cors_allowed_origins=config.url, logger=True)
+socketio = SocketIO(cors_allowed_origins=config.url)
 
 
 def get_room(sid: str) -> str:

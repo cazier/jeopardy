@@ -1,6 +1,9 @@
-import eventlet
+import sys
 
-eventlet.monkey_patch()
+if not "pytest" in sys.modules:
+    import eventlet
+
+    eventlet.monkey_patch()
 
 from flask import Flask
 
