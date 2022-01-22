@@ -38,7 +38,7 @@ def _run():
 
 @pytest.fixture(scope="module")
 def players(player1: Page, player2: Page, player3: Page) -> dict[str, Page]:
-    return {"Alex": player1, "Brad": player2, "Carl": player3}
+    return {"Alex": player1, "Brad With Space": player2, "Carl12345": player3}
 
 
 @pytest.fixture(scope="module")
@@ -167,11 +167,12 @@ class TestBrowsers:
             page.fill('css=[name="name"]', name)
             page.click("#cplayer >> text=Let's Go!")
 
-            page.wait_for_timeout(200)
-
             page.wait_for_load_state()
             assert name in page.content()
 
+            # This is occasionally causing test failures 😭
+            # It appears to be failing because the test instance does not make the WebSocket connection
+            board.wait_for_timeout(200)
             board.wait_for_load_state()
             assert name in board.content()
 
