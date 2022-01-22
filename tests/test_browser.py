@@ -1,28 +1,37 @@
 import os
-import time
 import random
 import threading
 
 import pytest
-from playwright.sync_api import Page, Playwright, BrowserType, sync_playwright
+from playwright.sync_api import Page, Browser, Playwright, BrowserType, sync_playwright
 
 from jeopardy import web, alex, config, sockets
 
-BASE_URL = "http://192.168.1.220:5001"
+if os.getenv("SHOW"):
+    BASE_URL = "http://192.168.1.220:5001"
+    LAUNCH = False
+
+else:
+    BASE_URL = "http://127.0.0.1:5001"
+    LAUNCH = True
 
 
 @pytest.fixture(scope="module", autouse=True)
 def _run():
-    def start():
+    def start(port: int):
         config.buzzer_time = 0.1
         app = web.create_app()
         socketio = sockets.socketio
         socketio.init_app(app)
-        socketio.run(app, host="0.0.0.0", port=5001)
+        socketio.run(app, host="0.0.0.0", port=port)
 
-    thread = threading.Thread(target=start)
-    thread.daemon = True
-    thread.start()
+    api = threading.Thread(target=start, args=(5000,))
+    api.daemon = True
+    api.start()
+
+    game = threading.Thread(target=start, args=(5001,))
+    game.daemon = True
+    game.start()
 
     yield
 
@@ -33,47 +42,47 @@ def players(player1: Page, player2: Page, player3: Page) -> dict[str, Page]:
 
 
 @pytest.fixture(scope="module")
-def playwright():
+def playwright() -> Playwright:
     p = sync_playwright().start()
     yield p
     p.stop()
 
 
 @pytest.fixture(scope="module")
-def browser_fix(playwright):
-    _browser = get_browser(playwright).launch()
-    # _browser = get_browser(playwright).connect('ws://192.168.1.171:55000/page')
+def browser_fix(playwright: Playwright) -> Browser:
+    if LAUNCH:
+        _browser = get_browser(playwright).launch()
+    else:
+        _browser = get_browser(playwright).connect("ws://192.168.1.171:55000/page")
+
     yield _browser
+
     _browser.close()
 
 
 @pytest.fixture(scope="module")
-def host(playwright: Playwright, browser_fix):
-    phone = playwright.devices["iPhone XR"]
-    yield browser_fix.new_context(**phone).new_page()
+def host(browser_fix: Browser):
+    yield browser_fix.new_context().new_page()
 
 
 @pytest.fixture(scope="module")
-def board(browser_fix):
-    yield browser_fix.new_context(viewport={"width": 1440, "height": 450}).new_page()
+def board(browser_fix: Browser):
+    yield browser_fix.new_context().new_page()
 
 
 @pytest.fixture(scope="module")
-def player1(playwright: Playwright, browser_fix):
-    phone = playwright.devices["iPhone XR"]
-    yield browser_fix.new_context(**phone).new_page()
+def player1(browser_fix: Browser):
+    yield browser_fix.new_context().new_page()
 
 
 @pytest.fixture(scope="module")
-def player2(playwright: Playwright, browser_fix):
-    phone = playwright.devices["iPhone XR"]
-    yield browser_fix.new_context(**phone).new_page()
+def player2(browser_fix: Browser):
+    yield browser_fix.new_context().new_page()
 
 
 @pytest.fixture(scope="module")
-def player3(playwright: Playwright, browser_fix):
-    phone = playwright.devices["iPhone XR"]
-    yield browser_fix.new_context(**phone).new_page()
+def player3(browser_fix: Browser):
+    yield browser_fix.new_context().new_page()
 
 
 def get_browser(_playwright: Playwright) -> BrowserType:
@@ -84,6 +93,14 @@ def get_browser(_playwright: Playwright) -> BrowserType:
 
 def pid(id: str) -> str:
     return f"css=[id='{id}']"
+
+
+def js_id_equality(id: str, value: str) -> str:
+    return f"document.getElementById('{id}').textContent == '{value}'"
+
+
+def js_has_class(id: str, value: str) -> str:
+    return f"document.getElementById('{id}').classList.contains('{value}')"
 
 
 @pytest.mark.browser
@@ -150,6 +167,8 @@ class TestBrowsers:
             page.fill('css=[name="name"]', name)
             page.click("#cplayer >> text=Let's Go!")
 
+            page.wait_for_timeout(200)
+
             page.wait_for_load_state()
             assert name in page.content()
 
@@ -163,13 +182,14 @@ class TestBrowsers:
     def test_game_play(self, host: Page, board: Page, players: dict[str, Page]):
         for _ in range(2):
             for category in range(6):
+                host.locator(pid(f"category_{category}")).wait_for(state="visible")
                 host.click(pid(f"category_{category}"))
 
                 for set_ in range(5):
-                    assert host.locator(pid(f"q_{category}_{set_}")).is_visible()
-
+                    host.locator(pid(f"q_{category}_{set_}")).wait_for(state="visible")
                     host.click(pid(f"q_{category}_{set_}"))
-                    time.sleep(0.2)
+
+                    host.locator(pid("master-modal")).wait_for(state="visible")
 
                     if host.locator(pid("wager_round")).is_visible():
                         name, page = random.choice(list(players.items()))
@@ -193,9 +213,9 @@ class TestBrowsers:
 
                     else:
                         host.click("text='Finished Reading!'")
-                        time.sleep(0.2)
 
                         for page in players.values():
+                            page.wait_for_function(js_has_class("buzzer", "btn-success"))
                             assert "btn-success" in page.locator(pid("buzzer")).get_attribute("class")
 
                         # Get the _round_status:
@@ -209,9 +229,10 @@ class TestBrowsers:
                         # No one answered
                         if _round_status == 3:
                             host.click("text='Dismiss'")
-                            time.sleep(0.2)
 
                             for page in players.values():
+                                page.wait_for_function(js_has_class("buzzer", "btn-danger"))
+
                                 assert "btn-success" not in page.locator(pid("buzzer")).get_attribute("class")
                                 assert "disabled btn-danger" in page.locator(pid("buzzer")).get_attribute("class")
 
@@ -227,7 +248,7 @@ class TestBrowsers:
                                     )
 
                                 page.click(pid("buzzer"))
-                                time.sleep(0.2)
+                                host.wait_for_function(js_id_equality("player", name))
 
                                 assert host.locator(pid("player")).text_content().strip() == name
 
@@ -238,7 +259,7 @@ class TestBrowsers:
                                     host.click(pid("correct_response"))
                                     break
 
-                    time.sleep(0.2)
+                    host.wait_for_timeout(200)
 
                     for name, page in players.items():
                         player_score = int(page.locator(pid("score")).text_content().strip())
@@ -272,7 +293,7 @@ class TestBrowsers:
             page.fill(pid("wager_value"), str(wager))
             page.click("text='Submit!'")
 
-            time.sleep(0.2)
+            host.wait_for_function(js_has_class(alex.safe_name(name), "btn-success"))
 
             assert "btn-success" in host.locator(pid(alex.safe_name(name))).get_attribute("class")
             assert "btn-danger" not in host.locator(pid(alex.safe_name(name))).get_attribute("class")
@@ -291,7 +312,7 @@ class TestBrowsers:
             page.fill(pid("question_value"), f"{name}'s answer")
             page.click("text='Submit!'")
 
-            time.sleep(0.2)
+            host.wait_for_function(js_has_class(alex.safe_name(name), "btn-success"))
 
             assert "btn-success" in host.locator(pid(alex.safe_name(name))).get_attribute("class")
             assert "btn-danger" not in host.locator(pid(alex.safe_name(name))).get_attribute("class")
@@ -299,8 +320,12 @@ class TestBrowsers:
         host.locator(pid("show_responses")).wait_for(state="visible")
         host.click(pid("show_responses"))
 
+        host.locator(pid("final_reveal")).wait_for(state="visible")
+
         for (name, scoring) in sorted(reveal_prep.items(), key=lambda k: k[1]["pre"]):
             for screen in (host, board):
+                host.wait_for_function(js_id_equality("player", name))
+
                 assert screen.locator(pid("player")).text_content() == name
                 assert screen.locator(pid("question")).text_content() == f"{name}'s answer"
                 assert int(screen.locator(pid("score")).text_content().strip()) == scoring["pre"]
@@ -316,8 +341,13 @@ class TestBrowsers:
             assert int(players[name].locator(pid("score")).text_content().strip()) == final_score
 
             host.click(pid("next"))
-            time.sleep(0.2)
 
-        for page in (host, board, *players.values()):
-            page.wait_for_load_state()
+        winner = sorted(reveal_prep.items(), key=lambda k: k[1]["final"])[-1]
+
+        for page in (host, board, players[winner[0]]):
+            page.wait_for_function("document.location.pathname.indexOf('results') > 0")
+
+            assert page.url.endswith("/results/")
+
+        for page in players.values():
             assert page.url.endswith("/results/")
