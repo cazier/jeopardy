@@ -1,19 +1,15 @@
 import os
+import time
 import random
-import threading
+import multiprocessing
 
 import pytest
 from playwright.sync_api import Page, Browser, Playwright, BrowserType, sync_playwright
 
 from jeopardy import web, alex, config, sockets
 
-if os.getenv("SHOW"):
-    BASE_URL = "http://192.168.1.220:5001"
-    LAUNCH = False
-
-else:
-    BASE_URL = "http://127.0.0.1:5001"
-    LAUNCH = True
+BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:5001")
+LAUNCH = not os.getenv("BASE_URL")
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -25,13 +21,16 @@ def _run():
         socketio.init_app(app)
         socketio.run(app, host="0.0.0.0", port=port)
 
-    api = threading.Thread(target=start, args=(5000,))
-    api.daemon = True
+    # Two background processes are run for the backend server, because the eventlet.monkey_patch does not get performed
+    # during pytest runs. In "normal" usage, the single server process is acceptable as eventlet handles the async stuff
+    api = multiprocessing.Process(name="api", target=start, args=(5000,), daemon=True)
     api.start()
 
-    game = threading.Thread(target=start, args=(5001,))
-    game.daemon = True
+    game = multiprocessing.Process(name="game", target=start, args=(5001,), daemon=True)
     game.start()
+
+    # Adding a one-time delay to ensure each of the api/game processes have completely started.
+    time.sleep(10)
 
     yield
 
@@ -53,7 +52,7 @@ def browser_fix(playwright: Playwright) -> Browser:
     if LAUNCH:
         _browser = get_browser(playwright).launch()
     else:
-        _browser = get_browser(playwright).connect("ws://192.168.1.171:55000/page")
+        _browser = get_browser(playwright).connect(os.getenv("CONNECT_URL"))
 
     yield _browser
 
@@ -170,9 +169,6 @@ class TestBrowsers:
             page.wait_for_load_state()
             assert name in page.content()
 
-            # This is occasionally causing test failures 😭
-            # It appears to be failing because the test instance does not make the WebSocket connection
-            board.wait_for_timeout(200)
             board.wait_for_load_state()
             assert name in board.content()
 
