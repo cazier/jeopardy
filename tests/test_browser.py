@@ -179,6 +179,9 @@ class TestBrowsers:
         for _ in range(2):
             for category in range(6):
                 host.locator(pid(f"category_{category}")).wait_for(state="visible")
+                assert host.locator(pid(f"category_{category}")).is_visible()
+                assert host.locator(pid(f"category_{category}")).is_enabled()
+
                 host.click(pid(f"category_{category}"))
 
                 for set_ in range(5):
