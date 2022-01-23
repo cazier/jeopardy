@@ -42,9 +42,8 @@ def players(player1: Page, player2: Page, player3: Page) -> dict[str, Page]:
 
 @pytest.fixture(scope="module")
 def playwright() -> Playwright:
-    p = sync_playwright().start()
-    yield p
-    p.stop()
+    with sync_playwright() as p:
+        yield p
 
 
 @pytest.fixture(scope="module")
