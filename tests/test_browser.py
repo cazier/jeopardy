@@ -4,7 +4,7 @@ import random
 import multiprocessing
 
 import pytest
-from playwright.sync_api import Page, Browser, Playwright, BrowserType, sync_playwright
+from playwright.sync_api import Page, Browser, Playwright, BrowserType, TimeoutError, sync_playwright
 
 from jeopardy import web, alex, config, sockets
 
@@ -42,6 +42,9 @@ def players(player1: Page, player2: Page, player3: Page) -> dict[str, Page]:
 
 @pytest.fixture(scope="module")
 def playwright() -> Playwright:
+    import pathlib
+
+    pathlib.Path.cwd().joinpath("output").mkdir(parents=True, exist_ok=True)
     with sync_playwright() as p:
         yield p
 
@@ -60,7 +63,7 @@ def browser_fix(playwright: Playwright) -> Browser:
 
 @pytest.fixture(scope="module")
 def host(browser_fix: Browser):
-    yield browser_fix.new_context().new_page()
+    yield browser_fix.new_context(record_video_dir="output").new_page()
 
 
 @pytest.fixture(scope="module")
@@ -182,8 +185,11 @@ class TestBrowsers:
 
                 item.wait_for(state="visible")
                 item.click()
+                try:
+                    host.click(pid(f"category_{category}"))
 
-                # host.click(pid(f"category_{category}"))
+                except TimeoutError:
+                    host.screenshot(path="output/host.png")
 
                 for set_ in range(5):
                     host.locator(pid(f"q_{category}_{set_}")).wait_for(state="visible")

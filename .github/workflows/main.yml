@@ -47,6 +47,7 @@ jobs:
 
     strategy:
       matrix:
+        python-version: ['3.9'] #, '3.10']
         browser: ['firefox', 'chromium'] #, 'webkit']
         os: [ubuntu-latest]
 
@@ -57,7 +58,7 @@ jobs:
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
-        python-version: '3.9'
+        python-version: ${{ matrix.os }}
 
     - name: Get Python path
       id: python-path
@@ -79,6 +80,13 @@ jobs:
         PLAYWRIGHT_BROWSER_NAME: ${{ matrix.browser }}
       run: |
         pipenv run pytest -m "browser" --no-cov
+
+    - name: 'Upload Artifact'
+      uses: actions/upload-artifact@v2
+      with:
+        name: artifacts
+        path: output/*
+        retention-days: 1
 
   coverage:
     runs-on: ubuntu-latest
