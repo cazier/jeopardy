@@ -63,7 +63,10 @@ def browser_fix(playwright: Playwright) -> Browser:
 
 @pytest.fixture(scope="module")
 def host(browser_fix: Browser):
-    yield browser_fix.new_context(record_video_dir="output").new_page()
+    browser = browser_fix.new_context(record_video_dir="output")
+    yield browser.new_page()
+
+    browser.close()
 
 
 @pytest.fixture(scope="module")
@@ -181,15 +184,15 @@ class TestBrowsers:
     def test_game_play(self, host: Page, board: Page, players: dict[str, Page]):
         for _ in range(2):
             for category in range(6):
-                item = host.locator(pid(f"category_{category}"))
+                host.locator(pid(f"category_{category}")).wait_for(state="visible")
 
-                item.wait_for(state="visible")
-                item.click()
                 try:
                     host.click(pid(f"category_{category}"))
 
+                # Fix for occasional double click on category reveal....
                 except TimeoutError:
-                    host.screenshot(path="output/host.png")
+                    host.evaluate(f"$('#content_{category + 1}').collapse('show')")
+                    assert host.locator(pid(f"content_{category + 1}")).is_visible()
 
                 for set_ in range(5):
                     host.locator(pid(f"q_{category}_{set_}")).wait_for(state="visible")
