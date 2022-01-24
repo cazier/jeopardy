@@ -58,7 +58,7 @@ jobs:
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
-        python-version: ${{ matrix.os }}
+        python-version: ${{ matrix.python-version }}
 
     - name: Get Python path
       id: python-path
@@ -94,7 +94,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python
       uses: actions/setup-python@v2
       with:
         python-version: '3.9'
@@ -108,13 +108,13 @@ jobs:
 
     - name: Install dependencies
       env:
-        PIPENV_DEFAULT_PYTHON_VERSION: ${{ matrix.python-version }}
+        PIPENV_DEFAULT_PYTHON_VERSION: '3.9'
       run: |
         pipenv install --dev --python=${{ steps.python-path.outputs.path }}
 
     - name: Test with pytest
       env:
-        PIPENV_DEFAULT_PYTHON_VERSION: ${{ matrix.python-version }}
+        PIPENV_DEFAULT_PYTHON_VERSION: '3.9'
       run: |
         pipenv run pytest -m "not browser"
 
