@@ -178,11 +178,12 @@ class TestBrowsers:
     def test_game_play(self, host: Page, board: Page, players: dict[str, Page]):
         for _ in range(2):
             for category in range(6):
-                host.locator(pid(f"category_{category}")).wait_for(state="visible")
-                assert host.locator(pid(f"category_{category}")).is_visible()
-                assert host.locator(pid(f"category_{category}")).is_enabled()
+                item = host.locator(pid(f"category_{category}"))
 
-                host.click(pid(f"category_{category}"))
+                item.wait_for(state="visible")
+                item.click()
+
+                # host.click(pid(f"category_{category}"))
 
                 for set_ in range(5):
                     host.locator(pid(f"q_{category}_{set_}")).wait_for(state="visible")
