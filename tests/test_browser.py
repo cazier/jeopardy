@@ -44,7 +44,12 @@ def players(player1: Page, player2: Page, player3: Page) -> dict[str, Page]:
 def playwright() -> Playwright:
     import pathlib
 
-    pathlib.Path.cwd().joinpath("output").mkdir(parents=True, exist_ok=True)
+    output = pathlib.Path.cwd().joinpath("output")
+    output.mkdir(parents=True, exist_ok=True)
+
+    for file in output.glob("*.webm"):
+        file.unlink()
+
     with sync_playwright() as p:
         yield p
 
@@ -183,6 +188,8 @@ class TestBrowsers:
 
     def test_game_play(self, host: Page, board: Page, players: dict[str, Page]):
         for _ in range(2):
+            host.wait_for_timeout(2000)
+
             for category in range(6):
                 host.locator(pid(f"category_{category}")).wait_for(state="visible")
 
@@ -191,9 +198,7 @@ class TestBrowsers:
 
                 # Fix for occasional double click on category reveal....
                 except:
-                    host.evaluate(f"$('#content_{category + 1}').collapse('show')")
-
-                assert host.locator(pid(f"content_{category + 1}")).is_visible()
+                    host.evaluate(f"$('#content_{category}').collapse('show')")
 
                 for set_ in range(5):
                     host.locator(pid(f"q_{category}_{set_}")).wait_for(state="visible")
