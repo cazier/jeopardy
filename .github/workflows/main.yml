@@ -81,7 +81,7 @@ jobs:
       run: |
         pipenv run pytest -m "browser" --no-cov
 
-    - name: 'Upload Artifact'
+    - name: 'Upload Artifacts'
       uses: actions/upload-artifact@v2
       with:
         name: artifacts
