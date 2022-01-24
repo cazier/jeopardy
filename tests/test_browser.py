@@ -190,9 +190,10 @@ class TestBrowsers:
                     host.click(pid(f"category_{category}"))
 
                 # Fix for occasional double click on category reveal....
-                except TimeoutError:
+                except:
                     host.evaluate(f"$('#content_{category + 1}').collapse('show')")
-                    assert host.locator(pid(f"content_{category + 1}")).is_visible()
+
+                assert host.locator(pid(f"content_{category + 1}")).is_visible()
 
                 for set_ in range(5):
                     host.locator(pid(f"q_{category}_{set_}")).wait_for(state="visible")
