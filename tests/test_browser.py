@@ -3,13 +3,16 @@ import time
 import random
 import multiprocessing
 
+import faker
 import pytest
-from playwright.sync_api import Page, Browser, Playwright, BrowserType, TimeoutError, sync_playwright
+from playwright.sync_api import Page, Browser, Playwright, BrowserType, sync_playwright
 
 from jeopardy import web, alex, config, sockets
 
 BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:5001")
 LAUNCH = not os.getenv("BASE_URL")
+
+fake = faker.Faker(faker.config.AVAILABLE_LOCALES)
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -37,18 +40,21 @@ def _run():
 
 @pytest.fixture(scope="module")
 def players(player1: Page, player2: Page, player3: Page) -> dict[str, Page]:
-    return {"Alex": player1, "Brad With Space": player2, "Carl12345": player3}
+    return {fake.name(): player1, fake.name(): player2, fake.name(): player3}
 
 
 @pytest.fixture(scope="module")
 def playwright() -> Playwright:
     import pathlib
 
-    output = pathlib.Path.cwd().joinpath("output")
-    output.mkdir(parents=True, exist_ok=True)
+    artifacts = pathlib.Path.cwd().joinpath("artifacts")
 
-    for file in output.glob("*.webm"):
-        file.unlink()
+    for final in ("host", "board", "player1", "player2", "player3"):
+        artifacts = artifacts.joinpath(final)
+        artifacts.mkdir(parents=True, exist_ok=True)
+
+        for file in artifacts.glob("*.webm"):
+            file.unlink()
 
     with sync_playwright() as p:
         yield p
@@ -68,30 +74,37 @@ def browser_fix(playwright: Playwright) -> Browser:
 
 @pytest.fixture(scope="module")
 def host(browser_fix: Browser):
-    browser = browser_fix.new_context(record_video_dir="output")
+    browser = browser_fix.new_context(record_video_dir="artifacts/host")
     yield browser.new_page()
-
     browser.close()
 
 
 @pytest.fixture(scope="module")
 def board(browser_fix: Browser):
-    yield browser_fix.new_context().new_page()
+    browser = browser_fix.new_context(record_video_dir="artifacts/board")
+    yield browser.new_page()
+    browser.close()
 
 
 @pytest.fixture(scope="module")
 def player1(browser_fix: Browser):
-    yield browser_fix.new_context().new_page()
+    browser = browser_fix.new_context(record_video_dir="artifacts/player1")
+    yield browser.new_page()
+    browser.close()
 
 
 @pytest.fixture(scope="module")
 def player2(browser_fix: Browser):
-    yield browser_fix.new_context().new_page()
+    browser = browser_fix.new_context(record_video_dir="artifacts/player2")
+    yield browser.new_page()
+    browser.close()
 
 
 @pytest.fixture(scope="module")
 def player3(browser_fix: Browser):
-    yield browser_fix.new_context().new_page()
+    browser = browser_fix.new_context(record_video_dir="artifacts/player3")
+    yield browser.new_page()
+    browser.close()
 
 
 def get_browser(_playwright: Playwright) -> BrowserType:
@@ -196,7 +209,7 @@ class TestBrowsers:
                 try:
                     host.click(pid(f"category_{category}"))
 
-                # Fix for occasional double click on category reveal....
+                # Fix for occasional double click on category reveal
                 except:
                     host.evaluate(f"$('#content_{category}').collapse('show')")
 

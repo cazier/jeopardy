@@ -122,4 +122,5 @@ dmypy.json
 !sample.db
 
 storage/
+artifacts/
 output/

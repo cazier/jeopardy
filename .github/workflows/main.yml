@@ -1,12 +1,10 @@
 name: CI/CD
 on:
   push:
-    branches: [ master, testing ]
   pull_request:
-    branches: [ master ]
 
 jobs:
-  test:
+  pytest-suite:
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -42,13 +40,13 @@ jobs:
       run: |
         pipenv run pytest -m "not browser"
 
-  browser_test:
+  browser:
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        python-version: ['3.9'] #, '3.10']
-        browser: ['firefox', 'chromium'] #, 'webkit']
+        python-version: ['3.9', '3.10']
+        browser: ['firefox', 'chromium', 'webkit']
         os: [ubuntu-latest]
 
     steps:
@@ -83,10 +81,10 @@ jobs:
 
     - name: 'Upload Artifacts'
       uses: actions/upload-artifact@v2
-      continue-on-error: true
+      if: failure()
       with:
         name: artifacts
-        path: output/
+        path: artifacts/
         retention-days: 1
 
   coverage:
