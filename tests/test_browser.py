@@ -12,7 +12,7 @@ from jeopardy import web, alex, config, sockets
 BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:5001")
 LAUNCH = not os.getenv("BASE_URL")
 
-fake = faker.Faker(faker.config.AVAILABLE_LOCALES)
+fake = faker.Faker()
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -233,6 +233,10 @@ class TestBrowsers:
 
                         page.fill(pid("wager_value"), str(wager))
                         page.click("text='Submit!'")
+
+                        # Fix for the time the modal stayed up after clicking submit
+                        if page.locator(pid("master-modal")).is_visible:
+                            page.evaluate("$('#master-modal').modal('hide')")
 
                         host.locator(pid("wager_footer")).wait_for(state="visible")
 
