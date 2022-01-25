@@ -1,4 +1,3 @@
-import zlib
 import random
 import datetime
 
@@ -7,9 +6,9 @@ from flask import jsonify, request
 from sqlalchemy import or_, and_
 from flask_restful import Resource, abort
 
-from . import KEYS, api, database
-from .models import *
-from .schemas import *
+from jeopardy.api import KEYS, api, database
+from jeopardy.api.models import *
+from jeopardy.api.schemas import *
 
 
 class DetailsResource(Resource):
@@ -241,9 +240,9 @@ class CategoryMultiple(Resource):
         return paginate(model=Category.query, schema=categories_schema.dump, indices=request.args)
 
 
-class BlankResource(Resource):
-    def get(self) -> dict:
-        return {"message": "hello!"}
+# class BlankResource(Resource):
+#     def get(self) -> dict:
+#         return {"message": "hello!"}
 
 
 class GameResource(Resource):
@@ -489,5 +488,4 @@ api.add_resource(CategoryByShowId, "/category/show/id/<int:show_id>")
 
 api.add_resource(DetailsResource, "/details")
 api.add_resource(GameResource, "/game")
-api.add_resource(BlankResource, "/")
-# # api_base = ""  # /api/v1/"
+# api.add_resource(BlankResource, "/")

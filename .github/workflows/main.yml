@@ -1,17 +1,15 @@
 name: CI/CD
 on:
   push:
-    branches: [ master ]
   pull_request:
-    branches: [ master ]
 
 jobs:
-  test:
+  pytest-suite:
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        python-version: ['3.8', '3.9', '3.10']
+        python-version: ['3.9', '3.10']
         os: [ubuntu-latest]
 
     steps:
@@ -40,7 +38,54 @@ jobs:
       env:
         PIPENV_DEFAULT_PYTHON_VERSION: ${{ matrix.python-version }}
       run: |
-        pipenv run pytest
+        pipenv run pytest -m "not browser"
+
+  browser:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10']
+        browser: ['firefox', 'chromium', 'webkit']
+        os: [ubuntu-latest]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Get Python path
+      id: python-path
+      run: echo ::set-output name=path::$(python -c "import sys; print(sys.executable)")
+
+    - name: Installing pip/pipenv
+      run: python -m pip install --upgrade pip pipenv
+
+    - name: Install dependencies
+      env:
+        PIPENV_DEFAULT_PYTHON_VERSION: ${{ matrix.python-version }}
+      run: |
+        pipenv install --dev --python=${{ steps.python-path.outputs.path }} && \
+        pipenv run playwright install --with-deps ${{ matrix.browser }}
+
+    - name: Test with pytest
+      env:
+        PIPENV_DEFAULT_PYTHON_VERSION: ${{ matrix.python-version }}
+        PLAYWRIGHT_BROWSER_NAME: ${{ matrix.browser }}
+      run: |
+        pipenv run pytest -m "browser" --no-cov
+
+    - name: 'Upload Artifacts'
+      uses: actions/upload-artifact@v2
+      if: failure()
+      with:
+        name: artifacts
+        path: artifacts/
+        retention-days: 1
 
   coverage:
     runs-on: ubuntu-latest
@@ -48,7 +93,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python
       uses: actions/setup-python@v2
       with:
         python-version: '3.9'
@@ -62,15 +107,15 @@ jobs:
 
     - name: Install dependencies
       env:
-        PIPENV_DEFAULT_PYTHON_VERSION: ${{ matrix.python-version }}
+        PIPENV_DEFAULT_PYTHON_VERSION: '3.9'
       run: |
         pipenv install --dev --python=${{ steps.python-path.outputs.path }}
 
     - name: Test with pytest
       env:
-        PIPENV_DEFAULT_PYTHON_VERSION: ${{ matrix.python-version }}
+        PIPENV_DEFAULT_PYTHON_VERSION: '3.9'
       run: |
-        pipenv run coverage run -m pytest; pipenv run coverage xml --include="jeopardy/*"
+        pipenv run pytest -m "not browser"
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v2.1.0

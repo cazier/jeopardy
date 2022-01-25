@@ -7,18 +7,12 @@
     {% include "scripts_meta.html" %}
     {% include "socketio_connect.html" %}
 
-    <script>
-        var type = 'player';
-    </script>
-
 </head>
 
 <body>
     {% include "header.html" %}
     <div class="jumbotron">
-        <h2>
-            Hey {{ session['name'] }}!
-        </h2>
+        <h2>Hey {{ session['name'] }}!</h2>
         <div class="input-group-lg mb-3">
             <div class="input-group-prepend">
                 <span class="input-group-text">Current Score:
@@ -34,7 +28,7 @@
         <div class="modal fade" id="master-modal" tabindex="-1" role="dialog" aria-labelledby="master-modal-holder"
           aria-hidden="true" data-keyboard="false" data-backdrop="static">
             <div class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content" id="wager-amount" style="display: none;">
+                <div class="modal-content" id="wager_amount" style="display: none;">
                     <div class="modal-text">
                         <div class="modal-custom" id="wager_title">{{ game.heading() }}</div>
                         <div class="modal-custom small">You currently have {{ currency }}<span
@@ -76,7 +70,7 @@
         }
 
         socket.on('enable_buzzers-s>p', function(message) {
-            if (!message['players'].includes("{{ session['name'] }}")) {
+            if (!message['except_players'].includes("{{ session['name'] }}")) {
                 $('#buzzer').toggleClass('disabled btn-danger btn-success');
             }
 
@@ -103,7 +97,7 @@
 
 
             if (message['players'].includes('{{ session["name"] }}')) {
-                displayedInModal = '#wager-amount';
+                displayedInModal = '#wager_amount';
 
                 manageModal({
                     action: 'show'
@@ -114,7 +108,7 @@
         socket.on('wager_response_prompt-s>p', function(message) {
 
             if (message['players'].includes('{{ session["name"] }}')) {
-                displayedInModal = '#wager-amount';
+                displayedInModal = '#wager_amount';
 
                 manageModal({
                     action: 'show'
@@ -178,8 +172,7 @@
 
         socket.on('results-page-s>bph', function(message) {
             $("<form method='POST' action='" + window.location.origin +
-                "/results/'><input type='hidden' name='room' value='{{ game.room }}'/><input type='hidden' name='type' value='" +
-                type + "'/><input type='hidden' name='name' value='{{ session["name"] }}'/></form>").appendTo("body").submit();
+                "/results/'><input type='hidden' name='room' value='{{ game.room }}'/><input type='hidden' name='name' value='{{ session["name"] }}'/></form>").appendTo("body").submit();
         });
     </script>
 </body>

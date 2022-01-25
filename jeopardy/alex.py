@@ -3,19 +3,12 @@ import json
 import random
 import urllib
 import hashlib
-import sqlite3
 import datetime
 import itertools
+import dataclasses
 
-try:
-    import config
-
-except ImportError:
-    from jeopardy import config
-
-
-if config.debug:
-    from pprint import pprint
+# TODO: Move config stuff out of here. This should just be game logic
+from jeopardy import config
 
 
 class Game(object):
@@ -37,14 +30,23 @@ class Game(object):
 
         self.current_set = None
 
-    def add_player(self, name: str, check_exists: bool = False):
+        if config.debug:
+            self.add_player("Alex")
+            self.add_player("Brad")
+            self.add_player("Carl")
+
+            self.score.players["Alex"]["score"] = 1500
+            self.score.players["Brad"]["score"] = 500
+            self.score.players["Carl"]["score"] = 750
+
+    def add_player(self, name: str) -> dict:
         """Add a player to the game with a starting score of zero (0).
 
         Required Arguments:
 
         name (str) -- The player's name
         """
-        return self.score.add(name, check_exists=check_exists)
+        return self.score.add(name)
 
     def make_board(self):
         """Create a game board.
@@ -58,22 +60,6 @@ class Game(object):
 
         if not self.board.build_error:
             self.board.add_wagers()
-
-    def reset(self, reset_score: bool = False, reset_players: bool = False):
-        """Reset the game to play again!
-
-        Required Arguments:
-
-        `reset_score` (bool) -- Keep the players, but set score to zero. (Basically, rematch)
-        `reset_players` (bool) -- Reset both players and score (Basically, a whole new game)
-        """
-        if reset_players:
-            self.score.reset(type_="players")
-
-        elif reset_score:
-            self.score.reset(type_="score")
-
-        self.round = 0
 
     def round_text(self, upcoming: bool = False) -> str:
         """Return the text describing the title of the, by default, current round.
@@ -122,9 +108,8 @@ class Game(object):
         entry, category, value = identifier.split("_")
 
         if entry == "q":
-            response = self.board.categories[int(category)].sets[int(value)]
-            self.current_set = response.get_content()
-            return response.get()
+            self.current_set = self.board.categories[int(category)].sets[int(value)]
+            return self.current_set
 
         else:
             print("An error has occurred....")
@@ -158,17 +143,13 @@ class Scoreboard(object):
     def __contains__(self, item: str) -> bool:
         return item in self.players.keys()
 
-    def add(self, other: str, check_exists: bool) -> bool:
-        name = "".join(re.findall(r"[A-z0-9 \.\-\_]", other))
-        safe = hashlib.md5(name.encode("utf-8")).hexdigest()
+    def add(self, name: str) -> dict:
+        self.players[name] = {"safe": safe_name(name), "score": 0, "wager": {"amount": 0, "question": "", "pre": 0}}
 
-        if check_exists:
-            return (name in self) or (safe in (i["safe"] for i in self.players.values()))
+        return {"name": name, "safe": self.players[name]["safe"]}
 
-        else:
-            self.players[name] = {"safe": safe, "score": 0, "wager": {"amount": 0, "question": ""}}
-
-            return name
+    def player_exists(self, name: str) -> bool:
+        return (name in self) or (safe_name(name) in (i["safe"] for i in self.players.values()))
 
     def __len__(self) -> int:
         return len(self.players.keys())
@@ -180,6 +161,7 @@ class Scoreboard(object):
         k, v = wager
 
         self.players[player]["wager"][k] = v
+        self.players[player]["wager"]["pre"] = self.players[player]["score"]
 
         self.num += 1
 
@@ -189,24 +171,36 @@ class Scoreboard(object):
     def keys(self) -> list:
         return list(self.players.keys())
 
-    def sort(self, **kwargs) -> list:
-        return [i[0] for i in sorted(self.players.items(), key=lambda k: k[1]["score"], **kwargs)]
+    def sort(self, reverse: bool = False, wager: bool = False) -> list:
+        if wager:
+            key = lambda k: k[1]["wager"]["pre"]
+        else:
+            key = lambda k: k[1]["score"]
+        return [i[0] for i in sorted(self.players.items(), key=key, reverse=reverse)]
 
     def wager(self, player: str) -> dict:
         return {
-            **self.players[player]["wager"],
             "player": player,
-            "score": self[player],
+            "amount": self.players[player]["wager"]["amount"],
+            "question": self.players[player]["wager"]["question"],
+            "score": self.players[player]["score"],
         }
 
     def reset(self, type_: str) -> None:
-        # TODO: This won't work, for score, because the wager dictionary has been refactored.
-        #       Need to fix this, and possibly (ideally), clean up this super deep dict traversal
+        """
+        `reset_score` (bool) -- Keep the players, but set score to zero. (Basically, rematch)
+        `reset_players` (bool) -- Reset both players and score (Basically, a whole new game)
+        """
         if type_ == "players":
             self.players = dict()
 
-        elif type_ == "score":
-            self.players = {i: {"score": 0, "wager": 0} for i in self.players}
+            return
+
+        if type_ == "score":
+            for name in self.players.keys():
+                self.add(name)
+
+            return
 
     def update(self, game, correct: int) -> None:
         if self.wagerer is None:
@@ -232,19 +226,25 @@ class Board(object):
     def __init__(self, round_: int, settings: dict):
         self.round: int = round_
         self.categories: list = list()
+        self.daily_doubles: list = list()
 
         settings["round"] = self.round
 
         if self.round == 2:
             settings["size"] = 1
 
-        base_url = f"{config.api_endpoint}?"
         params = urllib.parse.urlencode(settings)
 
         try:
-            api_data = urllib.request.urlopen(base_url + params)
+            api_data = urllib.request.urlopen(f"{config.api_endpoint}?{params}")
 
             game = json.loads(api_data.read().decode("utf-8"))
+
+            if isinstance(game, dict) and (error := game.get("message")):
+                self.message = error
+                self.build_error = True
+
+                return
 
             for index, details in enumerate(game):
                 self.categories.append(Category(index=index, name=details["category"]["name"], sets=details["sets"]))
@@ -274,7 +274,9 @@ class Board(object):
             if config.debug:
                 daily_double = (0, 0)
 
-            self.categories[daily_double[0]].sets[daily_double[1]].wager = True
+            self.daily_doubles.append(daily_double)
+
+            self.categories[daily_double[0]].sets[daily_double[1]].is_wager = True
 
 
 class Category(object):
@@ -286,7 +288,7 @@ class Category(object):
         self.sets: list = list()
 
         for set_ in sets:
-            self.sets.append(Content(details=set_, category_index=index))
+            self.sets.append(Content(set_["value"], set_["answer"], set_["question"], set_["date"], index))
 
         self.sets.sort()
 
@@ -299,41 +301,32 @@ class Category(object):
         return str(self)
 
 
-class Content(object):
-    """Class to hold a single answer/question set"""
+@dataclasses.dataclass(eq=True, order=True)
+class Content:
+    value: int
+    answer: str
+    question: str
+    year: str
 
-    def __init__(self, details: dict, category_index: int):
-        self.category_index = category_index
-        self.shown = False
+    category_index: int
 
-        self.wager = False
-
-        self.answer = details["answer"]
-        self.question = details["question"]
-        self.value = details["value"]
-        self.year = datetime.datetime.fromisoformat(details["date"]).strftime("%Y")
-
-    def __lt__(self, other):
-        return self.value < other.value
-
-    # def __str__(self):
-    #     """Creates a string representation of the set's value"""
-    #     return str(self.value)
-
-    # def __repr__(self):
-    #     """Duplicates `__str__`"""
-    #     return str(self)
-
+    @property
     def id(self):
-        """Returns the unique identifier of the set"""
         return f"{self.category_index}_{self.value}"
 
-    def get(self):
-        """Gets the set, as done within the Jinja loading of the webpage"""
-        self.shown = True
+    @property
+    def shown(self):
 
-        return {"question": self.question, "answer": self.answer, "wager": self.wager, "year": self.year}
+        resp = self._shown
+        self._shown = True
+        return resp
 
-    def get_content(self):
-        """Gets the set, as done within the Jinja loading of the webpage"""
-        return self
+    def __post_init__(self):
+        self._shown = False
+        self.is_wager = False
+        self.year = datetime.datetime.fromisoformat(self.year).strftime("%Y")
+
+
+def safe_name(name: str) -> str:
+    clean = "".join(re.findall(r"[A-z0-9 \.\-\_]", name))
+    return hashlib.md5(clean.encode("utf-8")).hexdigest()

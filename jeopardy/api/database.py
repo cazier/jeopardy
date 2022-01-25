@@ -1,8 +1,8 @@
 import zlib
 import datetime
 
-from . import KEYS
-from .models import *
+from jeopardy.api import KEYS
+from jeopardy.api.models import *
 
 
 class SetAlreadyExistsError(Exception):

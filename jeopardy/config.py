@@ -1,5 +1,4 @@
 import os
-import uuid
 import pathlib
 
 ### GAME SETTINGS ###
@@ -19,7 +18,7 @@ if (env_url := os.getenv(key="APP_URL")) is not None:
 else:
     url = "*"
 
-api_endpoint = os.getenv(key="API_ENDPOINT", default=f"http://127.0.0.1:5000/api/v{api_version}/game")
+api_endpoint = os.getenv(key="API_ENDPOINT", default=f"http://127.0.0.1:{port}/api/v{api_version}/game")
 
 db_file = pathlib.Path(os.getenv(key="DB_FILE", default="sample.db")).absolute()
 

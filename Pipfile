@@ -28,10 +28,15 @@ sqlalchemy = "*"
 werkzeug = "*"
 
 [dev-packages]
-pytest = "*"
+coverage = {extras = ["toml"], version = "*"}
+faker = "*"
+ipython = "*"
+jeopardy = {editable = true, path = "."}
 requests = "*"
-coverage = "*"
+playwright = "*"
 pre-commit = "*"
+pytest = "*"
+pytest-cov = "*"
 
 [requires]
 python_version = "3.9"

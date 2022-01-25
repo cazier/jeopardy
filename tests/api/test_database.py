@@ -1,6 +1,3 @@
-import json
-import pathlib
-
 import pytest
 
 from jeopardy import api

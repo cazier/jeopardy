@@ -7,10 +7,6 @@
     {% include "scripts_meta.html" %}
     {% include "socketio_connect.html" %}
 
-    <script>
-        var type = 'host';
-    </script>
-
 </head>
 
 <body>
@@ -41,8 +37,8 @@
                             <div class="row">
                                 {% for answer in name.sets %}
                                 <button
-                                  class="btn btn-primary col-sm show-answer {% if answer.shown %}disabled{% endif %} spaced"
-                                  type="button" id="q_{{ answer.id() }}">
+                                  class="btn btn-primary col-sm show-answer {% if answer._shown %}disabled{% endif %} spaced"
+                                  type="button" id="q_{{ answer.id }}">
                                     {{ currency }}{{ (answer.value + 1) * (game.round + 1) * 200 }}
                                 </button>
                                 {% endfor %}
@@ -425,19 +421,20 @@
             });
 
         });
-
+        {% if game.round >= 2 %}
         socket.on('update_scores-s>bph', function(message) {
             var player = $("#player").text();
 
             $('#final_score').text(message['scores'][player]['score']);
+            console.log(message['scores']);
 
             $('#wagering').toggle();
         });
+        {% endif %}
 
         socket.on('results-page-s>bph', function(message) {
             $("<form method='POST' action='" + window.location.origin +
-                "/results/'><input type='hidden' name='room' value='{{ game.room }}'/><input type='hidden' name='type' value='" +
-                type + "'/></form>").appendTo("body").submit();
+                "/results/'><input type='hidden' name='room' value='{{ game.room }}'/></form>").appendTo("body").submit();
         });
     </script>
 </body>

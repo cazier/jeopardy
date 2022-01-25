@@ -1,14 +1,7 @@
 from flask import Markup, request
 
-try:
-    import config
-    import rounds
-    import storage
-    from sockets import get_room, socketio
-
-except ImportError:
-    from jeopardy import config, rounds, storage
-    from jeopardy.sockets import get_room, socketio
+from jeopardy import rounds, storage
+from jeopardy.sockets import get_room, socketio
 
 
 def start_wager(game):
@@ -56,14 +49,16 @@ def wager_submittal(data):
                 game.score.num = 0
 
                 game.get(u"q_0_0")
-                info = game.current_set.get()
+                info = game.current_set
 
                 updates = {
-                    "wager_question": Markup(info["question"]),
-                    "wager_answer": Markup(info["answer"]),
-                    "wager_year": info["year"],
+                    "wager_question": Markup(info.question),
+                    "wager_answer": Markup(info.answer),
+                    "wager_year": info.year,
                     "displayedInModal": "#wager_round",
                 }
+
+                socketio.sleep(0.5)
 
                 socketio.emit(
                     event="reset_wager_names-s>h", data={"players": list(game.score.players.values())}, room=room
@@ -71,20 +66,15 @@ def wager_submittal(data):
 
                 reveal_wager(game=game, updates=updates)
 
-            # socketio.emit(
-            #     "wager_submitted-s>h",
-            #     {"room": game.room, "updates": {"name": data["name"]}},
-            # )
-
         elif game.round < 2:
             game.score.num = 0
 
-            info = game.current_set.get()
+            info = game.current_set
 
             updates = {
-                "wager_question": Markup(info["question"]),
-                "wager_answer": Markup(info["answer"]),
-                "wager_year": info["year"],
+                "wager_question": Markup(info.question),
+                "wager_answer": Markup(info.answer),
+                "wager_year": info.year,
             }
 
             reveal_wager(game=game, updates=updates)
@@ -108,8 +98,8 @@ def wager_submittal(data):
 
 def reveal_wager(game, updates: dict) -> None:
     socketio.emit(
-        event="reveal_wager-s>bh",
-        data={
+        "reveal_wager-s>bh",
+        {
             "updates": updates,
         },
         room=game.room,
@@ -137,8 +127,6 @@ def wager_responded(data):
             event="reset_wagers_modals-s>bh", data={"updates": {"wager_answer": "", "wager_question": ""}}, room=room
         )
 
-        socketio.emit(event="clear_modal-s>bh", room=room)
-
         rounds.end_set(room)
 
 
@@ -163,7 +151,7 @@ def show_responses():
         rounds.end_set(room)
 
     else:
-        player = game.score.sort()[game.score.num]
+        player = game.score.sort(wager=True)[game.score.num]
         game.score.wagerer = player
 
         socketio.emit(event="display_final_response-s>bph", data={"updates": game.score.wager(player)}, room=room)

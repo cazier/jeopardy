@@ -119,8 +119,8 @@ dmypy.json
 *.json
 !incomplete.json
 !complete.json
-!test-full.db
 !sample.db
 
 storage/
+artifacts/
 output/
