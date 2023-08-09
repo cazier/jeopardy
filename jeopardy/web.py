@@ -16,6 +16,7 @@ def create_app():
     app.jinja_env.globals.update(currency=config.currency)
 
     app.debug = config.debug
+    app.config["TESTING"] = hasattr(config, 'testing') and config.testing
     app.config["SECRET_KEY"] = config.secret_key
     app.config["SQLALCHEMY_DATABASE_URI"] = config.api_db
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False

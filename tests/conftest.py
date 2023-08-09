@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import shutil
 import pathlib
@@ -9,11 +10,13 @@ from urllib import request as urllib_request
 import pytest
 from flask import request, url_for, wrappers
 
+sys.path.append(pathlib.Path(__file__).parent.parent.joinpath('jeopardy'))
+
 from jeopardy import web, config, sockets, storage
 
 
 @pytest.fixture(scope="module", autouse=True)
-def populate_databses():
+def populate_databases():
     dbs = (pathlib.Path("tests/_files/test-empty.db"), pathlib.Path("tests/_files/test-full.db"))
 
     for db in dbs:
@@ -94,9 +97,9 @@ def samplecategory(webclient):
 @pytest.fixture(scope="session")
 def app_factory():
     def func(db):
+        config.api_db = f"sqlite:///{pathlib.Path('tests/_files/test').absolute()}-{db}.db"
+        config.testing = True
         app = web.create_app()
-        app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{pathlib.Path('tests/_files/test').absolute()}-{db}.db"
-        app.config["TESTING"] = True
 
         return app
 

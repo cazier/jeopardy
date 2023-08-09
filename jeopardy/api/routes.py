@@ -31,16 +31,16 @@ class DetailsResource(Resource):
 
         shows.update(
             {
-                "first_id": Show.query.order_by(Show.id)[0].id,
-                "last_id": Show.query.order_by(Show.id)[-1].id,
-                "first_number": Show.query.order_by(Show.number)[0].number,
-                "last_number": Show.query.order_by(Show.number)[-1].number,
+                "first_id": Show.query.order_by(Show.id).first().id,
+                "last_id": Show.query.order_by(Show.id.desc()).first().id,
+                "first_number": Show.query.order_by(Show.number).first().number,
+                "last_number": Show.query.order_by(Show.number.desc()).first().number,
             }
         )
 
         air_dates = {
-            "oldest": Date.query.order_by(Date.date)[0].date,
-            "most_recent": Date.query.order_by(Date.date)[-1].date,
+            "oldest": Date.query.order_by(Date.date).first().date,
+            "most_recent": Date.query.order_by(Date.date.desc()).first().date,
         }
 
         return jsonify({"categories": categories, "sets": sets, "shows": shows, "air_dates": air_dates})
