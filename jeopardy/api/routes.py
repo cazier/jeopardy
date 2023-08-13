@@ -1,46 +1,48 @@
 import random
+import typing as t
 import datetime
 
-import flask_sqlalchemy
 from flask import jsonify, request
-from sqlalchemy import or_, and_
+from sqlalchemy import Select, or_, and_, func, not_, exists, select
 from flask_restful import Resource, abort
 
 from jeopardy.api import KEYS, api, database
 from jeopardy.api.models import *
 from jeopardy.api.schemas import *
 
+Q = t.TypeVar("Q", Select, Base)
+
 
 class DetailsResource(Resource):
     def get(self) -> dict:
         categories = {
-            "total": Category.query.count(),
-            "complete": Category.query.filter(Category.complete == True).count(),
-            "incomplete": Category.query.filter(Category.complete == False).count(),
+            "total": session.scalar(select(func.count()).select_from(Category)),
+            "complete": session.scalar(select(func.count()).where(Category.complete == True)),
+            "incomplete": session.scalar(select(func.count()).where(Category.complete == False)),
         }
         sets = {
-            "total": Set.query.count(),
-            "has_external": Set.query.filter(Set.external == True).count(),
-            "no_external": Set.query.filter(Set.external == False).count(),
+            "total": session.scalar(select(func.count()).select_from(Set)),
+            "has_external": session.scalar(select(func.count()).where(Set.external == True)),
+            "no_external": session.scalar(select(func.count()).where(Set.external == True)),
         }
 
-        shows = {"total": Show.query.count()}
+        shows = {"total": session.scalar(select(func.count()).select_from(Show))}
 
         if 0 in {categories["total"], sets["total"], shows["total"]}:
             no_results(message="there are no items currently in the database")
 
         shows.update(
             {
-                "first_id": Show.query.order_by(Show.id).first().id,
-                "last_id": Show.query.order_by(Show.id.desc()).first().id,
-                "first_number": Show.query.order_by(Show.number).first().number,
-                "last_number": Show.query.order_by(Show.number.desc()).first().number,
+                "first_id": session.execute(select(Show).order_by(Show.id)).scalars().first().id,
+                "last_id": session.execute(select(Show).order_by(Show.id.desc())).scalars().first().id,
+                "first_number": session.execute(select(Show).order_by(Show.number)).scalars().first().number,
+                "last_number": session.execute(select(Show).order_by(Show.number.desc())).scalars().first().number,
             }
         )
 
         air_dates = {
-            "oldest": Date.query.order_by(Date.date).first().date,
-            "most_recent": Date.query.order_by(Date.date.desc()).first().date,
+            "oldest": session.execute(select(Date).order_by(Date.date)).scalars().first().date,
+            "most_recent": session.execute(select(Date).order_by(Date.date.desc())).scalars().first().date,
         }
 
         return jsonify({"categories": categories, "sets": sets, "shows": shows, "air_dates": air_dates})
@@ -51,12 +53,13 @@ class SetById(Resource):
         return jsonify(set_schema.dump(id_query(model=Set, id_=set_id)))
 
     def delete(self, set_id: int) -> dict:
-        set_ = Set.query.get(set_id)
+        row = session.scalar(select(Set).filter_by(id=set_id))
 
-        db.session.delete(set_)
-        db.session.commit()
+        if row:
+            session.delete(row)
+            session.commit()
 
-        return jsonify({"deleted": set_id})
+            return jsonify({"deleted": set_id})
 
 
 class SetByRound(Resource):
@@ -97,10 +100,10 @@ class SetByYear(Resource):
 
 class SetMultiple(Resource):
     def get(self) -> dict:
-        results = Set.query
-
+        # TODO: Might be able to get rid of id == date_id if back refs are good?
         results = (
-            results.join(Date, Date.id == Set.date_id)
+            select(Set)
+            .join(Date, Date.id == Set.date_id)
             .join(Round, Round.id == Set.round_id)
             .join(Category, Category.id == Set.category_id)
             .join(Value, Value.id == Set.value_id)
@@ -111,8 +114,8 @@ class SetMultiple(Resource):
         return paginate(model=results, schema=sets_schema.dump, indices=request.args)
 
     def post(self) -> dict:
-        payload = request.json
-        if (set(payload.keys()) == KEYS) and all((len(str(v)) > 0 for k, v in payload.items())):
+        payload: dict[str, t.Any] = request.json
+        if (set(payload.keys()) == KEYS) and all((len(str(value)) > 0 for value in payload.values())):
             try:
                 resp = database.add(clue_data=payload, uses_shortnames=False)
 
@@ -132,7 +135,7 @@ class ShowById(Resource):
 
 class ShowByNumber(Resource):
     def get(self, show_number: int) -> dict:
-        show = Show.query.filter_by(number=show_number).first()
+        show = session.scalar(select(Show).where(Show.number == show_number))
 
         if show == None:
             no_results()
@@ -157,7 +160,7 @@ class ShowByYears(Resource):
 
 class ShowMultiple(Resource):
     def get(self) -> dict:
-        return paginate(model=Show.query, schema=shows_schema.dump, indices=request.args)
+        return paginate(model=select(Show), schema=shows_schema.dump, indices=request.args)
 
 
 class CategoryById(Resource):
@@ -189,26 +192,28 @@ class CategoryByCompletion(Resource):
                 completion = False
 
         if completion == True or completion_string.lower() == "complete":
-            results = Category.query.filter(Category.complete == True)
+            results = select(Category).where(Category.complete == True)
 
         elif completion == False or completion_string.lower() == "incomplete":
-            results = Category.query.filter(Category.complete == False)
+            results = select(Category).where(Category.complete == False)
 
         else:
             abort(400, message='The completion status must be one of either "True/False" or "Complete/Incomplete"')
 
-        results = results.join(Date, Date.id == Category.date_id).join(Round, Round.id == Category.round_id)
-        results = results.order_by(Date.date, Round.number, Category.name)
+        results = results.join(Date).join(Round).order_by(Date.date, Round.number, Category.name)
 
         return paginate(model=results, schema=categories_schema.dump, indices=request.args)
 
 
 class CategoryByName(Resource):
     def get(self, name_string: int) -> dict:
-        results = Category.query.filter(Category.name.like(f"%{name_string}%"))
-
-        results = results.join(Date, Date.id == Category.date_id).join(Round, Round.id == Category.round_id)
-        results = results.order_by(Date.date, Round.number, Category.name)
+        results = (
+            select(Category)
+            .where(Category.name.like(f"%{name_string}%"))
+            .join(Date)
+            .join(Round)
+            .order_by(Date.date, Round.number, Category.name)
+        )
 
         return paginate(model=results, schema=categories_schema.dump, indices=request.args)
 
@@ -237,7 +242,7 @@ class CategoryByShowId(Resource):
 
 class CategoryMultiple(Resource):
     def get(self) -> dict:
-        return paginate(model=Category.query, schema=categories_schema.dump, indices=request.args)
+        return paginate(model=select(Category), schema=categories_schema.dump, indices=request.args)
 
 
 # class BlankResource(Resource):
@@ -260,16 +265,17 @@ class GameResource(Resource):
         allow_incomplete = bool(request.args.get("allow_incomplete", False))
 
         if round_ == -1:
-            categories = Category.query.filter(or_(Category.round.has(number=0), Category.round.has(number=1)))
+            categories = select(Category).join(Round).where(or_(Round.number == 0, Round.number == 1))
 
         elif 0 <= round_ <= 2:
-            categories = Category.query.filter(Category.round.has(number=round_))
+            categories = select(Category).join(Round).where(Round.number == round_)
 
         else:
             abort(
                 400,
                 message="The round number must be one of 0 (Jeopardy!), 1 (Double Jeopardy!), or 2 (Final Jeopardy!)",
             )
+            return
 
         if (start != -1) and (stop != -1):
             categories = date_query(model=Category, start=start, stop=stop, chained_results=categories)
@@ -284,21 +290,19 @@ class GameResource(Resource):
             categories = show_query(model=Category, identifier="id", value=show_id, chained_results=categories)
 
         if not allow_incomplete:
-            categories = categories.filter(Category.complete == True)
+            categories = categories.where(Category.complete == True)
 
         if not allow_external:
-            external_sets = Set.query.filter(Set.external == True).group_by(Set.category_id).subquery()
+            categories = categories.where(select(Set).exists().where(Set.external == False))
 
-            categories = categories.outerjoin(external_sets).filter(external_sets.c.id == None)
+        categories = session.scalars(categories.order_by(Category.id)).all()
 
-        categories = categories.order_by(Category.id)
-
-        if (number_results := categories.count()) < size:
+        if (number_results := len(categories)) < size:
             abort(400, message=f"Unfortunately only {number_results} categories were found. Please reduce the size.")
 
         numbers = random.sample(range(0, number_results), min(number_results, size * 2))
 
-        game: list = list()
+        game = []
 
         while len(game) < size:
             try:
@@ -310,16 +314,17 @@ class GameResource(Resource):
                 )
 
             if category.name not in (i["category"]["name"] for i in game):
-                sets = Set.query.filter(Set.category_id == category.id)
-                sets = sets.join(Value, Value.id == Set.value_id).order_by(Set.value)
+                sets = session.scalars(
+                    select(Set).where(Set.category_id == category.id).join(Value).order_by(Set.value)
+                ).all()
 
                 game.append({"category": category_schema.dump(category), "sets": sets_schema.dump(sets)})
 
         return jsonify(game)
 
 
-def paginate(model, schema, indices) -> dict:
-    if (count := model.count()) == 0:
+def paginate(model: Select, schema: callable, indices: dict[str, str]) -> dict:
+    if (count := session.scalar(select(func.count()).select_from(model.subquery()))) == 0:
         no_results()
 
     start = int(indices.get("start", 0))
@@ -328,11 +333,16 @@ def paginate(model, schema, indices) -> dict:
     if start > count:
         abort(400, message="start number too great")
 
+    if not isinstance(model, Select):
+        model = select(model)
+
+    rows = session.scalars(model).all()
+
     if start + number > count:
-        data = model[start:]
+        data = rows[start:]
 
     else:
-        data = model[start : start + number]
+        data = rows[start : start + number]
 
     return jsonify(
         {
@@ -345,13 +355,13 @@ def paginate(model, schema, indices) -> dict:
 
 
 def date_query(
-    model, year: int = -1, month: int = -1, day: int = -1, start: int = -1, stop: int = -1, chained_results=None
-):
+    model: Q, year: int = -1, month: int = -1, day: int = -1, start: int = -1, stop: int = -1, chained_results=None
+) -> Q:
     if chained_results != None:
         results = chained_results
 
     else:
-        results = model.query
+        results = select(model)
 
     if year != -1:
         try:
@@ -378,19 +388,20 @@ def date_query(
         if 1 > start or 1 > stop or 9999 < start or 9999 < stop:
             abort(400, message="year range must be between 0001 and 9999")
 
-        if Date.query.filter(and_(start <= Date.year, Date.year <= stop)).count() == 0:
+        if session.scalar(select(Date).where(start <= Date.year).where(Date.year <= stop)) is None:
             abort(
                 400,
                 message="Unfortunately, there are no data in the database within that year span. Please double check your values.",
             )
 
+        # TODO: New style
         results = results.join(Date, Date.id == model.date_id).filter(and_(start <= Date.year, Date.year <= stop))
 
     return results
 
 
-def id_query(model, id_: int) -> flask_sqlalchemy.BaseQuery:
-    results = model.query.filter_by(id=id_).first()
+def id_query(model: Q, id_: int) -> Q:
+    results = session.scalar(select(model).filter_by(id=id_))
 
     if results == None:
         no_results()
@@ -399,39 +410,38 @@ def id_query(model, id_: int) -> flask_sqlalchemy.BaseQuery:
         return results
 
 
-def show_query(model, identifier: str, value: int, chained_results=None) -> flask_sqlalchemy.BaseQuery:
+def show_query(model: Q, identifier: str, value: int, chained_results=None) -> Q:
     if chained_results != None:
         results = chained_results
 
     else:
-        results = model.query
+        results = select(model)
 
     if identifier == "number":
-        if Show.query.filter_by(number=value).count() == 0:
+        if session.scalar(select(Show).where(Show.number == value)) is None:
             abort(
                 400,
                 message="Unfortunately, there is no show in the database with that number. Please double check your values.",
             )
-
-        results = results.filter(model.show.has(number=value))
+        results = results.join(Show).where(Show.number == value)
 
     elif identifier == "id":
-        if Show.query.filter_by(id=value).count() == 0:
+        if session.scalar(select(Show).where(Show.id == value)) is None:
             abort(
                 400,
                 message="Unfortunately, there is no show in the database with that ID. Please double check your values.",
             )
 
-        results = results.filter(model.show.has(id=value))
+        results = results.join(Show).where(Show.id == value)
 
     return results
 
 
-def round_query(model, number: int) -> flask_sqlalchemy.BaseQuery:
+def round_query(model: Q, number: int) -> Q:
     if not (0 <= number <= 2):
         abort(400, message="round number must be between 0 (jeopardy) and 2 (final jeopardy/tiebreaker)")
 
-    return model.query.filter(model.round.has(number=number))
+    return select(model).join(Round).where(Round.number == number)
 
 
 def no_results(message: str = "no items were found with that query"):

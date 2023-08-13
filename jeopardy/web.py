@@ -16,7 +16,7 @@ def create_app():
     app.jinja_env.globals.update(currency=config.currency)
 
     app.debug = config.debug
-    app.config["TESTING"] = hasattr(config, 'testing') and config.testing
+    app.config["TESTING"] = hasattr(config, "testing") and config.testing
     app.config["SECRET_KEY"] = config.secret_key
     app.config["SQLALCHEMY_DATABASE_URI"] = config.api_db
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -30,11 +30,11 @@ def create_app():
     return app
 
 
-if __name__ == u"__main__":
+if __name__ == "__main__":
     print("Loading database file from:", config.db_file)
     app = create_app()
 
     socketio = sockets.socketio
     socketio.init_app(app)
 
-    socketio.run(app, host=u"0.0.0.0", debug=config.debug, port=config.port)
+    socketio.run(app, host="0.0.0.0", debug=config.debug, port=config.port)

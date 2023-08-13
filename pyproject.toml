@@ -7,11 +7,11 @@ length_sort = true
 multi_line_output = 3
 include_trailing_comma = true
 
-# [tool.pytest.ini_options]
-# addopts = "--cov=jeopardy --cov-report html --cov-report xml --import-mode importlib"
-# testpaths = [ "tests" ]
-# markers = [ "incremental", "browser" ]
-# filterwarnings = [ "ignore::DeprecationWarning" ]
+[tool.pytest.ini_options]
+# addopts = "--cov=jeopardy --cov-report html --cov-report xml"
+addopts = "--pdbcls=IPython.terminal.debugger:Pdb"
+testpaths = [ "tests" ]
+markers = [ "incremental", "browser" ]
 
 [tool.pylint.'FORMAT']
 max-line-length = 120
@@ -49,6 +49,12 @@ pre-commit = "^3.3.3"
 pytest = "^7.4.0"
 pytest-cov = "^4.1.0"
 rich = "^13.5.2"
+black = "^23.7.0"
+ipdb = "^0.13.13"
+isort = "^5.12.0"
+mypy = "^1.5.0"
+pylint = "^2.17.5"
+ruff = "^0.0.284"
 
 [build-system]
 requires = ["poetry-core"]
