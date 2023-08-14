@@ -3,27 +3,28 @@ import typing as t
 import datetime
 
 from flask import jsonify, request
-from sqlalchemy import Select, or_, and_, func, not_, exists, select
+from sqlalchemy import Select, or_, and_, func, select
 from flask_restful import Resource, abort
 
 from jeopardy.api import KEYS, api, database
-from jeopardy.api.models import *
-from jeopardy.api.schemas import *
+from jeopardy.api.models import Set, Base, Date, Show, Round, Value, Category, db
+from jeopardy.api.schemas import set_schema, sets_schema, show_schema, shows_schema, category_schema, categories_schema
 
 Q = t.TypeVar("Q", Select, Base)
+session = db.session
 
 
 class DetailsResource(Resource):
     def get(self) -> dict:
         categories = {
             "total": session.scalar(select(func.count()).select_from(Category)),
-            "complete": session.scalar(select(func.count()).where(Category.complete == True)),
-            "incomplete": session.scalar(select(func.count()).where(Category.complete == False)),
+            "complete": session.scalar(select(func.count()).where(Category.complete == True)),  # noqa: E712
+            "incomplete": session.scalar(select(func.count()).where(Category.complete == False)),  # noqa: E712
         }
         sets = {
             "total": session.scalar(select(func.count()).select_from(Set)),
-            "has_external": session.scalar(select(func.count()).where(Set.external == True)),
-            "no_external": session.scalar(select(func.count()).where(Set.external == True)),
+            "has_external": session.scalar(select(func.count()).where(Set.external == True)),  # noqa: E712
+            "no_external": session.scalar(select(func.count()).where(Set.external == True)),  # noqa: E712
         }
 
         shows = {"total": session.scalar(select(func.count()).select_from(Show))}
@@ -137,7 +138,7 @@ class ShowByNumber(Resource):
     def get(self, show_number: int) -> dict:
         show = session.scalar(select(Show).where(Show.number == show_number))
 
-        if show == None:
+        if show is None:
             no_results()
 
         else:
@@ -191,11 +192,11 @@ class CategoryByCompletion(Resource):
             elif completion.lower() == "false":
                 completion = False
 
-        if completion == True or completion_string.lower() == "complete":
-            results = select(Category).where(Category.complete == True)
+        if completion is True or completion_string.lower() == "complete":
+            results = select(Category).where(Category.complete == True)  # noqa: E712
 
-        elif completion == False or completion_string.lower() == "incomplete":
-            results = select(Category).where(Category.complete == False)
+        elif completion is False or completion_string.lower() == "incomplete":
+            results = select(Category).where(Category.complete == False)  # noqa: E712
 
         else:
             abort(400, message='The completion status must be one of either "True/False" or "Complete/Incomplete"')
@@ -290,10 +291,10 @@ class GameResource(Resource):
             categories = show_query(model=Category, identifier="id", value=show_id, chained_results=categories)
 
         if not allow_incomplete:
-            categories = categories.where(Category.complete == True)
+            categories = categories.where(Category.complete == True)  # noqa: E712
 
         if not allow_external:
-            categories = categories.where(select(Set).exists().where(Set.external == False))
+            categories = categories.where(select(Set).exists().where(Set.external == False))  # noqa: E712
 
         categories = session.scalars(categories.order_by(Category.id)).all()
 
@@ -357,7 +358,7 @@ def paginate(model: Select, schema: callable, indices: dict[str, str]) -> dict:
 def date_query(
     model: Q, year: int = -1, month: int = -1, day: int = -1, start: int = -1, stop: int = -1, chained_results=None
 ) -> Q:
-    if chained_results != None:
+    if chained_results is not None:
         results = chained_results
 
     else:
@@ -370,7 +371,7 @@ def date_query(
         except ValueError:
             abort(
                 400,
-                message="please check that your date is valid (year between 0001 and 9999, month between 1 and 12, and day between 1 and 31, as applicable)",
+                message="That date is invalid (0001 <= year <= 9999, 1 <= month <= 12, 1 <= day <= 31)",
             )
 
         results = results.filter(model.date.has(year=date.year))
@@ -391,7 +392,7 @@ def date_query(
         if session.scalar(select(Date).where(start <= Date.year).where(Date.year <= stop)) is None:
             abort(
                 400,
-                message="Unfortunately, there are no data in the database within that year span. Please double check your values.",
+                message="There are no data in the database within that year span. Please double check your values.",
             )
 
         # TODO: New style
@@ -403,7 +404,7 @@ def date_query(
 def id_query(model: Q, id_: int) -> Q:
     results = session.scalar(select(model).filter_by(id=id_))
 
-    if results == None:
+    if results is None:
         no_results()
 
     else:
@@ -411,7 +412,7 @@ def id_query(model: Q, id_: int) -> Q:
 
 
 def show_query(model: Q, identifier: str, value: int, chained_results=None) -> Q:
-    if chained_results != None:
+    if chained_results is not None:
         results = chained_results
 
     else:
@@ -421,7 +422,7 @@ def show_query(model: Q, identifier: str, value: int, chained_results=None) -> Q
         if session.scalar(select(Show).where(Show.number == value)) is None:
             abort(
                 400,
-                message="Unfortunately, there is no show in the database with that number. Please double check your values.",
+                message="There is no show in the database with that number. Please double check your values.",
             )
         results = results.join(Show).where(Show.number == value)
 
@@ -429,7 +430,7 @@ def show_query(model: Q, identifier: str, value: int, chained_results=None) -> Q
         if session.scalar(select(Show).where(Show.id == value)) is None:
             abort(
                 400,
-                message="Unfortunately, there is no show in the database with that ID. Please double check your values.",
+                message="There is no show in the database with that ID. Please double check your values.",
             )
 
         results = results.join(Show).where(Show.id == value)

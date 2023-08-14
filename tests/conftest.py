@@ -10,9 +10,9 @@ from urllib import request as urllib_request
 import pytest
 from flask import request, url_for, wrappers
 
-sys.path.append(pathlib.Path(__file__).parent.parent.joinpath('jeopardy'))
+sys.path.append(pathlib.Path(__file__).parent.parent.joinpath("jeopardy"))
 
-from jeopardy import web, config, sockets, storage
+from jeopardy import web, config, sockets, storage  # noqa: E402
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -126,7 +126,7 @@ def webclient(app_factory):
 
     flask = app.test_client()
 
-    with app.test_request_context() as ctx:
+    with app.test_request_context():
         client = socketio.test_client(app, flask_test_client=flask)
 
         yield client

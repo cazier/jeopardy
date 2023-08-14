@@ -1,10 +1,12 @@
 import zlib
 import datetime
 
-from sqlalchemy import or_, and_, func, select
+from sqlalchemy import select
 
 from jeopardy.api import KEYS
-from jeopardy.api.models import *
+from jeopardy.api.models import Set, Date, Show, Round, Value, Category, db
+
+session = db.session
 
 
 class SetAlreadyExistsError(Exception):

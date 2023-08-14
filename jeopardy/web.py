@@ -1,6 +1,6 @@
 import sys
 
-if not "pytest" in sys.modules:
+if "pytest" not in sys.modules:
     import eventlet
 
     eventlet.monkey_patch()

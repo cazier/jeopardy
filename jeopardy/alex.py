@@ -51,7 +51,7 @@ class Game(object):
     def make_board(self):
         """Create a game board.
 
-        This will track the number of question/answer sets in each round, and runs the function `self.board.add_wagers()`
+        This will track the number of question/answer sets in each round, and runs the `self.board.add_wagers()` method
         to ensure the "Daily Doubles" are placed around the board.
         """
         self.remaining_content = config.sets if config.debug else self.size * 5
@@ -173,9 +173,15 @@ class Scoreboard(object):
 
     def sort(self, reverse: bool = False, wager: bool = False) -> list:
         if wager:
-            key = lambda k: k[1]["wager"]["pre"]
+
+            def key(k):
+                return k[1]["wager"]["pre"]
+
         else:
-            key = lambda k: k[1]["score"]
+
+            def key(k):
+                return k[1]["score"]
+
         return [i[0] for i in sorted(self.players.items(), key=key, reverse=reverse)]
 
     def wager(self, player: str) -> dict:

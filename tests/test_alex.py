@@ -29,9 +29,9 @@ def test_content_creation(samplecontent):
 
     assert content.id == f"{0}_{data['value']}"
 
-    assert content.shown == False
+    assert not content.shown
     assert content.question == cleaned["question"]
-    assert content.shown == True
+    assert content.shown
 
     sample = alex.Content(content.value + 200, data["answer"], data["question"], data["date"], 0)
 
@@ -103,7 +103,7 @@ def test_board_creation_debug(webclient):
 
     assert board.round == 1
     assert sum([j.is_wager for i in board.categories for j in i.sets]) == 1
-    assert board.categories[0].sets[0].is_wager == True
+    assert board.categories[0].sets[0].is_wager
 
 
 def test_board_creation_400(webclient):
@@ -117,7 +117,7 @@ def test_board_creation_400(webclient):
 
         board = alex.Board(round_=0, settings={})
 
-    assert board.build_error == True
+    assert board.build_error
     assert board.message == data["message"]
 
 
@@ -132,7 +132,7 @@ def test_board_creation_404(webclient):
 
         board = alex.Board(round_=0, settings={})
 
-    assert board.build_error == True
+    assert board.build_error
     assert (
         board.message
         == "An error occurred finding the API. Please try restarting the server, or check your configuration."
@@ -150,7 +150,7 @@ def test_board_creation_500(webclient):
 
         board = alex.Board(round_=0, settings={})
 
-    assert board.build_error == True
+    assert board.build_error
     assert board.message == "An unknown error occurred. Please submit a bug report with details!"
 
 
@@ -206,7 +206,7 @@ def test_game_creation(webclient, clean_content):
     assert (len(game.board.categories) == 6) & (len(game.board.categories[0].sets) == 5)
     assert (len(html_board) == 5) & (len(html_board[0]) == 6)
 
-    assert game.get("a_0_0") == False
+    assert not game.get("a_0_0")
 
     assert game.buzz_order == dict()
     game.buzz({"name": "Test", "time": 1000})
@@ -266,14 +266,14 @@ def test_game_creation_debug(webclient):
         },
     }
 
-    assert game.board.categories[0].sets[0].is_wager == True
+    assert game.board.categories[0].sets[0].is_wager
 
 
 def test_scoreboard_creation():
     board = alex.Scoreboard()
-    assert board.player_exists("test") == False
+    assert not board.player_exists("test")
     board.add("test")
-    assert board.player_exists("test") == True
+    assert board.player_exists("test")
 
     assert len(board) == 1
     assert board["test"] == 0

@@ -110,14 +110,14 @@ def test_sets_by_show(webclient, test_data):
 
     assert rv.status_code == 400
     assert rv.get_json() == {
-        "message": "Unfortunately, there is no show in the database with that number. Please double check your values."
+        "message": "There is no show in the database with that number. Please double check your values."
     }
 
     rv = webclient.flask_test_client.get(f"/api/v{API_VERSION}/set/show/id/100")
 
     assert rv.status_code == 400
     assert rv.get_json() == {
-        "message": "Unfortunately, there is no show in the database with that ID. Please double check your values."
+        "message": "There is no show in the database with that ID. Please double check your values."
     }
 
 
@@ -131,7 +131,7 @@ def test_sets_by_date(webclient, test_data):
     rv = webclient.flask_test_client.get(f"/api/v{API_VERSION}/set/date/2020/02/31")
 
     assert rv.status_code == 400
-    assert "check that your date is valid" in rv.get_json()["message"]
+    assert "That date is invalid" in rv.get_json()["message"]
 
 
 def test_sets_by_years(webclient, test_data):
@@ -151,7 +151,7 @@ def test_sets_by_years(webclient, test_data):
 
     rv = webclient.flask_test_client.get(f"/api/v{API_VERSION}/set/years/1995/1996")
     assert rv.status_code == 400
-    assert "Unfortunately, there are no data in the database within that year span." in rv.get_json()["message"]
+    assert "There are no data in the database within that year span." in rv.get_json()["message"]
 
     rv = webclient.flask_test_client.get(f"/api/v{API_VERSION}/set/years/1994/1992")
     assert rv.status_code == 400
@@ -253,12 +253,12 @@ def test_show_by_date(webclient):
     rv = webclient.flask_test_client.get(f"/api/v{API_VERSION}/show/date/00/01/01")
 
     assert rv.status_code == 400
-    assert "check that your date is valid" in rv.get_json()["message"]
+    assert "That date is invalid" in rv.get_json()["message"]
 
     rv = webclient.flask_test_client.get(f"/api/v{API_VERSION}/show/date/2020/02/31")
 
     assert rv.status_code == 400
-    assert "check that your date is valid" in rv.get_json()["message"]
+    assert "That date is invalid" in rv.get_json()["message"]
 
 
 def test_shows_by_years(webclient, test_data):
@@ -277,7 +277,7 @@ def test_shows_by_years(webclient, test_data):
 
     rv = webclient.flask_test_client.get(f"/api/v{API_VERSION}/show/years/1995/1996")
     assert rv.status_code == 400
-    assert "Unfortunately, there are no data in the database within that year span." in rv.get_json()["message"]
+    assert "There are no data in the database within that year span." in rv.get_json()["message"]
 
     rv = webclient.flask_test_client.get(f"/api/v{API_VERSION}/show/years/1994/1992")
     assert rv.status_code == 400
@@ -317,7 +317,7 @@ def test_categories_by_date(webclient, test_data):
     rv = webclient.flask_test_client.get(f"/api/v{API_VERSION}/category/date/2020/02/31")
 
     assert rv.status_code == 400
-    assert "check that your date is valid" in rv.get_json()["message"]
+    assert "That date is invalid" in rv.get_json()["message"]
 
 
 def test_category_by_years(webclient, test_data):
@@ -337,7 +337,7 @@ def test_category_by_years(webclient, test_data):
 
     rv = webclient.flask_test_client.get(f"/api/v{API_VERSION}/category/years/1995/1996")
     assert rv.status_code == 400
-    assert "Unfortunately, there are no data in the database within that year span." in rv.get_json()["message"]
+    assert "There are no data in the database within that year span." in rv.get_json()["message"]
 
     rv = webclient.flask_test_client.get(f"/api/v{API_VERSION}/category/years/1994/1992")
     assert rv.status_code == 400
@@ -411,14 +411,14 @@ def test_categories_by_show(webclient, test_data):
 
     assert rv.status_code == 400
     assert rv.get_json() == {
-        "message": "Unfortunately, there is no show in the database with that number. Please double check your values."
+        "message": "There is no show in the database with that number. Please double check your values."
     }
 
     rv = webclient.flask_test_client.get(f"/api/v{API_VERSION}/category/show/id/100")
 
     assert rv.status_code == 400
     assert rv.get_json() == {
-        "message": "Unfortunately, there is no show in the database with that ID. Please double check your values."
+        "message": "There is no show in the database with that ID. Please double check your values."
     }
 
 
@@ -453,7 +453,7 @@ def test_empty_db(emptyclient, test_data):
 
     rv = emptyclient.post(f"/api/v{API_VERSION}/set", json=question)
 
-    assert rv.data != None
+    assert rv.data is not None
 
 
 def test_game_resource(webclient, test_data):
@@ -549,22 +549,3 @@ def test_game_resource(webclient, test_data):
 
     assert rv.status_code == 400
     assert "categories were found. Please reduce the size." in rv.get_json()["message"]
-
-
-# """
-# | ROUTE               |       |                   |        |       |          |      |          |                 |        |
-# | ------------------- | ----- | ----------------- | ------ | ----- | -------- | ---- | -------- | --------------- | ------ |
-# | CATEGORY (MULTIPLE) | N     | Y                 | N      | Y     | N        | Y    | Y        | Y (NAME and ID) |        |
-# | COMPLETE            | N/A   | N/A               | N/A    | N/A   | N/A      | N/A  | N/A      | N/A             |        |
-# | DATE                | N/A   | N/A               | N/A    | N/A   | N/A      | N/A  | N/A      | N/A             |        |
-# | EXTERNAL            | N/A   | N/A               | N/A    | N/A   | N/A      | N/A  | N/A      | N/A             |        |
-# | ROUND               | N/A   | N/A               | N/A    | N/A   | N/A      | N/A  | N/A      | N/A             |        |
-# | SET (MULTIPLE)      | Y     | Y                 | Y (ID) | Y     | Y        | Y    | Y        | Y               |        |
-# | SHOW (MULTIPLE)     | N     | Y (NUMBER and ID) | N      | N     | N        | Y    | N        | N               |        |
-# | VALUE               | N/A   | N/A               | N/A    | N/A   | N/A      | N/A  | N/A      | N/A             |        |
-# |                     | VALUE | SHOW              | SET    | ROUND | EXTERNAL | DATE | COMPLETE | CATEGORY        | FILTER |
-
-# https://restfulapi.net/http-status-codes/
-# https://restfulapi.net/http-methods/#summary
-
-# """

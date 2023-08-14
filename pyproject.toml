@@ -7,6 +7,10 @@ length_sort = true
 multi_line_output = 3
 include_trailing_comma = true
 
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
 [tool.pytest.ini_options]
 # addopts = "--cov=jeopardy --cov-report html --cov-report xml"
 addopts = "--pdbcls=IPython.terminal.debugger:Pdb"

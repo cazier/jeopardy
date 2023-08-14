@@ -10,4 +10,4 @@ api = Api(app=bp, prefix=f"/api/v{config.api_version}")
 
 KEYS = {"date", "show", "round", "complete", "category", "value", "external", "question", "answer"}
 
-from . import routes
+from . import routes  # noqa: E402,F401
