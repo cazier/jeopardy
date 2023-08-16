@@ -1,4 +1,5 @@
 import sys
+import pathlib
 
 if "pytest" not in sys.modules:
     import eventlet
@@ -6,6 +7,8 @@ if "pytest" not in sys.modules:
     eventlet.monkey_patch()
 
 from flask import Flask
+
+sys.path.append(str(pathlib.Path(__file__).parent.parent))
 
 from jeopardy import api, config, rounds, routing, sockets
 
@@ -36,5 +39,4 @@ if __name__ == "__main__":
 
     socketio = sockets.socketio
     socketio.init_app(app)
-
     socketio.run(app, host="0.0.0.0", debug=config.debug, port=config.port)

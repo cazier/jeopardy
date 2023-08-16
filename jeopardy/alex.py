@@ -9,26 +9,27 @@ import dataclasses
 
 # TODO: Move config stuff out of here. This should just be game logic
 from jeopardy import config
+from jeopardy.api.models import Set
 
 
-class Game(object):
+class Game:
     """Class definining the game itself, containing each player and the board itself."""
 
-    def __init__(self, game_settings: dict):
+    def __init__(self, game_settings: dict[str, str]) -> None:
         self.game_name: str = config.game_name
 
         self.game_settings: dict = game_settings
 
-        self.size: int = self.game_settings["size"]
-        self.room: str = self.game_settings["room"]
+        self.size = int(self.game_settings["size"])
+        self.room = self.game_settings["room"]
 
-        self.round: int = config.start_round if config.debug else 0
+        self.round = int(config.start_round) if config.debug else 0
 
         self.score = Scoreboard()
 
-        self.buzz_order: dict = dict()
+        self.buzz_order: dict[str, dict[str, datetime.datetime | bool]] = {}
 
-        self.current_set = None
+        self.current_set: Set | None = None
 
         if config.debug:
             self.add_player("Alex")
@@ -134,7 +135,7 @@ class Game(object):
             return "Final Jeopardy!"
 
 
-class Scoreboard(object):
+class Scoreboard:
     def __init__(self):
         self.players: dict = dict()
         self.num = 0
@@ -226,7 +227,7 @@ class Scoreboard(object):
         self.wagerer = None
 
 
-class Board(object):
+class Board:
     """Class to hold the Jeopardy game board. Contains methods to get categories and content."""
 
     def __init__(self, round_: int, settings: dict):
@@ -285,7 +286,7 @@ class Board(object):
             self.categories[daily_double[0]].sets[daily_double[1]].is_wager = True
 
 
-class Category(object):
+class Category:
     """Class to hold one of the categories (ostensibly columns) on a Jeopardy game board."""
 
     def __init__(self, name: str, index: int, sets: list):

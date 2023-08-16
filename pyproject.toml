@@ -11,6 +11,16 @@ include_trailing_comma = true
 line-length = 120
 target-version = "py311"
 
+[tool.mypy]
+python_version = 3.11
+strict = true
+mypy_path = "stubs"
+
+[[tool.mypy.overrides]]
+module = "socketio.*"
+ignore_missing_imports = true
+# exclude =
+
 [tool.pytest.ini_options]
 # addopts = "--cov=jeopardy --cov-report html --cov-report xml"
 addopts = "--pdbcls=IPython.terminal.debugger:Pdb"
@@ -38,9 +48,7 @@ eventlet = "^0.33.3"
 flask-sqlalchemy = "^3.0.5"
 jinja2 = "^3.1.2"
 flask-socketio = "^5.3.5"
-flask-restful = "^0.3.10"
 marshmallow-sqlalchemy = "^0.29.0"
-
 
 [tool.poetry.group.dev.dependencies]
 coverage = {extras = ["toml"], version = "^7.2.7"}

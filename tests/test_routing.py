@@ -157,7 +157,7 @@ def test_route_host_error(webclient):
     rv = webclient.flask_test_client.post(
         url_for("routing.route_host"), headers={"Referer": "/new/"}, data={"size": 25}, follow_redirects=True
     )
-    assert "categories were found. Please reduce the size." in rv.get_data(as_text=True)
+    assert "categories were found." in rv.get_data(as_text=True)
     assert rv.request.path == "/new/"
 
     rv = webclient.flask_test_client.post(

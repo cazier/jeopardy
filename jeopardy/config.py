@@ -12,11 +12,10 @@ secret_key = os.getenv(key="SECRET_KEY", default="correctbatteryhorsestaple")
 
 port = os.getenv(key="PORT", default="5000")
 
-if (env_url := os.getenv(key="APP_URL")) is not None:
-    url = env_url.split(",")
+url: str | list[str] = "*"
 
-else:
-    url = "*"
+if env_url := os.getenv(key="APP_URL"):
+    url = env_url.split(",")
 
 api_endpoint = os.getenv(key="API_ENDPOINT", default=f"http://127.0.0.1:{port}/api/v{api_version}/game")
 
@@ -37,9 +36,3 @@ debug = bool(os.getenv(key="DEBUG", default=False))
 
 sets = 2
 start_round = 0
-
-# access_key = uuid.uuid4().hex
-# if not debug:
-#     print(f"+{'-' * 46}+")
-#     print("| ACCESS KEY:", access_key, "|")
-#     print(f"+{'-' * 46}+")

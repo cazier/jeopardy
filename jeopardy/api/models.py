@@ -1,6 +1,7 @@
 import datetime
 
-from sqlalchemy import Date, String, Boolean, Integer, ForeignKey, extract
+from sqlalchemy import Date as DateType
+from sqlalchemy import String, Boolean, Integer, ForeignKey, extract
 from sqlalchemy.orm import Mapped, DeclarativeBase, relationship, mapped_column
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -36,7 +37,7 @@ class Set(Base):
     answer: Mapped[str] = mapped_column(String(1000))
     question: Mapped[str] = mapped_column(String(255))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Set {self.id}, (Hash={self.hash})>"
 
 
@@ -57,7 +58,7 @@ class Category(Base):
     complete: Mapped[bool] = mapped_column(Boolean, nullable=False)
     sets: Mapped[list[Set]] = relationship(back_populates="category")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Category {self.name}>"
 
 
@@ -65,7 +66,7 @@ class Date(Base):
     __tablename__ = "date"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    date: Mapped[datetime.date] = mapped_column(Date)
+    date: Mapped[datetime.date] = mapped_column(DateType)
     sets: Mapped[list[Set]] = relationship("Set", back_populates="date")
     show: Mapped["Show"] = relationship("Show", back_populates="date")
     categories: Mapped[Category] = relationship("Category", back_populates="date")
@@ -74,7 +75,7 @@ class Date(Base):
     def year(self):
         return self.date.year
 
-    @year.expression
+    @year.expression  # type: ignore[no-redef]
     def year(cls):
         return extract("year", cls.date)
 
@@ -82,7 +83,7 @@ class Date(Base):
     def month(self):
         return self.date.month
 
-    @month.expression
+    @month.expression  # type: ignore[no-redef]
     def month(cls):
         return extract("month", cls.date)
 
@@ -90,11 +91,11 @@ class Date(Base):
     def day(self):
         return self.date.day
 
-    @day.expression
+    @day.expression  # type: ignore[no-redef]
     def day(cls):
         return extract("day", cls.date)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Date {self.date}>"
 
 
@@ -110,7 +111,7 @@ class Show(Base):
     sets: Mapped[list[Set]] = relationship("Set", back_populates="show")
     categories: Mapped[list[Category]] = relationship("Category", back_populates="show")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Show {self.number}>"
 
 
@@ -123,7 +124,7 @@ class Round(Base):
     categories: Mapped[list[Category]] = relationship("Category", back_populates="round")
     values: Mapped["Value"] = relationship("Value", back_populates="round")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Round {self.number}>"
 
 
@@ -138,5 +139,5 @@ class Value(Base):
 
     sets: Mapped[list[Set]] = relationship("Set", back_populates="value")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Value {self.amount}>"

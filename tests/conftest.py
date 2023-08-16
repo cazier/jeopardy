@@ -135,6 +135,11 @@ def webclient(app_factory):
 
 
 @pytest.fixture
+def testclient(webclient):
+    yield webclient.flask_test_client
+
+
+@pytest.fixture
 def emptyclient(app_factory):
     app = app_factory("empty")
 
