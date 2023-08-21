@@ -464,7 +464,6 @@ def test_game_resource(webclient, test_data):
 
     expected = [i for i in test_data if i["complete"]]
     rv = webclient.flask_test_client.get(f"/api/v{API_VERSION}/game", query_string={"round": 1})
-
     assert rv.status_code == 200
     assert len(rv.get_json()) == min(
         6,

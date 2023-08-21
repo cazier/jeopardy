@@ -1,7 +1,7 @@
-import time
 import asyncio
 
-from flask import Markup, Blueprint, request
+from flask import Blueprint, request
+from markupsafe import Markup
 
 from jeopardy import config, wagers, storage
 from jeopardy.sockets import get_room, socketio

@@ -1,17 +1,61 @@
 [tool.black]
-line-length = 119
+line-length = 120
 
 [tool.isort]
-line_length = 119
+line_length = 120
 length_sort = true
 multi_line_output = 3
 include_trailing_comma = true
 
 [tool.pytest.ini_options]
-addopts = "--cov=jeopardy --cov-report html --cov-report xml --import-mode importlib"
+# addopts = "--cov=jeopardy --cov-report html --cov-report xml"
+addopts = "--pdbcls=IPython.terminal.debugger:Pdb"
 testpaths = [ "tests" ]
 markers = [ "incremental", "browser" ]
-filterwarnings = [ "ignore::DeprecationWarning" ]
 
 [tool.pylint.'FORMAT']
-max-line-length = 119
+max-line-length = 120
+
+[tool.poetry]
+name = "jeopardy"
+version = "0.10.0"
+description = "A multiplayer clone of Jeopardy!"
+authors = ["Brendan Cazier <520246+cazier@users.noreply.github.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [{ include = "jeopardy", from = "jeopardy" }]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+Flask = "^2.3.2"
+flask-marshmallow = "^0.15.0"
+click = "^8.1.6"
+eventlet = "^0.33.3"
+flask-sqlalchemy = "^3.0.5"
+jinja2 = "^3.1.2"
+flask-socketio = "^5.3.5"
+flask-restful = "^0.3.10"
+marshmallow-sqlalchemy = "^0.29.0"
+
+
+[tool.poetry.group.dev.dependencies]
+coverage = {extras = ["toml"], version = "^7.2.7"}
+#jeopardy = {path = ".", develop = true}
+faker = "^19.2.0"
+ipython = "^8.14.0"
+requests = "^2.31.0"
+playwright = "^1.36.0"
+pre-commit = "^3.3.3"
+pytest = "^7.4.0"
+pytest-cov = "^4.1.0"
+rich = "^13.5.2"
+black = "^23.7.0"
+ipdb = "^0.13.13"
+isort = "^5.12.0"
+mypy = "^1.5.0"
+pylint = "^2.17.5"
+ruff = "^0.0.284"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

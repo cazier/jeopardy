@@ -316,7 +316,6 @@ class Content:
 
     @property
     def shown(self):
-
         resp = self._shown
         self._shown = True
         return resp

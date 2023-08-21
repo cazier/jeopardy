@@ -1,4 +1,5 @@
-from flask import Markup, request
+from flask import request
+from markupsafe import Markup
 
 from jeopardy import rounds, storage
 from jeopardy.sockets import get_room, socketio
@@ -48,7 +49,7 @@ def wager_submittal(data):
             if game.score.num == len(game.score):
                 game.score.num = 0
 
-                game.get(u"q_0_0")
+                game.get("q_0_0")
                 info = game.current_set
 
                 updates = {
