@@ -10,28 +10,28 @@ session = db.session
 
 
 class SetAlreadyExistsError(Exception):
-    def __init__(self):
+    def __init__(self) -> None:
         self.message = "This set is already in the database"
 
         super().__init__(self.message)
 
 
 class MissingDataError(Exception):
-    def __init__(self, message: str):
+    def __init__(self, message: str) -> None:
         self.message = message
 
         super().__init__(self.message)
 
 
 class BadDataError(Exception):
-    def __init__(self, item: str, error: str):
+    def __init__(self, item: str, error: str) -> None:
         self.message = f"Please ensure the {item} is {error}"
 
         super().__init__(self.message)
 
 
-def add(clue_data: dict, uses_shortnames: bool) -> list:
-    def key(key: str) -> str:
+def add(clue_data: dict[str, str | bool | int], uses_shortnames: bool) -> Set:
+    def key(key: str) -> str | bool | int:
         if uses_shortnames:
             return clue_data[key[0].lower() if key.lower() != "complete" else "f"]
 
@@ -50,7 +50,7 @@ def add(clue_data: dict, uses_shortnames: bool) -> list:
             raise MissingDataError(message=f"This set has an empty value for key: {k}")
 
     try:
-        date_format = datetime.date.fromisoformat(key("date"))
+        date_format = datetime.date.fromisoformat(str(key("date")))
 
     except ValueError:
         raise BadDataError(item="date", error="in the isoformat: YYYY-MM-DD")

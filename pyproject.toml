@@ -48,7 +48,6 @@ eventlet = "^0.33.3"
 flask-sqlalchemy = "^3.0.5"
 jinja2 = "^3.1.2"
 flask-socketio = "^5.3.5"
-marshmallow-sqlalchemy = "^0.29.0"
 
 [tool.poetry.group.dev.dependencies]
 coverage = {extras = ["toml"], version = "^7.2.7"}

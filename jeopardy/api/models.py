@@ -1,9 +1,13 @@
+import typing
+import typing as t
 import datetime
+import collections
 
 from sqlalchemy import Date as DateType
-from sqlalchemy import String, Boolean, Integer, ForeignKey, extract
-from sqlalchemy.orm import Mapped, DeclarativeBase, relationship, mapped_column
+from sqlalchemy import Table, Column, String, Boolean, Integer, MetaData, ForeignKey, ColumnElement, extract
+from sqlalchemy.orm import Mapped, DeclarativeBase, MappedAsDataclass, registry, relationship, mapped_column
 from flask_sqlalchemy import SQLAlchemy
+from flask.json.provider import DefaultJSONProvider
 from sqlalchemy.ext.hybrid import hybrid_property
 
 db = SQLAlchemy()
@@ -16,7 +20,7 @@ class Base(DeclarativeBase):
 class Set(Base):
     __tablename__ = "set"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, info={"serialize": int})
 
     category_id: Mapped[int] = mapped_column(ForeignKey("category.id"), nullable=False)
     date_id: Mapped[int] = mapped_column(ForeignKey("date.id"), nullable=False)
@@ -24,18 +28,18 @@ class Set(Base):
     round_id: Mapped[int] = mapped_column(ForeignKey("round.id"), nullable=False)
     value_id: Mapped[int] = mapped_column(ForeignKey("value.id"), nullable=False)
 
-    category: Mapped["Category"] = relationship(back_populates="sets")
-    date: Mapped["Date"] = relationship(back_populates="sets")
-    show: Mapped["Show"] = relationship(back_populates="sets")
-    round: Mapped["Round"] = relationship(back_populates="sets")
-    value: Mapped["Value"] = relationship(back_populates="sets")
+    category: Mapped["Category"] = relationship(back_populates="sets", info={"serialize": lambda k: k.name})
+    date: Mapped["Date"] = relationship(back_populates="sets", info={"serialize": lambda k: k.date.isoformat()})
+    show: Mapped["Show"] = relationship(back_populates="sets", info={"serialize": lambda k: k.number})
+    round: Mapped["Round"] = relationship(back_populates="sets", info={"serialize": lambda k: k.number})
+    value: Mapped["Value"] = relationship(back_populates="sets", info={"serialize": lambda k: k.amount})
 
-    external: Mapped[bool] = mapped_column(Boolean, nullable=False)
-    complete: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    external: Mapped[bool] = mapped_column(Boolean, nullable=False, info={"serialize": bool})
+    complete: Mapped[bool] = mapped_column(Boolean, nullable=False, info={"serialize": bool})
     hash: Mapped[int] = mapped_column(Integer, nullable=False, unique=True)
 
-    answer: Mapped[str] = mapped_column(String(1000))
-    question: Mapped[str] = mapped_column(String(255))
+    answer: Mapped[str] = mapped_column(String(1000), info={"serialize": str})
+    question: Mapped[str] = mapped_column(String(255), info={"serialize": str})
 
     def __repr__(self) -> str:
         return f"<Set {self.id}, (Hash={self.hash})>"
@@ -44,18 +48,18 @@ class Set(Base):
 class Category(Base):
     __tablename__ = "category"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(100))
+    id: Mapped[int] = mapped_column(primary_key=True, info={"serialize": int})
+    name: Mapped[str] = mapped_column(String(100), info={"serialize": str})
 
     show_id: Mapped[int] = mapped_column(ForeignKey("show.id"), nullable=False)
     date_id: Mapped[int] = mapped_column(ForeignKey("date.id"), nullable=False)
     round_id: Mapped[int] = mapped_column(ForeignKey("round.id"), nullable=False)
 
-    show: Mapped["Show"] = relationship(back_populates="categories")
-    date: Mapped["Date"] = relationship(back_populates="categories")
-    round: Mapped["Round"] = relationship(back_populates="categories")
+    show: Mapped["Show"] = relationship(back_populates="categories", info={"serialize": lambda k: k.number})
+    date: Mapped["Date"] = relationship(back_populates="categories", info={"serialize": lambda k: k.date.isoformat()})
+    round: Mapped["Round"] = relationship(back_populates="categories", info={"serialize": lambda k: k.number})
 
-    complete: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    complete: Mapped[bool] = mapped_column(Boolean, nullable=False, info={"serialize": bool})
     sets: Mapped[list[Set]] = relationship(back_populates="category")
 
     def __repr__(self) -> str:
@@ -66,33 +70,36 @@ class Date(Base):
     __tablename__ = "date"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    date: Mapped[datetime.date] = mapped_column(DateType)
+    date: Mapped[datetime.date] = mapped_column(DateType, info={"serialize": lambda k: k.isoformat()})
     sets: Mapped[list[Set]] = relationship("Set", back_populates="date")
-    show: Mapped["Show"] = relationship("Show", back_populates="date")
+    shows: Mapped["Show"] = relationship("Show", back_populates="date")
     categories: Mapped[Category] = relationship("Category", back_populates="date")
 
     @hybrid_property
-    def year(self):
+    def _year(self) -> int:
         return self.date.year
 
-    @year.expression  # type: ignore[no-redef]
-    def year(cls):
+    @_year.expression
+    @classmethod
+    def year(cls) -> ColumnElement[int]:
         return extract("year", cls.date)
 
     @hybrid_property
-    def month(self):
+    def _month(self) -> int:
         return self.date.month
 
-    @month.expression  # type: ignore[no-redef]
-    def month(cls):
+    @_month.expression
+    @classmethod
+    def month(cls) -> ColumnElement[int]:
         return extract("month", cls.date)
 
     @hybrid_property
-    def day(self):
+    def _day(self) -> int:
         return self.date.day
 
-    @day.expression  # type: ignore[no-redef]
-    def day(cls):
+    @_day.expression
+    @classmethod
+    def day(cls) -> ColumnElement[int]:
         return extract("day", cls.date)
 
     def __repr__(self) -> str:
@@ -102,11 +109,11 @@ class Date(Base):
 class Show(Base):
     __tablename__ = "show"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    number: Mapped[int] = mapped_column(Integer)
+    id: Mapped[int] = mapped_column(primary_key=True, info={"serialize": int})
+    number: Mapped[int] = mapped_column(Integer, info={"serialize": int})
     date_id: Mapped[int] = mapped_column(ForeignKey("date.id"))
 
-    date: Mapped["Date"] = relationship(back_populates="show")
+    date: Mapped["Date"] = relationship(back_populates="shows", info={"serialize": lambda k: k.date.isoformat()})
 
     sets: Mapped[list[Set]] = relationship("Set", back_populates="show")
     categories: Mapped[list[Category]] = relationship("Category", back_populates="show")
@@ -119,7 +126,7 @@ class Round(Base):
     __tablename__ = "round"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    number: Mapped[int] = mapped_column(Integer)
+    number: Mapped[int] = mapped_column(Integer, info={"serialize": int})
     sets: Mapped[list[Set]] = relationship("Set", back_populates="round")
     categories: Mapped[list[Category]] = relationship("Category", back_populates="round")
     values: Mapped["Value"] = relationship("Value", back_populates="round")
@@ -132,7 +139,7 @@ class Value(Base):
     __tablename__ = "value"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    amount: Mapped[int] = mapped_column(Integer)
+    amount: Mapped[int] = mapped_column(Integer, info={"serialize": int})
     round_id: Mapped[int] = mapped_column(ForeignKey("round.id"), nullable=False)
 
     round: Mapped["Round"] = relationship(back_populates="values")
@@ -141,3 +148,23 @@ class Value(Base):
 
     def __repr__(self) -> str:
         return f"<Value {self.amount}>"
+
+
+class NoResultFound:
+    def __getattribute__(self, __name: str) -> None:
+        return None
+
+
+NoResultFoundSentinel = NoResultFound()
+
+
+def or_zero(scalar: int | None) -> int:
+    return 0 if scalar is None else scalar
+
+
+Q = typing.TypeVar("Q", Set, Category, Date, Show, Round, Value, NoResultFound)
+M: typing.TypeAlias = type[Set | Category | Date | Show | Round | Value]
+
+
+def or_none(scalar: Q | None) -> Q:
+    return NoResultFoundSentinel if scalar is None else scalar

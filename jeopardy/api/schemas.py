@@ -1,72 +1,35 @@
-from marshmallow import fields
-from marshmallow_sqlalchemy import SQLAlchemySchema
+import typing as t
+from functools import lru_cache
 
-from jeopardy.api import models
+import sqlalchemy
+from flask.json.provider import DefaultJSONProvider
+from sqlalchemy.orm.mapper import Mapper
 
-
-class RoundSchema(SQLAlchemySchema):
-    model = models.Round
-
-    number = fields.Integer(required=True)
+from jeopardy.api.models import Q, Base
 
 
-class ValueSchema(SQLAlchemySchema):
-    model = models.Value
+@lru_cache
+def schema_keys(model: type[Q]) -> t.Iterator[tuple[str, t.Callable[[Q], t.Any]]]:
+    mapper: Mapper = sqlalchemy.inspect(model)
 
-    amount = fields.Integer(required=True)
+    response: list[tuple[str, t.Callable[[Q], t.Any]]] = []
 
+    for attr in mapper.attrs:
+        if func := getattr(type(model), attr.key).info.get("serialize", None):
+            response.append((attr.key, func))
 
-class DateSchema(SQLAlchemySchema):
-    model = models.Date
-
-    date = fields.Date(format="iso", required=True)
-
-
-class ShowSchema(SQLAlchemySchema):
-    model = models.Show
-
-    id = fields.Integer(required=True)
-    number = fields.Integer(required=True)
-
-    date = fields.Pluck("DateSchema", "date", required=True)
+    return response
 
 
-class CategorySchema(SQLAlchemySchema):
-    model = models.Category
+class ApiJSONProvider(DefaultJSONProvider):
+    @staticmethod
+    def default(o: t.Any) -> t.Any:
+        if isinstance(o, Base):
+            resp: dict[str, t.Any] = {}
 
-    id = fields.Integer(required=True)
-    name = fields.String(required=True)
-    complete = fields.Boolean(required=True)
+            for key, func in schema_keys(o):
+                resp[key] = func(getattr(o, key))
 
-    date = fields.Pluck("DateSchema", "date")
-    show = fields.Pluck("ShowSchema", "number")
-    round = fields.Pluck("RoundSchema", "number")
+            return resp
 
-
-class SetSchema(SQLAlchemySchema):
-    model = models.Set
-
-    id = fields.Integer(required=True)
-    answer = fields.String(required=True)
-    question = fields.String(required=True)
-    external = fields.Boolean(required=True)
-    complete = fields.Boolean(required=True)
-
-    category = fields.Pluck("CategorySchema", "name")
-    date = fields.Pluck("DateSchema", "date")
-    show = fields.Pluck("ShowSchema", "number")
-    round = fields.Pluck("RoundSchema", "number")
-    value = fields.Pluck("ValueSchema", "amount")
-
-
-set_schema = SetSchema()
-sets_schema = SetSchema(many=True)
-
-show_schema = ShowSchema()
-shows_schema = ShowSchema(many=True)
-
-category_schema = CategorySchema()
-categories_schema = CategorySchema(many=True)
-
-date_schema = DateSchema()
-dates_schema = DateSchema(many=True)
+        return super(ApiJSONProvider, ApiJSONProvider).default(o)
