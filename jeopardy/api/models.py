@@ -1,10 +1,8 @@
 import typing
-import typing as t
 import datetime
-import collections
 
 from sqlalchemy import Date as DateType
-from sqlalchemy import Table, Column, String, Boolean, Integer, MetaData, ForeignKey, ColumnElement, extract
+from sqlalchemy import String, Boolean, Integer, ForeignKey, ColumnElement, extract
 from sqlalchemy.orm import Mapped, DeclarativeBase, synonym, relationship, mapped_column
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -52,6 +50,7 @@ class Category(Base):
     __tablename__ = "category"
 
     id: Mapped[int] = mapped_column(primary_key=True, info={"serialize": int})
+
     name: Mapped[str] = mapped_column(String(100), info={"serialize": str})
 
     show_id: Mapped[int] = mapped_column(ForeignKey("show.id"), nullable=False)
@@ -73,6 +72,7 @@ class Date(Base):
     __tablename__ = "date"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+
     date: Mapped[datetime.date] = mapped_column(DateType, info={"serialize": lambda k: k.isoformat()})
     sets: Mapped[list[Set]] = relationship("Set", back_populates="date")
     shows: Mapped["Show"] = relationship("Show", back_populates="date")
@@ -113,6 +113,7 @@ class Show(Base):
     __tablename__ = "show"
 
     id: Mapped[int] = mapped_column(primary_key=True, info={"serialize": int})
+
     number: Mapped[int] = mapped_column(Integer, info={"serialize": int})
     date_id: Mapped[int] = mapped_column(ForeignKey("date.id"))
 
@@ -154,7 +155,7 @@ class Value(Base):
 
 
 class NoResultFound:
-    def __getattribute__(self, __name: str) -> None:
+    def __getattr__(self, name: str) -> None:
         return None
 
 
@@ -169,5 +170,5 @@ Q = typing.TypeVar("Q", Set, Category, Date, Show, Round, Value, NoResultFound)
 M: typing.TypeAlias = type[Set | Category | Date | Show | Round | Value]
 
 
-def or_none(scalar: Q | None) -> Q:
+def or_none(scalar: Q | None) -> Q | NoResultFound:
     return NoResultFoundSentinel if scalar is None else scalar
