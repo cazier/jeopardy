@@ -9,12 +9,25 @@ from jeopardy.api.models import Q, Base
 
 
 @lru_cache
-def schema_keys(model: type[Q]) -> t.Iterator[tuple[str, t.Callable[[Q], t.Any]]]:
-    mapper: Mapper = sqlalchemy.inspect(model)
+def schema_keys(model: type[Q]) -> list[tuple[str, t.Callable[[Q], t.Any]]]:
+    """Get the name and serialization function for each column, which is intended to be included in the JSON data, for
+    a particular model.
 
-    response: list[tuple[str, t.Callable[[Q], t.Any]]] = []
+    Args:
+        model (type[Q]): model to be serialized
+
+    Returns:
+        list[tuple[str, t.Callable[[Q], t.Any]]]: names (keys) and serialization functions
+    """
+    mapper: Mapper[Q] = sqlalchemy.inspect(model, raiseerr=True).mapper
+
+    response = []
 
     for attr in mapper.attrs:
+        if func := attr.info.get("serialize", None):
+            response.append((attr.key, func))
+            continue
+
         if func := getattr(type(model), attr.key).info.get("serialize", None):
             response.append((attr.key, func))
 
@@ -22,14 +35,26 @@ def schema_keys(model: type[Q]) -> t.Iterator[tuple[str, t.Callable[[Q], t.Any]]
 
 
 class ApiJSONProvider(DefaultJSONProvider):
+    """Custom JSON provider for the API to automatically determine the serialization functions (and the actual included
+    data) for each request response.
+    """
+
     @staticmethod
-    def default(o: t.Any) -> t.Any:
-        if isinstance(o, Base):
+    def default(data: t.Any) -> dict[str, t.Any]:
+        """Provides a custom serialization method for objects the standard ``json.dumps`` doesn't know how to dump.
+
+        Args:
+            data (t.Any): object to be serialized, which may contain SQLAlchemy models
+
+        Returns:
+            dict[str, t.Any]: serialized json data
+        """
+        if isinstance(data, Base):
             resp: dict[str, t.Any] = {}
 
-            for key, func in schema_keys(o):
-                resp[key] = func(getattr(o, key))
+            for key, func in schema_keys(data):
+                resp[key] = func(getattr(data, key))
 
             return resp
 
-        return super(ApiJSONProvider, ApiJSONProvider).default(o)
+        return super(ApiJSONProvider, ApiJSONProvider).default(data)
