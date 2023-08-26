@@ -5,9 +5,8 @@ import collections
 
 from sqlalchemy import Date as DateType
 from sqlalchemy import Table, Column, String, Boolean, Integer, MetaData, ForeignKey, ColumnElement, extract
-from sqlalchemy.orm import Mapped, DeclarativeBase, MappedAsDataclass, registry, relationship, mapped_column
+from sqlalchemy.orm import Mapped, DeclarativeBase, synonym, relationship, mapped_column
 from flask_sqlalchemy import SQLAlchemy
-from flask.json.provider import DefaultJSONProvider
 from sqlalchemy.ext.hybrid import hybrid_property
 
 db = SQLAlchemy()
@@ -35,7 +34,7 @@ class Set(Base):
     value: Mapped["Value"] = relationship(back_populates="sets", info={"serialize": lambda k: k.amount})
 
     external: Mapped[bool] = mapped_column(Boolean, nullable=False, info={"serialize": bool})
-    complete: Mapped[bool] = mapped_column(Boolean, nullable=False, info={"serialize": bool})
+    complete: Mapped[bool] = synonym("_complete", info={"serialize": bool})
     hash: Mapped[int] = mapped_column(Integer, nullable=False, unique=True)
 
     answer: Mapped[str] = mapped_column(String(1000), info={"serialize": str})
@@ -43,6 +42,10 @@ class Set(Base):
 
     def __repr__(self) -> str:
         return f"<Set {self.id}, (Hash={self.hash})>"
+
+    @hybrid_property
+    def _complete(self) -> bool:
+        return self.category.complete if self.category else False
 
 
 class Category(Base):

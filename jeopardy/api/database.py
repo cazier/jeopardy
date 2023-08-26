@@ -37,7 +37,7 @@ def add(clue_data: dict[str, str | bool | int], uses_shortnames: bool) -> Set:
 
         return clue_data[key]
 
-    keys = KEYS
+    keys = KEYS.copy()
 
     if uses_shortnames:
         keys = {i[0] if i != "complete" else "f" for i in keys}
@@ -119,7 +119,6 @@ def add(clue_data: dict[str, str | bool | int], uses_shortnames: bool) -> Set:
             question=key("question"),
             value=value,
             external=external_format,
-            complete=complete_format,
             hash=hash,
         )
 

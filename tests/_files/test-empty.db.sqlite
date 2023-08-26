@@ -45,7 +45,6 @@ CREATE TABLE IF NOT EXISTS "set" (
 	round_id INTEGER NOT NULL,
 	value_id INTEGER NOT NULL,
 	external BOOLEAN NOT NULL,
-	complete BOOLEAN NOT NULL,
 	hash INTEGER NOT NULL,
 	answer VARCHAR(1000),
 	question VARCHAR(255),
@@ -56,7 +55,6 @@ CREATE TABLE IF NOT EXISTS "set" (
 	FOREIGN KEY(round_id) REFERENCES round (id),
 	FOREIGN KEY(value_id) REFERENCES value (id),
 	CHECK (external IN (0, 1)),
-	CHECK (complete IN (0, 1)),
 	UNIQUE (hash)
 );
 COMMIT;
