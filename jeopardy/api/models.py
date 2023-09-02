@@ -117,7 +117,6 @@ class Date(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    # date: Mapped[_Date] = mapped_column(DateType, info={"serialize": lambda k: k.isoformat()})
     date: Mapped[_Date] = composite(
         mapped_column("year"),
         mapped_column("month"),
@@ -156,39 +155,6 @@ class Date(Base):
             return "That date is invalid (0001 <= year <= 9999, 1 <= month <= 12, 1 <= day <= 31)."
 
         return ""
-
-    # @hybrid_property
-    # def _year(self) -> int:
-    #     return self.date.year
-
-    # @_year.expression
-    # @classmethod
-    # def year(cls) -> ColumnElement[int]:
-    #     return extract("year", cls.date)
-
-    # @hybrid_property
-    # def _month(self) -> int:
-    #     return self.date.month
-
-    # @_month.expression
-    # @classmethod
-    # def month(cls) -> ColumnElement[int]:
-    #     return extract("month", cls.date)
-
-    # @hybrid_property
-    # def _day(self) -> int:
-    #     return self.date.day
-
-    # @_day.expression
-    # @classmethod
-    # def day(cls) -> ColumnElement[int]:
-    #     return extract("day", cls.date)
-
-    # @hybrid_property
-    # def _date(self) -> datetime.Date:
-    #     return self.date
-
-    # @_date.inplace.comparator(Comparator[datetime.date])
 
     def __repr__(self) -> str:
         return f"<Date {self.date.isoformat()}>"

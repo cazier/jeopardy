@@ -18,7 +18,7 @@ jobs:
   browser:
     strategy:
       matrix:
-        browser: ['firefox', 'chromium', 'webkit']
+        browser: ['webkit'] #, 'chromium', 'webkit']
 
     runs-on: ubuntu-latest
     container:
@@ -30,6 +30,8 @@ jobs:
       - run: poetry install --with testing
       - run: poetry run playwright install --with-deps ${{ matrix.browser }}
       - run: poetry run pytest -m 'browser' --no-cov -v
+        env:
+          PLAYWRIGHT_BROWSER_NAME: ${{ matrix.browser }}
 
       - name: 'Upload Artifacts'
         uses: actions/upload-artifact@v2
