@@ -19,11 +19,9 @@ mypy_path = "stubs"
 [[tool.mypy.overrides]]
 module = "socketio.*"
 ignore_missing_imports = true
-# exclude =
 
 [tool.pytest.ini_options]
-# addopts = "--cov=jeopardy --cov-report html --cov-report xml"
-addopts = "--pdbcls=IPython.terminal.debugger:Pdb"
+addopts = "--cov=jeopardy --cov-report html --cov-report xml"
 testpaths = [ "tests" ]
 markers = [ "incremental", "browser" ]
 
@@ -42,7 +40,6 @@ packages = [{ include = "jeopardy", from = "jeopardy" }]
 [tool.poetry.dependencies]
 python = "^3.11"
 Flask = "^2.3.2"
-flask-marshmallow = "^0.15.0"
 click = "^8.1.6"
 eventlet = "^0.33.3"
 flask-sqlalchemy = "^3.0.5"

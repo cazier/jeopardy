@@ -1,29 +1,38 @@
 import re
 import random
 import typing as t
-import datetime
 import functools
 
 from flask import Response, abort
 from flask import jsonify as flask_jsonify
 from flask import request
-from sqlalchemy import Select, or_, and_, func, select
+from sqlalchemy import Select, or_, func, select
 from flask.views import MethodView
 from flask.typing import ResponseReturnValue
 
 from jeopardy.api import KEYS, bp, database
-from jeopardy.api.models import Q, Set, Date, Show, Round, Value, Category, db, or_none, or_zero
+from jeopardy.api.models import M, N, Q, Set, Date, Show, Round, Value, Category, db, or_none, or_zero
 
 session = db.session
 
+P = t.ParamSpec("P")
+T = t.TypeVar("T")
 
-def query_check(model: "Q"):
-    def wrapped(function):
+
+def query_check(model: "M") -> t.Callable[[t.Callable[P, T]], t.Callable[P, T]]:
+    def wrapped(function: t.Callable[P, T]) -> t.Callable[P, T]:
         @functools.wraps(function)
-        def inner(*args, **kwargs):
-            [(key, _)] = kwargs.items()
+        def inner(*args: P.args, **kwargs: P.kwargs) -> T:
+            key = "/".join(kwargs.keys())
 
-            if db.session.scalar(select(func.count()).select_from(model).filter_by(**kwargs)) == 0:
+            if len(kwargs) > 1:
+                query = {"date": kwargs}
+
+            else:
+                query = kwargs.copy()  # type: ignore[assignment]
+
+            selection = select(func.count()).select_from(model).filter_by(**query)
+            if db.session.scalar(selection) == 0:
                 abort(
                     400,
                     description=f"There is no {model.__name__.lower()} in the database with that {key}.",
@@ -36,11 +45,11 @@ def query_check(model: "Q"):
     return wrapped
 
 
-def validate(model: "Q"):
-    def wrapped(function):
+def validate(model: "M") -> t.Callable[[t.Callable[P, T]], t.Callable[P, T]]:
+    def wrapped(function: t.Callable[P, T]) -> t.Callable[P, T]:
         @functools.wraps(function)
-        def inner(*args, **kwargs):
-            if error := model.valid_inputs(**kwargs):
+        def inner(*args: P.args, **kwargs: P.kwargs) -> T:
+            if error := model.valid_inputs(**kwargs):  # type: ignore[arg-type]
                 abort(400, description=error)
 
             return function(*args, **kwargs)
@@ -139,15 +148,19 @@ class SetByShowId(BaseResource):
 
 
 class SetByDate(BaseResource):
+    decorators = [query_check(Date), validate(Date)]
+
     def get(self, year: int, month: int = -1, day: int = -1) -> ResponseReturnValue:
-        results = date_query(model=Set, year=year, month=month, day=day).order_by(Set.id)
+        results = select(Set).join(Date).where(Date.date == {"year": year, "month": month, "day": day}).order_by(Set.id)
 
         return paginate(model=results, indices=request.args)
 
 
 class SetByYear(BaseResource):
+    decorators = [query_check(Date), validate(Date)]
+
     def get(self, start: int, stop: int) -> ResponseReturnValue:
-        results = date_query(model=Set, start=start, stop=stop).order_by(Date.date)
+        results = select(Set).join(Date).where(Date.date == {"start": start, "stop": stop}).order_by(Date.date)
 
         return paginate(model=results, indices=request.args)
 
@@ -197,15 +210,21 @@ class ShowByNumber(BaseResource):
 
 
 class ShowByDate(BaseResource):
+    decorators = [query_check(Date), validate(Date)]
+
     def get(self, year: int, month: int = -1, day: int = -1) -> ResponseReturnValue:
-        results = date_query(model=Show, year=year, month=month, day=day).order_by(Show.number)
+        results = (
+            select(Show).join(Date).where(Date.date == {"year": year, "month": month, "day": day}).order_by(Show.id)
+        )
 
         return paginate(model=results, indices=request.args)
 
 
 class ShowByYears(BaseResource):
+    decorators = [query_check(Date), validate(Date)]
+
     def get(self, start: int, stop: int) -> ResponseReturnValue:
-        results = date_query(model=Show, start=start, stop=stop).order_by(Date.date)
+        results = select(Show).join(Date).where(Date.date == {"start": start, "stop": stop}).order_by(Date.date)
 
         return paginate(model=results, indices=request.args)
 
@@ -223,15 +242,19 @@ class CategoryById(BaseResource):
 
 
 class CategoryByDate(BaseResource):
+    decorators = [query_check(Date), validate(Date)]
+
     def get(self, year: int, month: int = -1, day: int = -1) -> ResponseReturnValue:
-        results = date_query(model=Category, year=year, month=month, day=day).order_by(Category.name)
+        results = select(Category).join(Date).where(Date.date == {"year": year, "month": month}).order_by(Category.name)
 
         return paginate(model=results, indices=request.args)
 
 
 class CategoryByYears(BaseResource):
+    decorators = [query_check(Date), validate(Date)]
+
     def get(self, start: int, stop: int) -> ResponseReturnValue:
-        results = date_query(model=Category, start=start, stop=stop).order_by(Date.date)
+        results = select(Category).join(Date).where(Date.date == {"start": start, "stop": stop}).order_by(Date.date)
 
         return paginate(model=results, indices=request.args)
 
@@ -322,7 +345,7 @@ class GameResource(BaseResource):
             abort(400, description=message)
 
         if (start != -1) and (stop != -1):
-            categories = date_query(model=Category, start=start, stop=stop, results=categories)
+            categories = categories.join(Date).where(Date.date == {"start": start, "stop": stop})
 
         if show_number != -1 and show_id != -1:
             abort(400, description="Only one of Show Number or Show ID can be supplied at a time.")
@@ -368,7 +391,7 @@ class GameResource(BaseResource):
         return jsonify(game)
 
 
-def paginate(model: Select[tuple[Q]], indices: dict[str, str], missing: str = "") -> ResponseReturnValue:
+def paginate(model: Select[tuple[N]], indices: dict[str, str], missing: str = "") -> ResponseReturnValue:
     if (count := or_zero(session.scalar(select(func.count()).select_from(model.subquery())))) == 0:
         return jsonify()
 
@@ -397,54 +420,6 @@ def paginate(model: Select[tuple[Q]], indices: dict[str, str], missing: str = ""
             "results": count,
         }
     )
-
-
-def date_query(
-    model: type[Q],
-    year: int = -1,
-    month: int = -1,
-    day: int = -1,
-    start: int = -1,
-    stop: int = -1,
-    results: t.Optional[Select[tuple[Q]]] = None,
-) -> Select[tuple[Q]]:
-    if results is None:
-        results = select(model)
-
-    if year != -1:
-        try:
-            date = datetime.datetime.strptime(f"{year:04d}/{abs(month):02d}/{abs(day):02d}", "%Y/%m/%d")
-
-        except ValueError:
-            abort(
-                400,
-                description="That date is invalid (0001 <= year <= 9999, 1 <= month <= 12, 1 <= day <= 31)",
-            )
-
-        results = results.join(Date).where(Date.year == date.year)
-
-        if month != -1:
-            results = results.where(Date.month == date.month)
-
-            if day != -1:
-                results = results.where(Date.day == date.day)
-
-    elif (start != -1) and (stop != -1):
-        if start > stop:
-            abort(400, description="The stop year must come after the starting year.")
-
-        if 1 > start or 1 > stop or 9999 < start or 9999 < stop:
-            abort(400, description="year range must be between 0001 and 9999")
-
-        if session.scalar(select(Date).where(start <= Date.year).where(Date.year <= stop)) is None:
-            abort(
-                400,
-                description="There are no data in the database within that year span.",
-            )
-
-        results = results.join(Date).where(and_(start <= Date.year, Date.year <= stop))
-
-    return results
 
 
 def register_api(view: type[BaseResource], *rules: str, endpoints: tuple[str, ...] = ()) -> None:

@@ -35,7 +35,7 @@ class TestModels:
         self.session.add(date)
         self.session.commit()
 
-        assert date.date == datetime.date.fromisoformat(date_string)
+        assert date.date.as_date() == datetime.date.fromisoformat(date_string)
 
         assert date.year == year
         assert date.month == month

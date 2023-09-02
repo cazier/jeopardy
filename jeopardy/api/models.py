@@ -1,18 +1,20 @@
 import typing
 import datetime
+import functools
+import dataclasses
 
-from sqlalchemy import Date as DateType
-from sqlalchemy import String, Boolean, Integer, ForeignKey, ColumnElement, event, extract
-from sqlalchemy.orm import Mapped, Session, DeclarativeBase, synonym, relationship, mapped_column
+from sqlalchemy import Column, String, Boolean, Integer, ClauseList, ForeignKey, ColumnElement, and_, desc, false
+from sqlalchemy.orm import Mapped, DeclarativeBase, CompositeProperty, synonym, composite, relationship, mapped_column
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.ext.hybrid import Comparator, hybrid_property
+from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.sql.elements import UnaryExpression
 
 db = SQLAlchemy()
 
 
 class Base(DeclarativeBase):
     @staticmethod
-    def valid_inputs(*args, **kwargs) -> str:
+    def valid_inputs(*args: typing.Any, **kwargs: dict[str, typing.Any]) -> str:
         return ""
 
 
@@ -70,42 +72,117 @@ class Category(Base):
         return f"<Category {self.name}>"
 
 
+@dataclasses.dataclass(order=True)
+class _Date:
+    year: int
+    month: int
+    day: int
+
+    def isoformat(self) -> str:
+        return f"{self.year:04}-{self.month:02}-{self.day:02}"
+
+    def as_date(self) -> datetime.date:
+        return datetime.date(year=self.year, month=self.month, day=self.day)
+
+
+class _DateComparator(CompositeProperty.Comparator[bool]):
+    @functools.cached_property
+    def columns(self) -> dict[str, Column[_Date]]:
+        return {column.key: column for column in self.__clause_element__().clauses}
+
+    def __eq__(self, obj: typing.Any) -> ColumnElement[bool]:  # type: ignore[override]
+        if isinstance(obj, (datetime.date, datetime.datetime)):
+            obj = {"year": obj.year, "month": obj.month, "day": obj.day}
+
+        if isinstance(obj, dict):
+            if "start" in obj:
+                return and_(obj["start"] <= self.columns["year"], self.columns["year"] <= obj["stop"])
+
+            return and_(
+                *[
+                    obj[key.name] == self.columns[key.name]
+                    for key in dataclasses.fields(_Date)
+                    if obj.get(key.name, -1) >= 0
+                ]
+            )
+
+        return false()
+
+    def desc(self) -> UnaryExpression[bool]:
+        return ClauseList(desc("year"), desc("month"), desc("day"))  # type: ignore[return-value]
+
+
 class Date(Base):
     __tablename__ = "date"
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    date: Mapped[datetime.date] = mapped_column(DateType, info={"serialize": lambda k: k.isoformat()})
+    # date: Mapped[_Date] = mapped_column(DateType, info={"serialize": lambda k: k.isoformat()})
+    date: Mapped[_Date] = composite(
+        mapped_column("year"),
+        mapped_column("month"),
+        mapped_column("day"),
+        comparator_factory=_DateComparator,
+        info={"serialize": lambda k: k.isoformat()},
+    )
     sets: Mapped[list[Set]] = relationship("Set", back_populates="date")
     shows: Mapped["Show"] = relationship("Show", back_populates="date")
     categories: Mapped[Category] = relationship("Category", back_populates="date")
 
-    @hybrid_property
-    def _year(self) -> int:
-        return self.date.year
+    @staticmethod
+    def valid_inputs(  # type: ignore[override]
+        *,
+        start: typing.Optional[int] = None,
+        stop: typing.Optional[int] = None,
+        year: typing.Optional[int] = None,
+        month: typing.Optional[int] = None,
+        day: typing.Optional[int] = None,
+        **kwargs: dict[str, typing.Any],
+    ) -> str:
+        if start is not None and stop is not None:
+            if start > stop:
+                return "The stop year must come after the starting year."
 
-    @_year.expression
-    @classmethod
-    def year(cls) -> ColumnElement[int]:
-        return extract("year", cls.date)
+            if not (1 <= start <= 9999) or not (1 <= stop <= 9999):
+                return "The year range must be between 0001 and 9999."
 
-    @hybrid_property
-    def _month(self) -> int:
-        return self.date.month
+            return ""
 
-    @_month.expression
-    @classmethod
-    def month(cls) -> ColumnElement[int]:
-        return extract("month", cls.date)
+        try:
+            month, day = month or 1, day or 1
+            datetime.datetime.strptime(f"{year:04d}/{abs(month):02d}/{abs(day):02d}", "%Y/%m/%d")
 
-    @hybrid_property
-    def _day(self) -> int:
-        return self.date.day
+        except ValueError:
+            return "That date is invalid (0001 <= year <= 9999, 1 <= month <= 12, 1 <= day <= 31)."
 
-    @_day.expression
-    @classmethod
-    def day(cls) -> ColumnElement[int]:
-        return extract("day", cls.date)
+        return ""
+
+    # @hybrid_property
+    # def _year(self) -> int:
+    #     return self.date.year
+
+    # @_year.expression
+    # @classmethod
+    # def year(cls) -> ColumnElement[int]:
+    #     return extract("year", cls.date)
+
+    # @hybrid_property
+    # def _month(self) -> int:
+    #     return self.date.month
+
+    # @_month.expression
+    # @classmethod
+    # def month(cls) -> ColumnElement[int]:
+    #     return extract("month", cls.date)
+
+    # @hybrid_property
+    # def _day(self) -> int:
+    #     return self.date.day
+
+    # @_day.expression
+    # @classmethod
+    # def day(cls) -> ColumnElement[int]:
+    #     return extract("day", cls.date)
 
     # @hybrid_property
     # def _date(self) -> datetime.Date:
@@ -114,7 +191,7 @@ class Date(Base):
     # @_date.inplace.comparator(Comparator[datetime.date])
 
     def __repr__(self) -> str:
-        return f"<Date {self.date}>"
+        return f"<Date {self.date.isoformat()}>"
 
 
 class Show(Base):
@@ -147,7 +224,7 @@ class Round(Base):
         return f"<Round {self.number}>"
 
     @staticmethod
-    def valid_inputs(*, number: int, **kwargs) -> tuple:
+    def valid_inputs(*, number: int, **kwargs: dict[str, typing.Any]) -> str:  # type: ignore[override]
         if 0 <= number <= 2:
             return ""
 
@@ -181,9 +258,10 @@ def or_zero(scalar: int | None) -> int:
     return 0 if scalar is None else scalar
 
 
-Q = typing.TypeVar("Q", Set, Category, Date, Show, Round, Value, NoResultFound)
+Q = typing.TypeVar("Q", Set, Category, Date, Show, Round, Value)
+N = typing.TypeVar("N", Set, Category, Date, Show, Round, Value, NoResultFound)
 M: typing.TypeAlias = type[Set | Category | Date | Show | Round | Value]
 
 
-def or_none(scalar: Q | None) -> Q | NoResultFound:
+def or_none(scalar: N | None) -> N | NoResultFound:
     return NoResultFoundSentinel if scalar is None else scalar

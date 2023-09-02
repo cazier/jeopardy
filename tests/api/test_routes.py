@@ -119,7 +119,7 @@ def test_sets_by_date(testclient: FlaskClient, test_data: list[dict[str, str]]):
     check_response(rv, 200, length=len(matching))
 
     rv = testclient.get(f"/api/v{API_VERSION}/set/date/2020/02/31")
-    check_response(rv, 400, "That date is invalid (0001 <= year <= 9999, 1 <= month <= 12, 1 <= day <= 31)")
+    check_response(rv, 400, "That date is invalid (0001 <= year <= 9999, 1 <= month <= 12, 1 <= day <= 31).")
 
 
 def test_sets_by_years(testclient: FlaskClient, test_data: list[dict[str, str]]):
@@ -135,13 +135,13 @@ def test_sets_by_years(testclient: FlaskClient, test_data: list[dict[str, str]])
     check_response(rv, 200, length=len(matching))
 
     rv = testclient.get(f"/api/v{API_VERSION}/set/years/1995/1996")
-    check_response(rv, 400, "There are no data in the database within that year span.")
+    check_response(rv, 400, "There is no date in the database with that start/stop.")
 
     rv = testclient.get(f"/api/v{API_VERSION}/set/years/1994/1992")
     check_response(rv, 400, "The stop year must come after the starting year.")
 
     rv = testclient.get(f"/api/v{API_VERSION}/set/years/0/20000")
-    check_response(rv, 400, "year range must be between 0001 and 9999")
+    check_response(rv, 400, "The year range must be between 0001 and 9999.")
 
 
 def test_sets_by_round(testclient: FlaskClient, test_data: list[dict[str, str]]):
@@ -181,15 +181,17 @@ def test_show_by_date(testclient: FlaskClient, endpoint: str):
     }
 
 
-def test_show_by_date_failures(testclient: FlaskClient):
-    rv = testclient.get(f"/api/v{API_VERSION}/show/date/2020/01/01")
-    check_response(rv, 404, "no items were found with that query")
-
-    rv = testclient.get(f"/api/v{API_VERSION}/show/date/00/01/01")
-    check_response(rv, 400, "That date is invalid (0001 <= year <= 9999, 1 <= month <= 12, 1 <= day <= 31)")
-
-    rv = testclient.get(f"/api/v{API_VERSION}/show/date/2020/02/31")
-    check_response(rv, 400, "That date is invalid (0001 <= year <= 9999, 1 <= month <= 12, 1 <= day <= 31)")
+@pytest.mark.parametrize(
+    ("endpoint", "message"),
+    (
+        ("show/date/2020/01/01", "There is no date in the database with that year/month/day."),
+        ("show/date/00/01/01", "That date is invalid (0001 <= year <= 9999, 1 <= month <= 12, 1 <= day <= 31)."),
+        ("show/date/2020/02/31", "That date is invalid (0001 <= year <= 9999, 1 <= month <= 12, 1 <= day <= 31)."),
+    ),
+)
+def test_show_by_date_failures(testclient: FlaskClient, endpoint: str, message: str):
+    rv = testclient.get(f"/api/v{API_VERSION}/{endpoint}")
+    check_response(rv, 400, message)
 
 
 @pytest.mark.parametrize("endpoint", ("years/1992/1992", "years/1992/1993", "years/1991/1992"))
@@ -205,13 +207,13 @@ def test_shows_by_years(testclient: FlaskClient, endpoint: str):
 
 def test_shows_by_years_failures(testclient: FlaskClient):
     rv = testclient.get(f"/api/v{API_VERSION}/show/years/1995/1996")
-    check_response(rv, 400, "There are no data in the database within that year span.")
+    check_response(rv, 400, "There is no date in the database with that start/stop.")
 
     rv = testclient.get(f"/api/v{API_VERSION}/show/years/1994/1992")
     check_response(rv, 400, "The stop year must come after the starting year.")
 
     rv = testclient.get(f"/api/v{API_VERSION}/show/years/0/20000")
-    check_response(rv, 400, "year range must be between 0001 and 9999")
+    check_response(rv, 400, "The year range must be between 0001 and 9999.")
 
 
 def test_categories(testclient: FlaskClient, test_data: list[dict[str, str]]):
@@ -241,7 +243,7 @@ def test_categories_by_date(testclient: FlaskClient, test_data: list[dict[str, s
     check_response(rv, 200, length=len(expected))
 
     rv = testclient.get(f"/api/v{API_VERSION}/category/date/2020/02/31")
-    check_response(rv, 400, "That date is invalid (0001 <= year <= 9999, 1 <= month <= 12, 1 <= day <= 31)")
+    check_response(rv, 400, "That date is invalid (0001 <= year <= 9999, 1 <= month <= 12, 1 <= day <= 31).")
 
 
 def test_category_by_years(testclient: FlaskClient, test_data: list[dict[str, str]]):
@@ -257,13 +259,13 @@ def test_category_by_years(testclient: FlaskClient, test_data: list[dict[str, st
     check_response(rv, 200, length=len(expected))
 
     rv = testclient.get(f"/api/v{API_VERSION}/category/years/1995/1996")
-    check_response(rv, 400, "There are no data in the database within that year span.")
+    check_response(rv, 400, "There is no date in the database with that start/stop.")
 
     rv = testclient.get(f"/api/v{API_VERSION}/category/years/1994/1992")
     check_response(rv, 400, "The stop year must come after the starting year.")
 
     rv = testclient.get(f"/api/v{API_VERSION}/category/years/0/20000")
-    check_response(rv, 400, "year range must be between 0001 and 9999")
+    check_response(rv, 400, "The year range must be between 0001 and 9999.")
 
 
 def test_categories_by_completion(testclient: FlaskClient, test_data: list[dict[str, str]]):
