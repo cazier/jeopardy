@@ -1,5 +1,4 @@
 import sys
-import pathlib
 
 if "pytest" not in sys.modules:
     import eventlet

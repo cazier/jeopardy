@@ -12,8 +12,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: python -m pip install poetry
-      - run: poetry install --with testing --without browser
-      - run: poetry run pytest -m "not browser" -v
+      - run: poetry install --with testing
+      - run: poetry run pytest -m 'not browser' -v
 
   browser:
     strategy:
@@ -27,9 +27,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: python -m pip install poetry
-      - run: poetry install --with testing --with browser
+      - run: poetry install --with testing
       - run: poetry run playwright install --with-deps ${{ matrix.browser }}
-      - run: poetry run pytest -m "browser" --no-cov -v
+      - run: poetry run pytest -m 'browser' --no-cov -v
 
       - name: 'Upload Artifacts'
         uses: actions/upload-artifact@v2
@@ -47,7 +47,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: python -m pip install poetry
-      - run: poetry install --with linters --without testing --without browser
+      - run: poetry install --with linters --without testing
       - run: poetry run mypy jeopardy/api
       - run: poetry run ruff jeopardy
       - run: poetry run black --check jeopardy
@@ -61,8 +61,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: python -m pip install poetry
-      - run: poetry install --with testing --without browser
-      - run: poetry run pytest -m "not browser" -v
+      - run: poetry install --with testing
+      - run: poetry run pytest -m 'not browser' -v
 
       - uses: cazier/actions/coverage@v1
         id: coverage
