@@ -8,8 +8,6 @@ if "pytest" not in sys.modules:
 
 from flask import Flask
 
-sys.path.append(str(pathlib.Path(__file__).parent.parent))
-
 from jeopardy import api, config, rounds, routing, sockets
 from jeopardy.api.schemas import ApiJSONProvider
 

@@ -11,7 +11,7 @@ from flask.views import MethodView
 from flask.typing import ResponseReturnValue
 
 from jeopardy.api import KEYS, bp, database
-from jeopardy.api.models import M, N, Q, Set, Date, Show, Round, Value, Category, db, or_none, or_zero
+from jeopardy.api.models import M, N, Set, Date, Show, Round, Value, Category, db, or_none, or_zero
 
 session = db.session
 
