@@ -18,7 +18,8 @@ jobs:
   browser:
     strategy:
       matrix:
-        browser: ['webkit'] #, 'chromium', 'webkit']
+        # browser: ['firefox', 'chromium', 'webkit']
+        browser: ['chromium']
 
     runs-on: ubuntu-latest
     container:
