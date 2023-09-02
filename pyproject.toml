@@ -35,7 +35,7 @@ description = "A multiplayer clone of Jeopardy!"
 authors = ["Brendan Cazier <520246+cazier@users.noreply.github.com>"]
 license = "MIT"
 readme = "README.md"
-packages = [{ include = "jeopardy", from = "jeopardy" }]
+packages = [{ include = "jeopardy", from = "." }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -46,23 +46,28 @@ flask-sqlalchemy = "^3.0.5"
 jinja2 = "^3.1.2"
 flask-socketio = "^5.3.5"
 
-[tool.poetry.group.dev.dependencies]
-coverage = {extras = ["toml"], version = "^7.2.7"}
-#jeopardy = {path = ".", develop = true}
-faker = "^19.2.0"
-ipython = "^8.14.0"
-requests = "^2.31.0"
-playwright = "^1.36.0"
-pre-commit = "^3.3.3"
+[tool.poetry.group.testing.dependencies]
 pytest = "^7.4.0"
 pytest-cov = "^4.1.0"
-rich = "^13.5.2"
+requests = "^2.31.0"
+faker = "^19.2.0"
+
+[tool.poetry.group.browser.dependencies]
+playwright = "^1.36.0"
+
+[tool.poetry.group.linters.dependencies]
 black = "^23.7.0"
-ipdb = "^0.13.13"
-isort = "^5.12.0"
 mypy = "^1.5.0"
-pylint = "^2.17.5"
 ruff = "^0.0.284"
+isort = "^5.12.0"
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^3.3.3"
+yamlfix = "^1.14.0"
+ipython = "^8.14.0"
+rich = "^13.5.2"
+ipdb = "^0.13.13"
+pylint = "^2.17.5"
 
 [build-system]
 requires = ["poetry-core"]
