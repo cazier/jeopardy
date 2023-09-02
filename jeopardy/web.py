@@ -11,6 +11,7 @@ from flask import Flask
 sys.path.append(str(pathlib.Path(__file__).parent.parent))
 
 from jeopardy import api, config, rounds, routing, sockets
+from jeopardy.api.schemas import ApiJSONProvider
 
 
 def create_app():
@@ -25,6 +26,7 @@ def create_app():
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     api.models.db.init_app(app)
+    app.json = ApiJSONProvider(app)
 
     app.register_blueprint(blueprint=rounds.rounds)
     app.register_blueprint(blueprint=routing.routing)

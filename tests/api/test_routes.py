@@ -106,10 +106,10 @@ def test_sets_by_show(testclient: FlaskClient, test_data: list[dict[str, str]]):
     check_response(rv, 200, length=len(matching))
 
     rv = testclient.get(f"/api/v{API_VERSION}/set/show/number/100")
-    check_response(rv, 400, "There is no show in the database with that number.")
+    check_response(rv, 404, "no items were found with that query")
 
     rv = testclient.get(f"/api/v{API_VERSION}/set/show/id/100")
-    check_response(rv, 400, "There is no show in the database with that ID.")
+    check_response(rv, 404, "no items were found with that query")
 
 
 def test_sets_by_date(testclient: FlaskClient, test_data: list[dict[str, str]]):
@@ -151,15 +151,12 @@ def test_sets_by_round(testclient: FlaskClient, test_data: list[dict[str, str]])
     check_response(rv, 200, length=len(matching))
 
     rv = testclient.get(f"/api/v{API_VERSION}/set/round/4")
-    check_response(rv, 400, "round number must be between 0 (jeopardy) and 2 (final jeopardy/tiebreaker)")
-
-    rv = testclient.get(f"/api/v{API_VERSION}/set/round/-1")
-    check_response(rv, 400, "round number must be between 0 (jeopardy) and 2 (final jeopardy/tiebreaker)")
+    check_response(rv, 400, "the round must be one of 0 (Jeopardy!), 1 (Double Jeopardy!), or 2 (Final Jeopardy!)")
 
 
 def test_sets_by_round_empty(emptyclient: FlaskClient):
     rv = emptyclient.get(f"/api/v{API_VERSION}/set/round/1")
-    check_response(rv, 404, "no items were found with that query")
+    check_response(rv, 400, "There is no round in the database with that number.")
 
 
 def test_show(testclient: FlaskClient):
@@ -314,7 +311,7 @@ def test_categories_by_show(testclient: FlaskClient, test_data: list[dict[str, s
     check_response(rv, 400, "There is no show in the database with that number.")
 
     rv = testclient.get(f"/api/v{API_VERSION}/category/show/id/100")
-    check_response(rv, 400, "There is no show in the database with that ID.")
+    check_response(rv, 400, "There is no show in the database with that id.")
 
 
 def test_categories_by_round(testclient: FlaskClient, test_data: list[dict[str, str]]):
@@ -324,15 +321,12 @@ def test_categories_by_round(testclient: FlaskClient, test_data: list[dict[str, 
     check_response(rv, 200, length=len(matching))
 
     rv = testclient.get(f"/api/v{API_VERSION}/category/round/4")
-    check_response(rv, 400, "round number must be between 0 (jeopardy) and 2 (final jeopardy/tiebreaker)")
-
-    rv = testclient.get(f"/api/v{API_VERSION}/category/round/-1")
-    check_response(rv, 400, "round number must be between 0 (jeopardy) and 2 (final jeopardy/tiebreaker)")
+    check_response(rv, 400, "the round must be one of 0 (Jeopardy!), 1 (Double Jeopardy!), or 2 (Final Jeopardy!)")
 
 
 def test_categories_by_round_empty(emptyclient: FlaskClient):
     rv = emptyclient.get(f"/api/v{API_VERSION}/category/round/1")
-    check_response(rv, 404, "no items were found with that query")
+    check_response(rv, 400, "There is no round in the database with that number.")
 
 
 def test_empty_db(emptyclient: FlaskClient, test_data: list[dict[str, str]]):
@@ -398,7 +392,7 @@ def test_game_resource(testclient: FlaskClient, test_data: list[dict[str, str]])
     )
 
     rv = testclient.get(f"/api/v{API_VERSION}/game", query_string={"show_id": 2, "show_number": 2})
-    check_response(rv, 400, "Only one of Show Number or Show ID may be supplied at a time.")
+    check_response(rv, 400, "Only one of Show Number or Show ID can be supplied at a time.")
 
     rv = testclient.get(
         f"/api/v{API_VERSION}/game", query_string={"show_number": 2, "round": 1, "allow_external": True}

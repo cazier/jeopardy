@@ -2,16 +2,18 @@ import typing
 import datetime
 
 from sqlalchemy import Date as DateType
-from sqlalchemy import String, Boolean, Integer, ForeignKey, ColumnElement, extract
-from sqlalchemy.orm import Mapped, DeclarativeBase, synonym, relationship, mapped_column
+from sqlalchemy import String, Boolean, Integer, ForeignKey, ColumnElement, event, extract
+from sqlalchemy.orm import Mapped, Session, DeclarativeBase, synonym, relationship, mapped_column
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy.ext.hybrid import Comparator, hybrid_property
 
 db = SQLAlchemy()
 
 
 class Base(DeclarativeBase):
-    pass
+    @staticmethod
+    def valid_inputs(*args, **kwargs) -> str:
+        return ""
 
 
 class Set(Base):
@@ -105,6 +107,12 @@ class Date(Base):
     def day(cls) -> ColumnElement[int]:
         return extract("day", cls.date)
 
+    # @hybrid_property
+    # def _date(self) -> datetime.Date:
+    #     return self.date
+
+    # @_date.inplace.comparator(Comparator[datetime.date])
+
     def __repr__(self) -> str:
         return f"<Date {self.date}>"
 
@@ -137,6 +145,13 @@ class Round(Base):
 
     def __repr__(self) -> str:
         return f"<Round {self.number}>"
+
+    @staticmethod
+    def valid_inputs(*, number: int, **kwargs) -> tuple:
+        if 0 <= number <= 2:
+            return ""
+
+        return "the round must be one of 0 (Jeopardy!), 1 (Double Jeopardy!), or 2 (Final Jeopardy!)"
 
 
 class Value(Base):
