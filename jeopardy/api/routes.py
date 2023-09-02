@@ -1,105 +1,172 @@
+import re
 import random
 import typing as t
-import datetime
+import functools
 
-from flask import jsonify, request
-from sqlalchemy import Select, or_, and_, func, not_, exists, select
-from flask_restful import Resource, abort
+from flask import Response, abort
+from flask import jsonify as flask_jsonify
+from flask import request
+from sqlalchemy import Select, or_, func, select
+from flask.views import MethodView
+from flask.typing import ResponseReturnValue
 
-from jeopardy.api import KEYS, api, database
-from jeopardy.api.models import *
-from jeopardy.api.schemas import *
+from jeopardy.api import KEYS, bp, database
+from jeopardy.api.models import M, N, Set, Date, Show, Round, Value, Category, db, or_none, or_zero
 
-Q = t.TypeVar("Q", Select, Base)
+session = db.session
+
+P = t.ParamSpec("P")
+T = t.TypeVar("T")
 
 
-class DetailsResource(Resource):
-    def get(self) -> dict:
+def query_check(model: "M") -> t.Callable[[t.Callable[P, T]], t.Callable[P, T]]:
+    def wrapped(function: t.Callable[P, T]) -> t.Callable[P, T]:
+        @functools.wraps(function)
+        def inner(*args: P.args, **kwargs: P.kwargs) -> T:
+            key = "/".join(kwargs.keys())
+
+            if len(kwargs) > 1:
+                query = {"date": kwargs}
+
+            else:
+                query = kwargs.copy()  # type: ignore[assignment]
+
+            selection = select(func.count()).select_from(model).filter_by(**query)
+            if db.session.scalar(selection) == 0:
+                abort(
+                    400,
+                    description=f"There is no {model.__name__.lower()} in the database with that {key}.",
+                )
+
+            return function(*args, **kwargs)
+
+        return inner
+
+    return wrapped
+
+
+def validate(model: "M") -> t.Callable[[t.Callable[P, T]], t.Callable[P, T]]:
+    def wrapped(function: t.Callable[P, T]) -> t.Callable[P, T]:
+        @functools.wraps(function)
+        def inner(*args: P.args, **kwargs: P.kwargs) -> T:
+            if error := model.valid_inputs(**kwargs):  # type: ignore[arg-type]
+                abort(400, description=error)
+
+            return function(*args, **kwargs)
+
+        return inner
+
+    return wrapped
+
+
+class BaseResource(MethodView):
+    methods = ["GET", "POST"]
+
+    def dispatch_request(self, **kwargs: t.Any) -> ResponseReturnValue:
+        try:
+            return super().dispatch_request(**kwargs)
+        except AssertionError as exc:
+            if "Unimplemented method" in str(exc):
+                return abort(405, description=str(exc))
+            return abort(500, description="An unknown error occurred")
+
+
+class DetailsResource(BaseResource):
+    def get(self) -> ResponseReturnValue:
         categories = {
-            "total": session.scalar(select(func.count()).select_from(Category)),
-            "complete": session.scalar(select(func.count()).where(Category.complete == True)),
-            "incomplete": session.scalar(select(func.count()).where(Category.complete == False)),
+            "total": or_zero(session.scalar(select(func.count()).select_from(Category))),
+            "complete": or_zero(session.scalar(select(func.count()).where(Category.complete == True))),  # noqa: E712
+            "incomplete": or_zero(session.scalar(select(func.count()).where(Category.complete == False))),  # noqa: E712
         }
         sets = {
-            "total": session.scalar(select(func.count()).select_from(Set)),
-            "has_external": session.scalar(select(func.count()).where(Set.external == True)),
-            "no_external": session.scalar(select(func.count()).where(Set.external == True)),
+            "total": or_zero(session.scalar(select(func.count()).select_from(Set))),
+            "has_external": or_zero(session.scalar(select(func.count()).where(Set.external == True))),  # noqa: E712
+            "no_external": or_zero(session.scalar(select(func.count()).where(Set.external == True))),  # noqa: E712
         }
 
         shows = {"total": session.scalar(select(func.count()).select_from(Show))}
 
         if 0 in {categories["total"], sets["total"], shows["total"]}:
-            no_results(message="there are no items currently in the database")
+            return jsonify()
 
         shows.update(
             {
-                "first_id": session.execute(select(Show).order_by(Show.id)).scalars().first().id,
-                "last_id": session.execute(select(Show).order_by(Show.id.desc())).scalars().first().id,
-                "first_number": session.execute(select(Show).order_by(Show.number)).scalars().first().number,
-                "last_number": session.execute(select(Show).order_by(Show.number.desc())).scalars().first().number,
+                "first_id": or_none(session.scalars(select(Show).order_by(Show.id)).first()).id,
+                "last_id": or_none(session.scalars(select(Show).order_by(Show.id.desc())).first()).id,
+                "first_number": or_none(session.scalars(select(Show).order_by(Show.number)).first()).number,
+                "last_number": or_none(session.scalars(select(Show).order_by(Show.number.desc())).first()).number,
             }
         )
 
         air_dates = {
-            "oldest": session.execute(select(Date).order_by(Date.date)).scalars().first().date,
-            "most_recent": session.execute(select(Date).order_by(Date.date.desc())).scalars().first().date,
+            "oldest": or_none(session.scalars(select(Date).order_by(Date.date)).first()).date,
+            "most_recent": or_none(session.scalars(select(Date).order_by(Date.date.desc())).first()).date,
         }
 
         return jsonify({"categories": categories, "sets": sets, "shows": shows, "air_dates": air_dates})
 
 
-class SetById(Resource):
-    def get(self, set_id: int) -> dict:
-        return jsonify(set_schema.dump(id_query(model=Set, id_=set_id)))
+class SetById(BaseResource):
+    def get(self, id: int) -> ResponseReturnValue:
+        results = select(Set).where(Set.id == id)
 
-    def delete(self, set_id: int) -> dict:
-        row = session.scalar(select(Set).filter_by(id=set_id))
+        return jsonify(session.scalar(results))
+
+    def delete(self, id: int) -> ResponseReturnValue:
+        row = session.scalar(select(Set).filter_by(id=id))
 
         if row:
             session.delete(row)
             session.commit()
 
-            return jsonify({"deleted": set_id})
+            return jsonify({"deleted": id})
+
+        return abort(404, description="id could not be found in the database")
 
 
-class SetByRound(Resource):
-    def get(self, round_number: str) -> dict:
-        round_number = int(round_number)
-        results = round_query(model=Set, number=round_number).order_by(Set.id)
+class SetByRound(BaseResource):
+    decorators = [query_check(Round), validate(Round)]
 
-        return paginate(model=results, schema=sets_schema.dump, indices=request.args)
+    def get(self, number: int) -> ResponseReturnValue:
+        results = select(Set).join(Round).where(Round.number == number).order_by(Set.id)
 
-
-class SetByShowNumber(Resource):
-    def get(self, show_number: int) -> dict:
-        results = show_query(model=Set, identifier="number", value=show_number).order_by(Set.id)
-
-        return paginate(model=results, schema=sets_schema.dump, indices=request.args)
+        return paginate(model=results, indices=request.args)
 
 
-class SetByShowId(Resource):
-    def get(self, show_id: int) -> dict:
-        results = show_query(model=Set, identifier="id", value=show_id).order_by(Set.id)
+class SetByShowNumber(BaseResource):
+    def get(self, number: int) -> ResponseReturnValue:
+        results = select(Set).join(Show).where(Show.number == number).order_by(Set.id)
 
-        return paginate(model=results, schema=sets_schema.dump, indices=request.args)
-
-
-class SetByDate(Resource):
-    def get(self, year: int, month: int = -1, day: int = -1) -> dict:
-        results = date_query(model=Set, year=year, month=month, day=day).order_by(Set.id)
-
-        return paginate(model=results, schema=sets_schema.dump, indices=request.args)
+        return paginate(model=results, indices=request.args)
 
 
-class SetByYear(Resource):
-    def get(self, start: int, stop: int) -> dict:
-        results = date_query(model=Set, start=start, stop=stop).order_by(Date.date)
+class SetByShowId(BaseResource):
+    def get(self, id: int) -> ResponseReturnValue:
+        results = select(Set).join(Show).where(Show.id == id).order_by(Set.id)
 
-        return paginate(model=results, schema=sets_schema.dump, indices=request.args)
+        return paginate(model=results, indices=request.args)
 
 
-class SetMultiple(Resource):
-    def get(self) -> dict:
+class SetByDate(BaseResource):
+    decorators = [query_check(Date), validate(Date)]
+
+    def get(self, year: int, month: int = -1, day: int = -1) -> ResponseReturnValue:
+        results = select(Set).join(Date).where(Date.date == {"year": year, "month": month, "day": day}).order_by(Set.id)
+
+        return paginate(model=results, indices=request.args)
+
+
+class SetByYear(BaseResource):
+    decorators = [query_check(Date), validate(Date)]
+
+    def get(self, start: int, stop: int) -> ResponseReturnValue:
+        results = select(Set).join(Date).where(Date.date == {"start": start, "stop": stop}).order_by(Date.date)
+
+        return paginate(model=results, indices=request.args)
+
+
+class SetMultiple(BaseResource):
+    def get(self) -> ResponseReturnValue:
         # TODO: Might be able to get rid of id == date_id if back refs are good?
         results = (
             select(Set)
@@ -111,147 +178,149 @@ class SetMultiple(Resource):
 
         results = results.order_by(Date.date, Set.round, Category.name, Value.amount)
 
-        return paginate(model=results, schema=sets_schema.dump, indices=request.args)
+        return paginate(model=results, indices=request.args)
 
-    def post(self) -> dict:
-        payload: dict[str, t.Any] = request.json
+    def post(self) -> ResponseReturnValue:
+        payload = t.cast(dict[str, str | int | bool], request.json)
         if (set(payload.keys()) == KEYS) and all((len(str(value)) > 0 for value in payload.values())):
             try:
                 resp = database.add(clue_data=payload, uses_shortnames=False)
 
-                return jsonify(set_schema.dump(resp))
+                return jsonify(resp)
 
             except database.SetAlreadyExistsError:
-                abort(400, message="The question set supplied is already in the database!")
+                abort(400, description="The question set supplied is already in the database!")
 
         else:
-            abort(400, message="The question set supplied is missing some data. Every field is required.")
+            abort(400, description="The question set supplied is missing some data. Every field is required.")
 
 
-class ShowById(Resource):
-    def get(self, show_id: int) -> dict:
-        return jsonify(show_schema.dump(id_query(model=Show, id_=show_id)))
+class ShowById(BaseResource):
+    def get(self, id: int) -> ResponseReturnValue:
+        results = select(Show).where(Show.id == id)
+
+        return jsonify(session.scalar(results))
 
 
-class ShowByNumber(Resource):
-    def get(self, show_number: int) -> dict:
-        show = session.scalar(select(Show).where(Show.number == show_number))
+class ShowByNumber(BaseResource):
+    def get(self, number: int) -> ResponseReturnValue:
+        results = select(Show).where(Show.number == number)
 
-        if show == None:
-            no_results()
+        return jsonify(session.scalar(results))
+
+
+class ShowByDate(BaseResource):
+    decorators = [query_check(Date), validate(Date)]
+
+    def get(self, year: int, month: int = -1, day: int = -1) -> ResponseReturnValue:
+        results = (
+            select(Show).join(Date).where(Date.date == {"year": year, "month": month, "day": day}).order_by(Show.id)
+        )
+
+        return paginate(model=results, indices=request.args)
+
+
+class ShowByYears(BaseResource):
+    decorators = [query_check(Date), validate(Date)]
+
+    def get(self, start: int, stop: int) -> ResponseReturnValue:
+        results = select(Show).join(Date).where(Date.date == {"start": start, "stop": stop}).order_by(Date.date)
+
+        return paginate(model=results, indices=request.args)
+
+
+class ShowMultiple(BaseResource):
+    def get(self) -> ResponseReturnValue:
+        return paginate(model=select(Show), indices=request.args)
+
+
+class CategoryById(BaseResource):
+    def get(self, category_id: int) -> ResponseReturnValue:
+        results = select(Category).where(Category.id == category_id)
+
+        return jsonify(session.scalar(results))
+
+
+class CategoryByDate(BaseResource):
+    decorators = [query_check(Date), validate(Date)]
+
+    def get(self, year: int, month: int = -1, day: int = -1) -> ResponseReturnValue:
+        results = select(Category).join(Date).where(Date.date == {"year": year, "month": month}).order_by(Category.name)
+
+        return paginate(model=results, indices=request.args)
+
+
+class CategoryByYears(BaseResource):
+    decorators = [query_check(Date), validate(Date)]
+
+    def get(self, start: int, stop: int) -> ResponseReturnValue:
+        results = select(Category).join(Date).where(Date.date == {"start": start, "stop": stop}).order_by(Date.date)
+
+        return paginate(model=results, indices=request.args)
+
+
+class CategoryByCompletion(BaseResource):
+    def get(self, completion: str = "") -> ResponseReturnValue:
+        if completion.lower() in ("true", "complete", "1"):
+            results = select(Category).where(Category.complete == True)  # noqa: E712
+
+        elif completion.lower() in ("false", "incomplete", "0"):
+            results = select(Category).where(Category.complete == False)  # noqa: E712
 
         else:
-            return jsonify(show_schema.dump(show))
-
-
-class ShowByDate(Resource):
-    def get(self, year: int, month: int = -1, day: int = -1) -> dict:
-        results = date_query(model=Show, year=year, month=month, day=day).order_by(Show.number)
-
-        return paginate(model=results, schema=shows_schema.dump, indices=request.args)
-
-
-class ShowByYears(Resource):
-    def get(self, start: int, stop: int) -> dict:
-        results = date_query(model=Show, start=start, stop=stop).order_by(Date.date)
-
-        return paginate(model=results, schema=shows_schema.dump, indices=request.args)
-
-
-class ShowMultiple(Resource):
-    def get(self) -> dict:
-        return paginate(model=select(Show), schema=shows_schema.dump, indices=request.args)
-
-
-class CategoryById(Resource):
-    def get(self, category_id: int) -> dict:
-        return jsonify(category_schema.dump(id_query(model=Category, id_=category_id)))
-
-
-class CategoryByDate(Resource):
-    def get(self, year: int, month: int = -1, day: int = -1) -> dict:
-        results = date_query(model=Category, year=year, month=month, day=day).order_by(Category.name)
-
-        return paginate(model=results, schema=categories_schema.dump, indices=request.args)
-
-
-class CategoryByYears(Resource):
-    def get(self, start: int, stop: int) -> dict:
-        results = date_query(model=Category, start=start, stop=stop).order_by(Date.date)
-
-        return paginate(model=results, schema=categories_schema.dump, indices=request.args)
-
-
-class CategoryByCompletion(Resource):
-    def get(self, completion: str = "", completion_string: str = "") -> dict:
-        if completion != "":
-            if completion.lower() == "true":
-                completion = True
-
-            elif completion.lower() == "false":
-                completion = False
-
-        if completion == True or completion_string.lower() == "complete":
-            results = select(Category).where(Category.complete == True)
-
-        elif completion == False or completion_string.lower() == "incomplete":
-            results = select(Category).where(Category.complete == False)
-
-        else:
-            abort(400, message='The completion status must be one of either "True/False" or "Complete/Incomplete"')
+            abort(400, description="The completion status value is invalid")
 
         results = results.join(Date).join(Round).order_by(Date.date, Round.number, Category.name)
 
-        return paginate(model=results, schema=categories_schema.dump, indices=request.args)
+        return paginate(model=results, indices=request.args)
 
 
-class CategoryByName(Resource):
-    def get(self, name_string: int) -> dict:
+class CategoryByName(BaseResource):
+    def get(self, name_string: int) -> ResponseReturnValue:
         results = (
             select(Category)
-            .where(Category.name.like(f"%{name_string}%"))
+            .where(Category.name.ilike(f"%{name_string}%"))
             .join(Date)
             .join(Round)
             .order_by(Date.date, Round.number, Category.name)
         )
 
-        return paginate(model=results, schema=categories_schema.dump, indices=request.args)
+        return paginate(model=results, indices=request.args)
 
 
-class CategoryByShowNumber(Resource):
-    def get(self, show_number: int) -> dict:
-        results = show_query(model=Category, identifier="number", value=show_number).order_by(Category.name)
+class CategoryByShowNumber(BaseResource):
+    decorators = [query_check(Show)]
 
-        return paginate(model=results, schema=categories_schema.dump, indices=request.args)
+    def get(self, number: int) -> ResponseReturnValue:
+        results = select(Category).join(Show).where(Show.number == number).order_by(Category.name)
 
-
-class CategoryByRound(Resource):
-    def get(self, round_number: str) -> dict:
-        round_number = int(round_number)
-        results = round_query(model=Category, number=round_number).order_by(Category.name)
-
-        return paginate(model=results, schema=categories_schema.dump, indices=request.args)
+        return paginate(model=results, indices=request.args)
 
 
-class CategoryByShowId(Resource):
-    def get(self, show_id: int) -> dict:
-        results = show_query(model=Category, identifier="id", value=show_id).order_by(Category.name)
+class CategoryByRound(BaseResource):
+    decorators = [query_check(Round), validate(Round)]
 
-        return paginate(model=results, schema=categories_schema.dump, indices=request.args)
+    def get(self, number: int) -> ResponseReturnValue:
+        results = select(Category).join(Round).where(Round.number == number).order_by(Category.name)
 
-
-class CategoryMultiple(Resource):
-    def get(self) -> dict:
-        return paginate(model=select(Category), schema=categories_schema.dump, indices=request.args)
+        return paginate(model=results, indices=request.args)
 
 
-# class BlankResource(Resource):
-#     def get(self) -> dict:
-#         return {"message": "hello!"}
+class CategoryByShowId(BaseResource):
+    decorators = [query_check(Show)]
+
+    def get(self, id: int) -> ResponseReturnValue:
+        results = select(Category).join(Show).where(Show.id == id).order_by(Category.name)
+        return paginate(model=results, indices=request.args)
 
 
-class GameResource(Resource):
-    def get(self) -> dict:
+class CategoryMultiple(BaseResource):
+    def get(self) -> ResponseReturnValue:
+        return paginate(model=select(Category), indices=request.args)
+
+
+class GameResource(BaseResource):
+    def get(self) -> ResponseReturnValue:
         size = int(request.args.get("size", 6))
         start = int(request.args.get("start", -1))
         stop = int(request.args.get("stop", -1))
@@ -259,79 +328,78 @@ class GameResource(Resource):
         show_number = int(request.args.get("show_number", -1))
         show_id = int(request.args.get("show_id", -1))
 
-        round_ = int(request.args.get("round", -1))
+        round = int(request.args.get("round", -1))
 
         allow_external = bool(request.args.get("allow_external", False))
         allow_incomplete = bool(request.args.get("allow_incomplete", False))
 
-        if round_ == -1:
+        if round == -1:
             categories = select(Category).join(Round).where(or_(Round.number == 0, Round.number == 1))
 
-        elif 0 <= round_ <= 2:
-            categories = select(Category).join(Round).where(Round.number == round_)
+        elif 0 <= round <= 2:
+            categories = select(Category).join(Round).where(Round.number == round)
 
         else:
-            abort(
-                400,
-                message="The round number must be one of 0 (Jeopardy!), 1 (Double Jeopardy!), or 2 (Final Jeopardy!)",
-            )
-            return
+            message = "The round number must be one of 0 (Jeopardy!), 1 (Double Jeopardy!), or 2 (Final Jeopardy!)"
+
+            abort(400, description=message)
 
         if (start != -1) and (stop != -1):
-            categories = date_query(model=Category, start=start, stop=stop, chained_results=categories)
+            categories = categories.join(Date).where(Date.date == {"start": start, "stop": stop})
 
         if show_number != -1 and show_id != -1:
-            abort(400, message="Only one of Show Number or Show ID may be supplied at a time.")
+            abort(400, description="Only one of Show Number or Show ID can be supplied at a time.")
 
         elif show_number != -1:
-            categories = show_query(model=Category, identifier="number", value=show_number, chained_results=categories)
+            categories = categories.join(Show).where(Show.number == show_number)
 
         elif show_id != -1:
-            categories = show_query(model=Category, identifier="id", value=show_id, chained_results=categories)
+            categories = categories.join(Show).where(Show.id == show_id)
 
         if not allow_incomplete:
-            categories = categories.where(Category.complete == True)
+            categories = categories.where(Category.complete == True)  # noqa: E712
 
         if not allow_external:
-            categories = categories.where(select(Set).exists().where(Set.external == False))
+            categories = categories.where(select(Set).exists().where(Set.external == False))  # noqa: E712
 
-        categories = session.scalars(categories.order_by(Category.id)).all()
+        results = session.scalars(categories.order_by(Category.id)).all()
 
-        if (number_results := len(categories)) < size:
-            abort(400, message=f"Unfortunately only {number_results} categories were found. Please reduce the size.")
+        if (number_results := len(results)) < size:
+            abort(400, description=f"Only {number_results} categories were found.")
 
         numbers = random.sample(range(0, number_results), min(number_results, size * 2))
 
-        game = []
+        # TODO: Narrow
+        selected: set[str] = set()
+        game: list[dict[str, t.Any]] = []
 
         while len(game) < size:
             try:
-                category = categories[numbers.pop(0)]
+                category = results[numbers.pop()]
 
             except IndexError:
-                abort(
-                    400, message=f"Unfortunately only {number_results} categories were found. Please reduce the size."
-                )
+                abort(400, description=f"Only {number_results} categories were found.")
 
-            if category.name not in (i["category"]["name"] for i in game):
+            if category.name not in selected:
                 sets = session.scalars(
                     select(Set).where(Set.category_id == category.id).join(Value).order_by(Set.value)
                 ).all()
 
-                game.append({"category": category_schema.dump(category), "sets": sets_schema.dump(sets)})
+                selected.add(category.name)
+                game.append({"category": category, "sets": sets})
 
         return jsonify(game)
 
 
-def paginate(model: Select, schema: callable, indices: dict[str, str]) -> dict:
-    if (count := session.scalar(select(func.count()).select_from(model.subquery()))) == 0:
-        no_results()
+def paginate(model: Select[tuple[N]], indices: dict[str, str], missing: str = "") -> ResponseReturnValue:
+    if (count := or_zero(session.scalar(select(func.count()).select_from(model.subquery())))) == 0:
+        return jsonify()
 
     start = int(indices.get("start", 0))
     number = min(int(indices.get("number", 100)), 200)
 
     if start > count:
-        abort(400, message="start number too great")
+        abort(400, description="start number too great")
 
     if not isinstance(model, Select):
         model = select(model)
@@ -348,154 +416,100 @@ def paginate(model: Select, schema: callable, indices: dict[str, str]) -> dict:
         {
             "start": start,
             "number": number,
-            "data": schema(data),
+            "data": data,
             "results": count,
         }
     )
 
 
-def date_query(
-    model: Q, year: int = -1, month: int = -1, day: int = -1, start: int = -1, stop: int = -1, chained_results=None
-) -> Q:
-    if chained_results != None:
-        results = chained_results
+def register_api(view: type[BaseResource], *rules: str, endpoints: tuple[str, ...] = ()) -> None:
+    if not endpoints:
+        endpoints = (re.sub("(?!^)([A-Z]+)", r"_\1", view.__name__).lower(),)
 
-    else:
-        results = select(model)
-
-    if year != -1:
-        try:
-            date = datetime.datetime.strptime(f"{year:04d}/{abs(month):02d}/{abs(day):02d}", "%Y/%m/%d")
-
-        except ValueError:
-            abort(
-                400,
-                message="please check that your date is valid (year between 0001 and 9999, month between 1 and 12, and day between 1 and 31, as applicable)",
-            )
-
-        results = results.filter(model.date.has(year=date.year))
-
-        if month != -1:
-            results = results.filter(model.date.has(month=date.month))
-
-            if day != -1:
-                results = results.filter(model.date.has(day=date.day))
-
-    elif (start != -1) and (stop != -1):
-        if start > stop:
-            abort(400, message="The stop year must come after the starting year.")
-
-        if 1 > start or 1 > stop or 9999 < start or 9999 < stop:
-            abort(400, message="year range must be between 0001 and 9999")
-
-        if session.scalar(select(Date).where(start <= Date.year).where(Date.year <= stop)) is None:
-            abort(
-                400,
-                message="Unfortunately, there are no data in the database within that year span. Please double check your values.",
-            )
-
-        # TODO: New style
-        results = results.join(Date, Date.id == model.date_id).filter(and_(start <= Date.year, Date.year <= stop))
-
-    return results
+    for rule, endpoint in zip(rules, endpoints):
+        bp.add_url_rule(rule, endpoint, view_func=view.as_view(endpoint))
 
 
-def id_query(model: Q, id_: int) -> Q:
-    results = session.scalar(select(model).filter_by(id=id_))
-
-    if results == None:
-        no_results()
-
-    else:
-        return results
+@bp.errorhandler(400)
+def resource_not_valid(e: Exception) -> ResponseReturnValue:
+    return jsonify(message=str(e)), 400
 
 
-def show_query(model: Q, identifier: str, value: int, chained_results=None) -> Q:
-    if chained_results != None:
-        results = chained_results
-
-    else:
-        results = select(model)
-
-    if identifier == "number":
-        if session.scalar(select(Show).where(Show.number == value)) is None:
-            abort(
-                400,
-                message="Unfortunately, there is no show in the database with that number. Please double check your values.",
-            )
-        results = results.join(Show).where(Show.number == value)
-
-    elif identifier == "id":
-        if session.scalar(select(Show).where(Show.id == value)) is None:
-            abort(
-                400,
-                message="Unfortunately, there is no show in the database with that ID. Please double check your values.",
-            )
-
-        results = results.join(Show).where(Show.id == value)
-
-    return results
+@bp.errorhandler(404)
+def items_not_found(e: Exception) -> ResponseReturnValue:
+    return jsonify(message=str(e)), 404
 
 
-def round_query(model: Q, number: int) -> Q:
-    if not (0 <= number <= 2):
-        abort(400, message="round number must be between 0 (jeopardy) and 2 (final jeopardy/tiebreaker)")
-
-    return select(model).join(Round).where(Round.number == number)
+@bp.errorhandler(405)
+def unimplemented(e: Exception) -> ResponseReturnValue:
+    return jsonify(message=str(e)), 405
 
 
-def no_results(message: str = "no items were found with that query"):
-    abort(404, message=message)
+def jsonify(*args: t.Any, **kwargs: t.Any) -> Response:
+    resp = flask_jsonify(*args, **kwargs)
+
+    if not resp.json:
+        abort(404, description="no items were found with that query")
+
+    return resp
 
 
-api.add_resource(SetMultiple, "/set")
-api.add_resource(SetById, "/set/id/<int:set_id>")
-api.add_resource(SetByRound, "/set/round/<round_number>")
-api.add_resource(SetByShowNumber, "/set/show/number/<int:show_number>")
-api.add_resource(SetByShowId, "/set/show/id/<int:show_id>")
-api.add_resource(
+register_api(SetMultiple, "/set")
+register_api(SetById, "/set/id/<int:id>")
+register_api(SetByRound, "/set/round/<int:number>")
+register_api(SetByShowNumber, "/set/show/number/<int:number>")
+register_api(SetByShowId, "/set/show/id/<int:id>")
+register_api(
     SetByDate,
     "/set/date/<int:year>",
     "/set/date/<int:year>/<int:month>",
     "/set/date/<int:year>/<int:month>/<int:day>",
+    endpoints=("set_by_date_year", "set_by_date_month", "set_by_date_day"),
 )
 
-api.add_resource(
+
+register_api(
     SetByYear,
     "/set/years/<int:start>/<int:stop>",
 )
 
 
-api.add_resource(ShowMultiple, "/show")
-api.add_resource(ShowByNumber, "/show/number/<int:show_number>")
-api.add_resource(ShowById, "/show/id/<int:show_id>")
-api.add_resource(
+register_api(ShowMultiple, "/show")
+register_api(ShowByNumber, "/show/number/<int:number>")
+register_api(ShowById, "/show/id/<int:id>")
+register_api(
     ShowByDate,
     "/show/date/<int:year>",
     "/show/date/<int:year>/<int:month>",
     "/show/date/<int:year>/<int:month>/<int:day>",
+    endpoints=("show_by_date_year", "show_by_date_month", "show_by_date_day"),
 )
 
-api.add_resource(ShowByYears, "/show/years/<int:start>/<int:stop>")
+register_api(ShowByYears, "/show/years/<int:start>/<int:stop>")
 
 
-api.add_resource(CategoryMultiple, "/category")
-api.add_resource(CategoryById, "/category/id/<int:category_id>")
-api.add_resource(
+register_api(CategoryMultiple, "/category")
+register_api(CategoryById, "/category/id/<int:category_id>")
+register_api(
     CategoryByDate,
     "/category/date/<int:year>",
     "/category/date/<int:year>/<int:month>",
     "/category/date/<int:year>/<int:month>/<int:day>",
+    endpoints=("category_by_date_year", "category_by_date_month", "category_by_date_day"),
 )
 
-api.add_resource(CategoryByYears, "/category/years/<int:start>/<int:stop>")
+register_api(CategoryByYears, "/category/years/<int:start>/<int:stop>")
 
-api.add_resource(CategoryByCompletion, "/category/complete/<completion>", "/category/<completion_string>")
-api.add_resource(CategoryByName, "/category/name/<name_string>")
-api.add_resource(CategoryByRound, "/category/round/<round_number>")
-api.add_resource(CategoryByShowNumber, "/category/show/number/<int:show_number>")
-api.add_resource(CategoryByShowId, "/category/show/id/<int:show_id>")
+register_api(
+    CategoryByCompletion,
+    "/category/complete/<completion>",
+    "/category/<completion>",
+    endpoints=("category_by_completion", "category_completion"),
+)
+register_api(CategoryByName, "/category/name/<name_string>")
+register_api(CategoryByRound, "/category/round/<int:number>")
+register_api(CategoryByShowNumber, "/category/show/number/<int:number>")
+register_api(CategoryByShowId, "/category/show/id/<int:id>")
 
-api.add_resource(DetailsResource, "/details")
-api.add_resource(GameResource, "/game")
-# api.add_resource(BlankResource, "/")
+register_api(DetailsResource, "/details")
+register_api(GameResource, "/game")

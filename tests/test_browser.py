@@ -210,7 +210,7 @@ class TestBrowsers:
                     host.click(pid(f"category_{category}"))
 
                 # Fix for occasional double click on category reveal
-                except:
+                except:  # noqa: E722
                     host.evaluate(f"$('#content_{category}').collapse('show')")
 
                 for set_ in range(5):
@@ -224,7 +224,7 @@ class TestBrowsers:
 
                         host.click(f"text='{name}'")
 
-                        for (other_name, other_page) in players.items():
+                        for other_name, other_page in players.items():
                             if other_name != name:
                                 assert other_page.locator(pid("wager_amount")).is_hidden()
 
@@ -271,10 +271,8 @@ class TestBrowsers:
                         else:
                             guess_order = random.sample(list(players.items()), k=len(players))
                             for index, (name, page) in enumerate(guess_order):
-                                for (other_name, other_page) in guess_order[:index]:
-                                    assert "btn-success" not in other_page.locator(pid("buzzer")).get_attribute(
-                                        "class"
-                                    )
+                                for other_name, other_page in guess_order[:index]:
+                                    assert "btn-success" not in other_page.locator(pid("buzzer")).get_attribute("class")
                                     assert "disabled btn-danger" in other_page.locator(pid("buzzer")).get_attribute(
                                         "class"
                                     )
@@ -354,7 +352,7 @@ class TestBrowsers:
 
         host.locator(pid("final_reveal")).wait_for(state="visible")
 
-        for (name, scoring) in sorted(reveal_prep.items(), key=lambda k: k[1]["pre"]):
+        for name, scoring in sorted(reveal_prep.items(), key=lambda k: k[1]["pre"]):
             for screen in (host, board):
                 host.wait_for_function(js_id_equality("player", name))
 

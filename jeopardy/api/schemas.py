@@ -1,72 +1,60 @@
-from marshmallow import fields
-from marshmallow_sqlalchemy import SQLAlchemySchema
+import typing as t
+from functools import lru_cache
 
-from jeopardy.api import models
+import sqlalchemy
+from flask.json.provider import DefaultJSONProvider
+from sqlalchemy.orm.mapper import Mapper
 
-
-class RoundSchema(SQLAlchemySchema):
-    model = models.Round
-
-    number = fields.Integer(required=True)
+from jeopardy.api.models import Q, Base
 
 
-class ValueSchema(SQLAlchemySchema):
-    model = models.Value
+@lru_cache
+def schema_keys(model: type[Q]) -> list[tuple[str, t.Callable[[Q], t.Any]]]:
+    """Get the name and serialization function for each column, which is intended to be included in the JSON data, for
+    a particular model.
 
-    amount = fields.Integer(required=True)
+    Args:
+        model (type[Q]): model to be serialized
 
+    Returns:
+        list[tuple[str, t.Callable[[Q], t.Any]]]: names (keys) and serialization functions
+    """
+    mapper: Mapper[Q] = sqlalchemy.inspect(model, raiseerr=True).mapper
 
-class DateSchema(SQLAlchemySchema):
-    model = models.Date
+    response = []
 
-    date = fields.Date(format="iso", required=True)
+    for attr in mapper.attrs:
+        if func := attr.info.get("serialize", None):
+            response.append((attr.key, func))
+            continue
 
+        if func := getattr(type(model), attr.key).info.get("serialize", None):
+            response.append((attr.key, func))
 
-class ShowSchema(SQLAlchemySchema):
-    model = models.Show
-
-    id = fields.Integer(required=True)
-    number = fields.Integer(required=True)
-
-    date = fields.Pluck("DateSchema", "date", required=True)
-
-
-class CategorySchema(SQLAlchemySchema):
-    model = models.Category
-
-    id = fields.Integer(required=True)
-    name = fields.String(required=True)
-    complete = fields.Boolean(required=True)
-
-    date = fields.Pluck("DateSchema", "date")
-    show = fields.Pluck("ShowSchema", "number")
-    round = fields.Pluck("RoundSchema", "number")
+    return response
 
 
-class SetSchema(SQLAlchemySchema):
-    model = models.Set
+class ApiJSONProvider(DefaultJSONProvider):
+    """Custom JSON provider for the API to automatically determine the serialization functions (and the actual included
+    data) for each request response.
+    """
 
-    id = fields.Integer(required=True)
-    answer = fields.String(required=True)
-    question = fields.String(required=True)
-    external = fields.Boolean(required=True)
-    complete = fields.Boolean(required=True)
+    @staticmethod
+    def default(data: t.Any) -> dict[str, t.Any]:
+        """Provides a custom serialization method for objects the standard ``json.dumps`` doesn't know how to dump.
 
-    category = fields.Pluck("CategorySchema", "name")
-    date = fields.Pluck("DateSchema", "date")
-    show = fields.Pluck("ShowSchema", "number")
-    round = fields.Pluck("RoundSchema", "number")
-    value = fields.Pluck("ValueSchema", "amount")
+        Args:
+            data (t.Any): object to be serialized, which may contain SQLAlchemy models
 
+        Returns:
+            dict[str, t.Any]: serialized json data
+        """
+        if isinstance(data, Base):
+            resp: dict[str, t.Any] = {}
 
-set_schema = SetSchema()
-sets_schema = SetSchema(many=True)
+            for key, func in schema_keys(data):
+                resp[key] = func(getattr(data, key))
 
-show_schema = ShowSchema()
-shows_schema = ShowSchema(many=True)
+            return resp
 
-category_schema = CategorySchema()
-categories_schema = CategorySchema(many=True)
-
-date_schema = DateSchema()
-dates_schema = DateSchema(many=True)
+        return super(ApiJSONProvider, ApiJSONProvider).default(data)

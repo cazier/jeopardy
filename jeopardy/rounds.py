@@ -70,7 +70,9 @@ def enable_buzzers(incorrect_players: list = list()):
 
 @socketio.on("dismiss-h>s")
 def dismiss():
-    """After receiving the `socket.on` that the host has determined no one wants to buzz in, `socket.emit` the signal to dismiss the set and return to the game board."""
+    """After receiving the `socket.on` that the host has determined no one wants to buzz in, `socket.emit` the signal to
+    dismiss the set and return to the game board.
+    """
 
     room = get_room(sid=request.sid)
 

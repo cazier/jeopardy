@@ -1,6 +1,6 @@
 import sys
 
-if not "pytest" in sys.modules:
+if "pytest" not in sys.modules:
     import eventlet
 
     eventlet.monkey_patch()
@@ -8,6 +8,7 @@ if not "pytest" in sys.modules:
 from flask import Flask
 
 from jeopardy import api, config, rounds, routing, sockets
+from jeopardy.api.schemas import ApiJSONProvider
 
 
 def create_app():
@@ -22,6 +23,7 @@ def create_app():
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     api.models.db.init_app(app)
+    app.json = ApiJSONProvider(app)
 
     app.register_blueprint(blueprint=rounds.rounds)
     app.register_blueprint(blueprint=routing.routing)
@@ -36,5 +38,4 @@ if __name__ == "__main__":
 
     socketio = sockets.socketio
     socketio.init_app(app)
-
     socketio.run(app, host="0.0.0.0", debug=config.debug, port=config.port)
