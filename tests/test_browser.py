@@ -126,7 +126,7 @@ def js_has_class(id: str, value: str) -> str:
 
 
 @pytest.mark.browser
-@pytest.mark.incremental
+# @pytest.mark.incremental
 class TestBrowsers:
     def test_index(self, host: Page):
         host.goto(BASE_URL)
