@@ -54,7 +54,7 @@ faker = "^19.12.0"
 playwright = "^1.39.0"
 
 [tool.poetry.group.linters.dependencies]
-black = "^23.10.1"
+black = "^24.3.0"
 mypy = "^1.6.1"
 ruff = "^0.1.2"
 isort = "^5.12.0"
