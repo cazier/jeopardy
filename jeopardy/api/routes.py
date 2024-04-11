@@ -17,9 +17,10 @@ session = db.session
 
 P = t.ParamSpec("P")
 T = t.TypeVar("T")
+F = t.TypeVar("F", bound=t.Callable[..., t.Any])
 
 
-def query_check(model: "M") -> t.Callable[[t.Callable[P, T]], t.Callable[P, T]]:
+def query_check(model: "M") -> t.Callable[[F], F]:
     def wrapped(function: t.Callable[P, T]) -> t.Callable[P, T]:
         @functools.wraps(function)
         def inner(*args: P.args, **kwargs: P.kwargs) -> T:
@@ -42,10 +43,10 @@ def query_check(model: "M") -> t.Callable[[t.Callable[P, T]], t.Callable[P, T]]:
 
         return inner
 
-    return wrapped
+    return wrapped  # type: ignore[return-value]
 
 
-def validate(model: "M") -> t.Callable[[t.Callable[P, T]], t.Callable[P, T]]:
+def validate(model: "M") -> t.Callable[[F], F]:
     def wrapped(function: t.Callable[P, T]) -> t.Callable[P, T]:
         @functools.wraps(function)
         def inner(*args: P.args, **kwargs: P.kwargs) -> T:
@@ -56,7 +57,7 @@ def validate(model: "M") -> t.Callable[[t.Callable[P, T]], t.Callable[P, T]]:
 
         return inner
 
-    return wrapped
+    return wrapped  # type: ignore[return-value]
 
 
 class BaseResource(MethodView):
